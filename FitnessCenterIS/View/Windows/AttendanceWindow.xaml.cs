@@ -207,7 +207,7 @@ namespace FitnessCenterIS.View.Windows
             var serviceInSeasonTicket = _dbContext.SeasonticketServices
                 .FirstOrDefault(sts => sts.SeasonticketID == seasonTicketClientId && sts.ServiceID == serviceId);
 
-            if (serviceInSeasonTicket != null && serviceInSeasonTicket.VisitLimit > 0)
+            if (serviceInSeasonTicket != null && serviceInSeasonTicket.VisitLimit > 0) 
             {
                 serviceInSeasonTicket.VisitLimit--;
             }
