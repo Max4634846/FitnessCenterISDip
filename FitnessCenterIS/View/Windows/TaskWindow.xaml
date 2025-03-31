@@ -1,0 +1,71 @@
+﻿<Window x:Class="FitnessCenterIS.View.Windows.TaskWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FitnessCenterIS.View.Windows"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Задача" Height="560" Width="400"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True"
+        Background="Transparent">
+    <Border Background="#f0f0f0" CornerRadius="15" BorderBrush="#090909" BorderThickness="1">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="WindowTitleTextBlock" Text="Создание новой задачи" Margin="10 0 0 10" 
+                       FontSize="22" FontWeight="SemiBold" Foreground="#333"/>
+
+            <TextBox Grid.Row="1" Grid.Column="1" x:Name="TaskNameTextBox" Margin="5" materialDesign:HintAssist.Hint="Название" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="PriorityComboBox" Margin="5"
+                      DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Приоритет задачи" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+
+            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StatusComboBox" Margin="5"
+                      DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Статус задачи" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+
+            <TextBox Grid.Row="4" Grid.Column="1" x:Name="ClientTextBox" Margin="5"
+                     materialDesign:HintAssist.Hint="Клиент" Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     TextChanged="ClientTextBox_TextChanged"/>
+
+            <Popup x:Name="ClientsPopup" PlacementTarget="{Binding ElementName=ClientTextBox}"
+                   Placement="Bottom" IsOpen="False" StaysOpen="False" MaxHeight="150">
+                <Border BorderBrush="{StaticResource MaterialDesignDivider}" BorderThickness="1" Background="White">
+                    <ListBox x:Name="ClientsListBoxInPopup" SelectionChanged="ClientsListBoxInPopup_SelectionChanged"/>
+                </Border>
+            </Popup>
+
+            <DatePicker Grid.Row="5" Grid.Column="1" x:Name="DeadlineDatePicker" Margin="5" materialDesign:HintAssist.Hint="Дата завершения" Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+
+            <TextBox Grid.Row="6" Grid.Column="1" x:Name="DeadlineTimeTextBox" Margin="5"
+                     materialDesign:HintAssist.Hint="Время завершения" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+
+            <TextBox Grid.Row="7" Grid.Column="1" x:Name="TaskDescriptionTextBox" Margin="5" Height="80" AcceptsReturn="True" TextWrapping="Wrap" materialDesign:HintAssist.Hint="Описание задачи..."
+                     Style="{StaticResource MaterialDesignFilledTextBox}"/>
+
+
+            <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+                <Button x:Name="AddButton" Content="Добавить" Height="40" 
+                        Margin="5" Background="#090909" BorderBrush="Transparent" Click="AddButton_Click"/>
+                <Button x:Name="SaveButton" Content="Сохранить" Height="40"
+                        Margin="5" Background="#090909" BorderBrush="Transparent" Click="SaveButton_Click" Visibility="Collapsed"/>
+                <Button Content="Назад" Height="40"
+                        Margin="5" Background="#090909" BorderBrush="Transparent" Click="CloseBtn_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

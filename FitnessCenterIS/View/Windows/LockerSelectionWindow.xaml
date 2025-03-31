@@ -1,0 +1,145 @@
+﻿<Window x:Class="FitnessCenterIS.View.Windows.LockerSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:FitnessCenterIS.View.Windows"
+        Title="Выбор шкафчика" Height="500" Width="700"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseDown="Window_MouseDown">
+
+
+    <Window.Resources>
+        <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <Style x:Key="LockerButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <SolidColorBrush x:Key="AvailableLockerBrush" Color="#E8F5E9"/>
+        <SolidColorBrush x:Key="UnavailableLockerBrush" Color="#FFEBEE"/>
+    </Window.Resources>
+
+    <Border CornerRadius="15" BorderThickness="1">
+        <Border.BorderBrush>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#3b3b3b" Offset="0"/>
+                <GradientStop Color="#6b6b6b" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.BorderBrush>
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#f5f5f5" Offset="0"/>
+                <GradientStop Color="#e5e5e5" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок -->
+            <TextBlock Text="Выбор шкафчика" FontSize="22" FontWeight="SemiBold" 
+                   VerticalAlignment="Center" Foreground="#333"/>
+
+            <!-- TabControl для разделения на мужскую и женскую раздевалки -->
+            <TabControl Grid.Row="1" Margin="0,15,0,0" x:Name="GenderTabControl">
+                <!-- Мужская раздевалка -->
+                <TabItem Header="Мужская раздевалка">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Доступные шкафчики" FontSize="16" Margin="0,10,0,10"/>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="MaleLockersList">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource LockerButtonStyle}"
+                                            Background="{Binding IsAvailable, Converter={StaticResource BoolToColorConverter}}"
+                                            Content="{Binding KeyNumber}"
+                                            Click="LockerButton_Click"
+                                            Tag="{Binding LockerID}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Женская раздевалка -->
+                <TabItem Header="Женская раздевалка">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Доступные шкафчики" FontSize="16" Margin="0,10,0,10"/>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="FemaleLockersList">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource LockerButtonStyle}"
+                                            Background="{Binding IsAvailable, Converter={StaticResource BoolToColorConverter}}"
+                                            Content="{Binding KeyNumber}"
+                                            Click="LockerButton_Click"
+                                            Tag="{Binding LockerID}"/>
+                                    </DataTemplate> 
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+
+            <!-- Кнопки действий -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,0">
+                <Button Content="Выбрать" Width="120" Height="40" Margin="10,0,0,0"
+                    Background="#090909" Foreground="White" BorderThickness="0"
+                    Click="SelectButton_Click"/>
+
+                <Button Content="Отмена" Width="120" Height="40" Margin="10,0,0,0"
+                    Background="#090909" Foreground="White" BorderThickness="0"
+                    Click="CancelButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

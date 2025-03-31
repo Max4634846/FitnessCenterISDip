@@ -1,0 +1,68 @@
+﻿<Page x:Class="FitnessCenterIS.View.Pages.WaitingListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:FitnessCenterIS.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      d:DesignHeight="700" d:DesignWidth="1000"
+      Title="Список ожидания"
+      Background="#fafafa">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0" Background="White" Margin="15,10,15,0" 
+                CornerRadius="10" Padding="15,12" 
+                Effect="{DynamicResource MaterialDesignShadowDepth1}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Список ожидания" FontSize="22" FontWeight="SemiBold" 
+                           VerticalAlignment="Center" Foreground="#212529"/>
+
+                <Button Grid.Column="1" Content="Обновить" Width="120" Height="40"
+                        Background="#090909" Foreground="White" BorderThickness="0"
+                        Click="RefreshButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Таблица списка ожидания -->
+        <Border Grid.Row="1" Margin="15,10,15,15" CornerRadius="10" Background="White" 
+                BorderBrush="#E0E0E0" BorderThickness="1" Effect="{DynamicResource MaterialDesignShadowDepth1}">
+            <DataGrid x:Name="WaitingListDataGrid" AutoGenerateColumns="False" 
+                      IsReadOnly="True" Margin="10" BorderThickness="0"
+                      CanUserAddRows="False" CanUserDeleteRows="False"
+                      CanUserReorderColumns="False" CanUserResizeRows="False"
+                      CanUserSortColumns="True" GridLinesVisibility="None"
+                      RowBackground="White" AlternatingRowBackground="#F5F5F5"
+                      HeadersVisibility="Column" SelectionMode="Single"
+                      SelectionChanged="WaitingListDataGrid_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding WaitingListID}" Width="50"/>
+                    <DataGridTextColumn Header="Услуга" Binding="{Binding ServiceName}" Width="200"/>
+                    <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="200"/>
+                    <DataGridTextColumn Header="Дата добавления" Binding="{Binding EnrollmentDateTime, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="150"/>
+                    <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="100"/>
+                    <DataGridTextColumn Header="Примечания" Binding="{Binding Notes}" Width="*"/>
+                    <DataGridTemplateColumn Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Обработать" Click="ProcessButton_Click"
+                                        Visibility="{Binding IsProcessed, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Page>

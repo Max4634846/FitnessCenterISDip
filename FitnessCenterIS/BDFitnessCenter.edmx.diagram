@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="64dbb18d13e1466282438561d0478c14" Name="Diagram1" ZoomLevel="82">
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Attendances" Width="1.5" PointX="13.5" PointY="11.375" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Classifications" Width="1.5" PointX="6" PointY="4.375" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Clients" Width="1.5" PointX="11.25" PointY="20.5" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.GroupMembers" Width="1.5" PointX="5.25" PointY="9" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Groups" Width="1.5" PointX="3" PointY="6.625" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Guardianships" Width="1.5" PointX="13.5" PointY="25.875" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.LockerRoomTypes" Width="1.5" PointX="9" PointY="3.875" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Lockers" Width="1.5" PointX="11.25" PointY="3.625" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.LoyaltyLevels" Width="1.5" PointX="9" PointY="21.75" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.NumberTrainings" Width="1.5" PointX="1.5" PointY="1.5" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.PaymentMethods" Width="1.5" PointX="8.25" PointY="7.25" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Payments" Width="1.5" PointX="10.5" PointY="9" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Persons" Width="1.5" PointX="3.75" PointY="28" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Relationships" Width="1.5" PointX="11.25" PointY="31.25" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Roles" Width="1.5" PointX="3.75" PointY="25.375" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Rooms" Width="1.5" PointX="0.75" PointY="34.25" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Sales" Width="1.5" PointX="8.25" PointY="10.375" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Schedules" Width="1.5" PointX="3" PointY="33.125" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.SeasonticketClients" Width="1.5" PointX="6" PointY="12.125" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Seasontickets" Width="1.5" PointX="0.75" PointY="11.5" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.SeasonticketSales" Width="1.5" PointX="10.5" PointY="12.125" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.SeasonticketServices" Width="1.5" PointX="3" PointY="11.25" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.SeasonticketsFreezes" Width="1.5" PointX="10.5" PointY="15.625" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.ServiceClassifications" Width="1.5" PointX="1.5" PointY="22.25" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.ServiceNumberClassTypes" Width="1.5" PointX="0.75" PointY="5" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Services" Width="1.5" PointX="1.5" PointY="16.125" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.ServiceTrainer" Width="1.5" PointX="8.25" PointY="24.125" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.ServiceTypes" Width="1.5" PointX="1.5" PointY="24.75" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Staffs" Width="1.5" PointX="6" PointY="26.875" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.sysdiagrams" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.TaskPriorities" Width="1.5" PointX="11.25" PointY="28" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Tasks" Width="1.5" PointX="13.5" PointY="20.5" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.TaskStatuses" Width="1.5" PointX="11.25" PointY="25.625" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Users" Width="1.5" PointX="6" PointY="20.875" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.Vatrates" Width="1.5" PointX="6" PointY="1.625" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.WaitingListClients" Width="1.5" PointX="7.5" PointY="16.875" />
+        <EntityTypeShape EntityType="BDFitnessClubDipModel.WaitingLists" Width="1.5" PointX="5.25" PointY="14.875" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Attendances_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Attendances_Lockers" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Attendances_Sales" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Attendances_Staffs" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Attendances_Staffs1" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_Classifications" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Clients_LoyaltyLevels" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Clients_Persons" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Guardianships_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Schedules_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketClients_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Tasks_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_WaitingListClients_Clients" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_GroupMembers_Groups" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_GroupMembers_SeasonticketServices" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Groups_Services" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Schedules_Groups" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Guardianships_Persons" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Guardianships_Relationships" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Lockers_LockerRoomTypes" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_NumberTrainings" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Payments_PaymentMethods" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Payments_Sales" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Staffs_Persons" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Staffs_Roles" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Schedules_Rooms" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_Seasontickets" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_SeasonticketServices" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_Staffs" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_Users" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Sales_Vatrates" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketSales_Sales" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Sales" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Schedules_Staffs" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_WaitingLists_Schedules" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketClients_Seasontickets" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketSales_Seasontickets" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketServices_Seasontickets" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Seasontickets" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketServices_ServiceNumberClassTypes" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketServices_Services" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_WaitingLists_SeasonticketServices" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Users" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Services_ServiceClassifications" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_Services" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Services_ServiceTypes" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_ServiceTrainer_Services" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_ServiceTrainer_Staffs" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Users_Staffs" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Tasks_TaskPriorities" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Tasks_TaskStatuses" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Tasks_Users" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_Tasks_Users1" />
+        <AssociationConnector Association="BDFitnessClubDipModel.FK_WaitingListClients_WaitingLists" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

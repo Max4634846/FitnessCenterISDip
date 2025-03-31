@@ -1,0 +1,292 @@
+﻿<Window x:Class="FitnessCenterIS.View.Windows.AddEditNewClientWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FitnessCenterIS.View.Windows"
+        xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Клиент"
+        Height="680" Width="1060"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True"
+        WindowStyle="None">
+
+    <Window.Resources>
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0 0 0 8"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0 0 0 15"/>
+            <Setter Property="Foreground" Value="#090909"/>
+        </Style>
+
+        <Style x:Key="FormLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0 0 0 5"/>
+            <Setter Property="Foreground" Value="#555555"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="White" CornerRadius="15" BorderBrush="#090909" BorderThickness="1" 
+            materialDesign:ElevationAssist.Elevation="Dp3">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="70" />
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок -->
+            <Border Grid.Row="0" Background="#f8f9fa" CornerRadius="15" BorderThickness="0 0 0 1" BorderBrush="#e0e0e0">
+                <Grid>
+                    <TextBlock x:Name="Title" Text="Новый клиент" FontSize="22" FontWeight="SemiBold" 
+                               Foreground="#333333" VerticalAlignment="Center" Margin="20 0"/>
+                </Grid>
+            </Border>
+
+            <!-- Основной контент -->
+            <TabControl Grid.Row="1" x:Name="ClientInfoTabControl" Margin="0 10" 
+                        Style="{StaticResource MaterialDesignTabControl}" 
+                        materialDesign:ColorZoneAssist.Mode="Standard">
+                <TabItem Header="Основная информация">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <Grid Margin="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="300"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Левая колонка - фото и карта -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Фотография" Style="{StaticResource HeaderTextStyle}"/>
+                                <Border Width="250" Height="250" Background="#f5f5f5"
+                                        BorderBrush="#e0e0e0" BorderThickness="1" Margin="0 0 0 20">
+                                    <Button Style="{StaticResource MaterialDesignFlatButton}" BorderBrush="#090909" 
+                                            BorderThickness="1"
+                                            Width="250" Height="250" Padding="0" Click="BtnImage_Click">
+                                        <Grid>
+
+                                            <Image x:Name="ClientImage" Source="/Resource/NewPerson.jpg" Stretch="Fill"/>
+                                            <materialDesign:PackIcon Kind="CameraPlus" Width="40" Height="40" 
+                                                                     Foreground="#90ffffff" Background="#80000000" 
+                                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Button>
+                                </Border>
+
+                                <TextBlock Text="Информация о карте" Style="{StaticResource HeaderTextStyle}" Margin="0 20 0 8"/>
+                                <TextBox x:Name="NumberCardTextBox" Width="250" 
+                                         materialDesign:HintAssist.Hint="Номер карты"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0 0 0 15"/>
+
+                                <TextBlock Text="Статус клиента" Style="{StaticResource FormLabelStyle}"/>
+                                <ComboBox x:Name="StatusClientComboBox" Width="250" Margin="0 0 0 10"
+                                          Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                    <ComboBoxItem x:Name="StatusCL" Content="Клиент"/>
+                                </ComboBox>
+
+                                <TextBlock x:Name="IdClientLabel" Text="ID клиента" Style="{StaticResource FormLabelStyle}" Margin="0 15 0 5"/>
+                                <TextBox x:Name="IdClient" Width="250" IsReadOnly="True"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            </StackPanel>
+
+                            <!-- Правая колонка - основная информация -->
+                            <StackPanel Grid.Column="1" Margin="30 0 0 0">
+                                <TextBlock Text="Личная информация" Style="{StaticResource SectionHeaderStyle}"/>
+
+                                <Grid Margin="0 0 0 20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                                        <TextBlock Text="Фамилия" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="LastNameTextBox" 
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="10 0">
+                                        <TextBlock Text="Имя" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="FirstNameTextBox"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Margin="10 0 0 0">
+                                        <TextBlock Text="Отчество" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="MiddleNameTextBox"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0 0 0 20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                                        <TextBlock Text="Телефон" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="PhoneNumberTextBox"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="10 0">
+                                        <TextBlock Text="Email" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="EmailTextBox"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2" Margin="10 0 0 0">
+                                        <TextBlock Text="Дата рождения" Style="{StaticResource FormLabelStyle}"/>
+                                        <DatePicker x:Name="DateOfBithTextBox"
+                                                    Style="{StaticResource MaterialDesignOutlinedDatePicker}"
+                                                    SelectedDateChanged="DateOfBithTextBox_SelectedDateChanged"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0 0 0 20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                                        <TextBlock Text="Адрес" Style="{StaticResource FormLabelStyle}"/>
+                                        <TextBox x:Name="AddressTextBox"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Margin="10 0 0 0" x:Name="GenderTextBox">
+                                        <TextBlock Text="Пол" Style="{StaticResource FormLabelStyle}"/>
+                                        <ComboBox x:Name="GenderComboBox"
+                                                  Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                            <ComboBoxItem Content="Муж"/>
+                                            <ComboBoxItem Content="Жен"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Заметки" Style="{StaticResource HeaderTextStyle}" Margin="0 10 0 8"/>
+                                <TextBox x:Name="Notes" Height="120" TextWrapping="Wrap" 
+                                         AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem Header="Опекун" x:Name="GuardianTabItem">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="25">
+                            <TextBlock Text="Информация об опекуне" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <Grid Margin="0 0 0 20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                                    <TextBlock Text="Фамилия опекуна" Style="{StaticResource FormLabelStyle}"/>
+                                    <TextBox x:Name="GuardianLastNameTextBox"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="10 0">
+                                    <TextBlock Text="Имя опекуна" Style="{StaticResource FormLabelStyle}"/>
+                                    <TextBox x:Name="GuardianFirstNameTextBox"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Margin="10 0 0 0">
+                                    <TextBlock Text="Отчество опекуна" Style="{StaticResource FormLabelStyle}"/>
+                                    <TextBox x:Name="GuardianMiddleNameTextBox"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0 0 0 20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0 0 10 0">
+                                    <TextBlock Text="Телефон опекуна" Style="{StaticResource FormLabelStyle}"/>
+                                    <TextBox x:Name="GuardianPhoneTextBox"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Margin="10 0">
+                                    <TextBlock Text="Email опекуна" Style="{StaticResource FormLabelStyle}"/>
+                                    <TextBox x:Name="GuardianEmailTextBox"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Margin="10 0 0 0">
+                                    <TextBlock Text="Кем приходится" Style="{StaticResource FormLabelStyle}"/>
+                                    <ComboBox x:Name="GuardianRelationshipComboBox"
+                                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="RelationshipID">
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+
+            <!-- Кнопки внизу -->
+            <Border Grid.Row="2" Background="#f8f9fa" CornerRadius="15" BorderThickness="0 1 0 0" BorderBrush="#e0e0e0">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="20 10">
+                        <Button x:Name="AddBtn" Width="130" Height="40" 
+                                Background="#090909" Foreground="White" BorderBrush="Transparent"
+                                materialDesign:ButtonAssist.CornerRadius="2"
+                                Click="AddClientButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AccountPlus" Width="20" Height="20" Margin="0 0 8 0"/>
+                                <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="EditBtn" Width="180" Height="40" 
+                                Background="#090909" Foreground="White" BorderBrush="Transparent"
+                                materialDesign:ButtonAssist.CornerRadius="2"
+                                Click="AddClientButton_Click" Visibility="Collapsed" Margin="0 0 15 0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSave" Width="20" Height="20" Margin="0 0 8 0"/>
+                                <TextBlock Text="Сохранить" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Width="120" Height="40" Margin="15 0 0 0"
+                                Background="#090909"
+                                BorderThickness="1" BorderBrush="Transparent"
+                                materialDesign:ButtonAssist.CornerRadius="2"
+                                Click="Exit_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Отмена" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

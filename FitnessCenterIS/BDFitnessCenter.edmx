@@ -1,0 +1,3135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="BDFitnessClubDipModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Attendances">
+          <Key>
+            <PropertyRef Name="AttendanceID" />
+          </Key>
+          <Property Name="AttendanceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientID" Type="int" />
+          <Property Name="StaffID" Type="int" />
+          <Property Name="SaleID" Type="int" />
+          <Property Name="EntryDateTime" Type="datetime" />
+          <Property Name="ExitDateTime" Type="datetime" />
+          <Property Name="Note" Type="nvarchar(max)" />
+          <Property Name="LockerID" Type="int" />
+        </EntityType>
+        <EntityType Name="Classifications">
+          <Key>
+            <PropertyRef Name="ClassificationID" />
+          </Key>
+          <Property Name="ClassificationID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Clients">
+          <Key>
+            <PropertyRef Name="ClientID" />
+          </Key>
+          <Property Name="ClientID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PersonID" Type="int" />
+          <Property Name="BonuseBalance" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="DepositBalance" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="LoyaltyLevelID" Type="int" />
+          <Property Name="StatusClient" Type="nvarchar" MaxLength="150" />
+          <Property Name="NumberCard" Type="nvarchar(max)" />
+          <Property Name="QRCode" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="GroupMembers">
+          <Key>
+            <PropertyRef Name="GroupMemberID" />
+          </Key>
+          <Property Name="GroupMemberID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GroupID" Type="int" />
+          <Property Name="SeasonticketServiceID" Type="int" />
+          <Property Name="CreateDateTime" Type="datetime" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Groups">
+          <Key>
+            <PropertyRef Name="GroupID" />
+          </Key>
+          <Property Name="GroupID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="Discount" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="ServiceID" Type="int" />
+          <Property Name="StatusActivity" Type="nvarchar" MaxLength="150" />
+          <Property Name="LimitCapacity" Type="int" />
+        </EntityType>
+        <EntityType Name="Guardianships">
+          <Key>
+            <PropertyRef Name="GuardianshipID" />
+          </Key>
+          <Property Name="GuardianshipID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ClientID" Type="int" />
+          <Property Name="ResponsiblePersonID" Type="int" />
+          <Property Name="RelationshipID" Type="int" />
+        </EntityType>
+        <EntityType Name="LockerRoomTypes">
+          <Key>
+            <PropertyRef Name="LockerRoomTypeID" />
+          </Key>
+          <Property Name="LockerRoomTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="Lockers">
+          <Key>
+            <PropertyRef Name="LockerID" />
+          </Key>
+          <Property Name="LockerID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LockerRoomTypeID" Type="int" />
+          <Property Name="IsAvailable" Type="bit" />
+          <Property Name="KeyNumber" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="LoyaltyLevels">
+          <Key>
+            <PropertyRef Name="LoyaltyLevelID" />
+          </Key>
+          <Property Name="LoyaltyLevelID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="NumberTrainings">
+          <Key>
+            <PropertyRef Name="NumberTrainingID" />
+          </Key>
+          <Property Name="NumberTrainingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Number" Type="int" />
+        </EntityType>
+        <EntityType Name="PaymentMethods">
+          <Key>
+            <PropertyRef Name="PaymentMethodID" />
+          </Key>
+          <Property Name="PaymentMethodID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Payments">
+          <Key>
+            <PropertyRef Name="PaymentID" />
+          </Key>
+          <Property Name="PaymentID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SaleID" Type="int" />
+          <Property Name="Amount" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="PaymentMethodID" Type="int" />
+          <Property Name="DateTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Persons">
+          <Key>
+            <PropertyRef Name="PersonID" />
+          </Key>
+          <Property Name="PersonID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Surname" Type="nvarchar" MaxLength="150" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="MiddleName" Type="nvarchar" MaxLength="150" />
+          <Property Name="Email" Type="nvarchar" MaxLength="150" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="16" />
+          <Property Name="DateOfBirth" Type="date" />
+          <Property Name="ImagePerson" Type="nvarchar(max)" />
+          <Property Name="Address" Type="nvarchar" MaxLength="150" />
+          <Property Name="Gender" Type="nvarchar" MaxLength="150" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Relationships">
+          <Key>
+            <PropertyRef Name="RelationshipID" />
+          </Key>
+          <Property Name="RelationshipID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="RoleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Rooms">
+          <Key>
+            <PropertyRef Name="RoomID" />
+          </Key>
+          <Property Name="RoomID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Sales">
+          <Key>
+            <PropertyRef Name="SaleID" />
+          </Key>
+          <Property Name="SaleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AdministratorID" Type="int" />
+          <Property Name="TrainerID" Type="int" />
+          <Property Name="SeasonticketID" Type="int" />
+          <Property Name="SeasonticketServiceID" Type="int" />
+          <Property Name="SaleDateTime" Type="datetime" />
+          <Property Name="DiscountAmount" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="PriceSold" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="RemainingVisits" Type="int" />
+          <Property Name="StatusSale" Type="nvarchar" MaxLength="150" />
+          <Property Name="VatRateID" Type="int" />
+          <Property Name="ClassificationID" Type="int" />
+          <Property Name="StartDateTime" Type="datetime" />
+          <Property Name="EndDateTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Schedules">
+          <Key>
+            <PropertyRef Name="ScheduleID" />
+          </Key>
+          <Property Name="ScheduleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Title" Type="nvarchar" MaxLength="255" />
+          <Property Name="SeasonticketServiceID" Type="int" />
+          <Property Name="TrainerID" Type="int" />
+          <Property Name="RoomID" Type="int" />
+          <Property Name="StartDateTime" Type="datetime" />
+          <Property Name="EndDateTime" Type="datetime" />
+          <Property Name="Note" Type="nvarchar(max)" />
+          <Property Name="ClientID" Type="int" />
+          <Property Name="GroupID" Type="int" />
+          <Property Name="ScheduleStatus" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="SeasonticketClients">
+          <Key>
+            <PropertyRef Name="SeasonticketClientID" />
+          </Key>
+          <Property Name="SeasonticketClientID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SeasonticketID" Type="int" />
+          <Property Name="ClientID" Type="int" />
+        </EntityType>
+        <EntityType Name="Seasontickets">
+          <Key>
+            <PropertyRef Name="SeasonticketID" />
+          </Key>
+          <Property Name="SeasonticketID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="ValidityDuration" Type="int" />
+          <Property Name="CreatedDateTime" Type="datetime" />
+          <Property Name="StatusSeasonticket" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="SeasonticketSales">
+          <Key>
+            <PropertyRef Name="SeasonticketSaleID" />
+          </Key>
+          <Property Name="SeasonticketSaleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SaleID" Type="int" />
+          <Property Name="SeasonticketID" Type="int" />
+        </EntityType>
+        <EntityType Name="SeasonticketServices">
+          <Key>
+            <PropertyRef Name="SeasonticketServiceID" />
+          </Key>
+          <Property Name="SeasonticketServiceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SeasonticketID" Type="int" />
+          <Property Name="ServiceID" Type="int" />
+          <Property Name="AccessAllowed" Type="bit" />
+          <Property Name="SaleID" Type="int" />
+          <Property Name="ServiceNumberClassTypeID" Type="int" />
+          <Property Name="VisitLimit" Type="int" />
+          <Property Name="DateTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="SeasonticketsFreezes">
+          <Key>
+            <PropertyRef Name="SeasonticketsFreezes" />
+          </Key>
+          <Property Name="SeasonticketsFreezes" Type="int" Nullable="false" />
+          <Property Name="SaleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AdministratorID" Type="int" />
+          <Property Name="StartDateTime" Type="datetime" />
+          <Property Name="EndDateTime" Type="datetime" />
+          <Property Name="FreezeStatus" Type="bit" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+          <Property Name="SeasonticketID" Type="int" />
+        </EntityType>
+        <EntityType Name="ServiceClassifications">
+          <Key>
+            <PropertyRef Name="ServiceClassificationID" />
+          </Key>
+          <Property Name="ServiceClassificationID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="ServiceNumberClassTypes">
+          <Key>
+            <PropertyRef Name="ServiceNumberClassTypeID" />
+          </Key>
+          <Property Name="ServiceNumberClassTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ServiceID" Type="int" />
+          <Property Name="NumberTrainingID" Type="int" />
+        </EntityType>
+        <EntityType Name="Services">
+          <Key>
+            <PropertyRef Name="ServiceID" />
+          </Key>
+          <Property Name="ServiceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Price" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="ServiceClassificationID" Type="int" />
+          <Property Name="SeviceTypeID" Type="int" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="TrialService" Type="bit" />
+          <Property Name="MinAge" Type="int" />
+          <Property Name="Capacity" Type="int" />
+          <Property Name="BonusQuantity" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="IsFreezable" Type="bit" />
+          <Property Name="FreezeDaysLimit" Type="int" />
+          <Property Name="StatusService" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="ServiceTrainer">
+          <Key>
+            <PropertyRef Name="ServiceTrainerID" />
+          </Key>
+          <Property Name="ServiceTrainerID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TrainerID" Type="int" />
+          <Property Name="ServiceID" Type="int" />
+        </EntityType>
+        <EntityType Name="ServiceTypes">
+          <Key>
+            <PropertyRef Name="ServiceTypeID" />
+          </Key>
+          <Property Name="ServiceTypeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="Staffs">
+          <Key>
+            <PropertyRef Name="StaffID" />
+          </Key>
+          <Property Name="StaffID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PersonID" Type="int" />
+          <Property Name="RoleID" Type="int" />
+          <Property Name="HireDate" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="principal_id" Type="int" Nullable="false" />
+          <Property Name="diagram_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="version" Type="int" />
+          <Property Name="definition" Type="varbinary(max)" />
+        </EntityType>
+        <EntityType Name="TaskPriorities">
+          <Key>
+            <PropertyRef Name="TaskPrioritieID" />
+          </Key>
+          <Property Name="TaskPrioritieID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="Tasks">
+          <Key>
+            <PropertyRef Name="TaskID" />
+          </Key>
+          <Property Name="TaskID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TaskPrioritieID" Type="int" />
+          <Property Name="TaskStatusID" Type="int" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Description" Type="nvarchar(max)" />
+          <Property Name="AdministratorID" Type="int" />
+          <Property Name="ResponsibleAdministratorID" Type="int" />
+          <Property Name="ClientID" Type="int" />
+          <Property Name="StartDedlainDateTime" Type="datetime" />
+          <Property Name="EndDedlainDateTime" Type="datetime" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="TaskStatuses">
+          <Key>
+            <PropertyRef Name="TaskStatusID" />
+          </Key>
+          <Property Name="TaskStatusID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StaffID" Type="int" />
+          <Property Name="Password" Type="nvarchar" MaxLength="50" />
+          <Property Name="Login" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Vatrates">
+          <Key>
+            <PropertyRef Name="VatRateID" />
+          </Key>
+          <Property Name="VatRateID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="Rate" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="Description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="WaitingListClients">
+          <Key>
+            <PropertyRef Name="WaitingID" />
+          </Key>
+          <Property Name="WaitingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="WaitingListID" Type="int" />
+          <Property Name="ClientID" Type="int" />
+          <Property Name="EnrollmentDateTime" Type="datetime" />
+          <Property Name="IsProcessed" Type="bit" />
+          <Property Name="Notes" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="WaitingLists">
+          <Key>
+            <PropertyRef Name="WaitingListID" />
+          </Key>
+          <Property Name="WaitingListID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="SheduleID" Type="int" />
+          <Property Name="SeasonticketServiceID" Type="int" />
+          <Property Name="DateTime" Type="datetime" />
+          <Property Name="IsActivite" Type="bit" />
+        </EntityType>
+        <Association Name="FK_Attendances_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="Attendances" Type="Self.Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Lockers">
+          <End Role="Lockers" Type="Self.Lockers" Multiplicity="0..1" />
+          <End Role="Attendances" Type="Self.Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Lockers">
+              <PropertyRef Name="LockerID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="LockerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Sales">
+          <End Role="Sales" Type="Self.Sales" Multiplicity="0..1" />
+          <End Role="Attendances" Type="Self.Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Staffs">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="Attendances" Type="Self.Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Staffs1">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="Attendances" Type="Self.Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_LoyaltyLevels">
+          <End Role="LoyaltyLevels" Type="Self.LoyaltyLevels" Multiplicity="0..1" />
+          <End Role="Clients" Type="Self.Clients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoyaltyLevels">
+              <PropertyRef Name="LoyaltyLevelID" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="LoyaltyLevelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_Persons">
+          <End Role="Persons" Type="Self.Persons" Multiplicity="0..1" />
+          <End Role="Clients" Type="Self.Clients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="PersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GroupMembers_Groups">
+          <End Role="Groups" Type="Self.Groups" Multiplicity="0..1" />
+          <End Role="GroupMembers" Type="Self.GroupMembers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Groups">
+              <PropertyRef Name="GroupID" />
+            </Principal>
+            <Dependent Role="GroupMembers">
+              <PropertyRef Name="GroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GroupMembers_SeasonticketServices">
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="0..1" />
+          <End Role="GroupMembers" Type="Self.GroupMembers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="GroupMembers">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Groups_Services">
+          <End Role="Services" Type="Self.Services" Multiplicity="0..1" />
+          <End Role="Groups" Type="Self.Groups" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="Groups">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="Guardianships" Type="Self.Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Persons">
+          <End Role="Persons" Type="Self.Persons" Multiplicity="0..1" />
+          <End Role="Guardianships" Type="Self.Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="ResponsiblePersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Relationships">
+          <End Role="Relationships" Type="Self.Relationships" Multiplicity="0..1" />
+          <End Role="Guardianships" Type="Self.Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Relationships">
+              <PropertyRef Name="RelationshipID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="RelationshipID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Lockers_LockerRoomTypes">
+          <End Role="LockerRoomTypes" Type="Self.LockerRoomTypes" Multiplicity="0..1" />
+          <End Role="Lockers" Type="Self.Lockers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LockerRoomTypes">
+              <PropertyRef Name="LockerRoomTypeID" />
+            </Principal>
+            <Dependent Role="Lockers">
+              <PropertyRef Name="LockerRoomTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payments_PaymentMethods">
+          <End Role="PaymentMethods" Type="Self.PaymentMethods" Multiplicity="0..1" />
+          <End Role="Payments" Type="Self.Payments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PaymentMethods">
+              <PropertyRef Name="PaymentMethodID" />
+            </Principal>
+            <Dependent Role="Payments">
+              <PropertyRef Name="PaymentMethodID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payments_Sales">
+          <End Role="Sales" Type="Self.Sales" Multiplicity="0..1" />
+          <End Role="Payments" Type="Self.Payments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="Payments">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Classifications">
+          <End Role="Classifications" Type="Self.Classifications" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Classifications">
+              <PropertyRef Name="ClassificationID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="ClassificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Seasontickets">
+          <End Role="Seasontickets" Type="Self.Seasontickets" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_SeasonticketServices">
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Staffs">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Vatrates">
+          <End Role="Vatrates" Type="Self.Vatrates" Multiplicity="0..1" />
+          <End Role="Sales" Type="Self.Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vatrates">
+              <PropertyRef Name="VatRateID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="VatRateID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="Schedules" Type="Self.Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Groups">
+          <End Role="Groups" Type="Self.Groups" Multiplicity="0..1" />
+          <End Role="Schedules" Type="Self.Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Groups">
+              <PropertyRef Name="GroupID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="GroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Rooms">
+          <End Role="Rooms" Type="Self.Rooms" Multiplicity="0..1" />
+          <End Role="Schedules" Type="Self.Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Rooms">
+              <PropertyRef Name="RoomID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="RoomID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Staffs">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="Schedules" Type="Self.Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketClients_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="SeasonticketClients" Type="Self.SeasonticketClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="SeasonticketClients">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketClients_Seasontickets">
+          <End Role="Seasontickets" Type="Self.Seasontickets" Multiplicity="0..1" />
+          <End Role="SeasonticketClients" Type="Self.SeasonticketClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketClients">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketSales_Sales">
+          <End Role="Sales" Type="Self.Sales" Multiplicity="0..1" />
+          <End Role="SeasonticketSales" Type="Self.SeasonticketSales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="SeasonticketSales">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketSales_Seasontickets">
+          <End Role="Seasontickets" Type="Self.Seasontickets" Multiplicity="0..1" />
+          <End Role="SeasonticketSales" Type="Self.SeasonticketSales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketSales">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_Seasontickets">
+          <End Role="Seasontickets" Type="Self.Seasontickets" Multiplicity="0..1" />
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_ServiceNumberClassTypes">
+          <End Role="ServiceNumberClassTypes" Type="Self.ServiceNumberClassTypes" Multiplicity="0..1" />
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceNumberClassTypes">
+              <PropertyRef Name="ServiceNumberClassTypeID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="ServiceNumberClassTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_Services">
+          <End Role="Services" Type="Self.Services" Multiplicity="0..1" />
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Sales">
+          <End Role="Sales" Type="Self.Sales" Multiplicity="1" />
+          <End Role="SeasonticketsFreezes" Type="Self.SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Seasontickets">
+          <End Role="Seasontickets" Type="Self.Seasontickets" Multiplicity="0..1" />
+          <End Role="SeasonticketsFreezes" Type="Self.SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="SeasonticketsFreezes" Type="Self.SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceNumberClassTypes_NumberTrainings">
+          <End Role="NumberTrainings" Type="Self.NumberTrainings" Multiplicity="0..1" />
+          <End Role="ServiceNumberClassTypes" Type="Self.ServiceNumberClassTypes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="NumberTrainings">
+              <PropertyRef Name="NumberTrainingID" />
+            </Principal>
+            <Dependent Role="ServiceNumberClassTypes">
+              <PropertyRef Name="NumberTrainingID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceNumberClassTypes_Services">
+          <End Role="Services" Type="Self.Services" Multiplicity="0..1" />
+          <End Role="ServiceNumberClassTypes" Type="Self.ServiceNumberClassTypes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="ServiceNumberClassTypes">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Services_ServiceClassifications">
+          <End Role="ServiceClassifications" Type="Self.ServiceClassifications" Multiplicity="0..1" />
+          <End Role="Services" Type="Self.Services" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceClassifications">
+              <PropertyRef Name="ServiceClassificationID" />
+            </Principal>
+            <Dependent Role="Services">
+              <PropertyRef Name="ServiceClassificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Services_ServiceTypes">
+          <End Role="ServiceTypes" Type="Self.ServiceTypes" Multiplicity="0..1" />
+          <End Role="Services" Type="Self.Services" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceTypes">
+              <PropertyRef Name="ServiceTypeID" />
+            </Principal>
+            <Dependent Role="Services">
+              <PropertyRef Name="SeviceTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceTrainer_Services">
+          <End Role="Services" Type="Self.Services" Multiplicity="0..1" />
+          <End Role="ServiceTrainer" Type="Self.ServiceTrainer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="ServiceTrainer">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceTrainer_Staffs">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="ServiceTrainer" Type="Self.ServiceTrainer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="ServiceTrainer">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffs_Persons">
+          <End Role="Persons" Type="Self.Persons" Multiplicity="0..1" />
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Staffs">
+              <PropertyRef Name="PersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffs_Roles">
+          <End Role="Roles" Type="Self.Roles" Multiplicity="0..1" />
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleID" />
+            </Principal>
+            <Dependent Role="Staffs">
+              <PropertyRef Name="RoleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_TaskPriorities">
+          <End Role="TaskPriorities" Type="Self.TaskPriorities" Multiplicity="0..1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskPriorities">
+              <PropertyRef Name="TaskPrioritieID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="TaskPrioritieID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_TaskStatuses">
+          <End Role="TaskStatuses" Type="Self.TaskStatuses" Multiplicity="0..1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskStatuses">
+              <PropertyRef Name="TaskStatusID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="TaskStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Users">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Users1">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Tasks" Type="Self.Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="ResponsibleAdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Staffs">
+          <End Role="Staffs" Type="Self.Staffs" Multiplicity="0..1" />
+          <End Role="Users" Type="Self.Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingListClients_Clients">
+          <End Role="Clients" Type="Self.Clients" Multiplicity="0..1" />
+          <End Role="WaitingListClients" Type="Self.WaitingListClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="WaitingListClients">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingListClients_WaitingLists">
+          <End Role="WaitingLists" Type="Self.WaitingLists" Multiplicity="0..1" />
+          <End Role="WaitingListClients" Type="Self.WaitingListClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WaitingLists">
+              <PropertyRef Name="WaitingListID" />
+            </Principal>
+            <Dependent Role="WaitingListClients">
+              <PropertyRef Name="WaitingListID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingLists_Schedules">
+          <End Role="Schedules" Type="Self.Schedules" Multiplicity="0..1" />
+          <End Role="WaitingLists" Type="Self.WaitingLists" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Schedules">
+              <PropertyRef Name="ScheduleID" />
+            </Principal>
+            <Dependent Role="WaitingLists">
+              <PropertyRef Name="SheduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingLists_SeasonticketServices">
+          <End Role="SeasonticketServices" Type="Self.SeasonticketServices" Multiplicity="0..1" />
+          <End Role="WaitingLists" Type="Self.WaitingLists" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="WaitingLists">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="BDFitnessClubDipModelStoreContainer">
+          <EntitySet Name="Attendances" EntityType="Self.Attendances" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Classifications" EntityType="Self.Classifications" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Clients" EntityType="Self.Clients" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="GroupMembers" EntityType="Self.GroupMembers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Groups" EntityType="Self.Groups" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Guardianships" EntityType="Self.Guardianships" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LockerRoomTypes" EntityType="Self.LockerRoomTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Lockers" EntityType="Self.Lockers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LoyaltyLevels" EntityType="Self.LoyaltyLevels" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="NumberTrainings" EntityType="Self.NumberTrainings" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PaymentMethods" EntityType="Self.PaymentMethods" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Payments" EntityType="Self.Payments" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Persons" EntityType="Self.Persons" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Relationships" EntityType="Self.Relationships" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Rooms" EntityType="Self.Rooms" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Sales" EntityType="Self.Sales" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Schedules" EntityType="Self.Schedules" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SeasonticketClients" EntityType="Self.SeasonticketClients" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Seasontickets" EntityType="Self.Seasontickets" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SeasonticketSales" EntityType="Self.SeasonticketSales" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SeasonticketServices" EntityType="Self.SeasonticketServices" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SeasonticketsFreezes" EntityType="Self.SeasonticketsFreezes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ServiceClassifications" EntityType="Self.ServiceClassifications" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ServiceNumberClassTypes" EntityType="Self.ServiceNumberClassTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Services" EntityType="Self.Services" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ServiceTrainer" EntityType="Self.ServiceTrainer" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ServiceTypes" EntityType="Self.ServiceTypes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Staffs" EntityType="Self.Staffs" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskPriorities" EntityType="Self.TaskPriorities" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tasks" EntityType="Self.Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskStatuses" EntityType="Self.TaskStatuses" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Vatrates" EntityType="Self.Vatrates" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WaitingListClients" EntityType="Self.WaitingListClients" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="WaitingLists" EntityType="Self.WaitingLists" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Attendances_Clients" Association="Self.FK_Attendances_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Lockers" Association="Self.FK_Attendances_Lockers">
+            <End Role="Lockers" EntitySet="Lockers" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Sales" Association="Self.FK_Attendances_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Staffs" Association="Self.FK_Attendances_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Staffs1" Association="Self.FK_Attendances_Staffs1">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_LoyaltyLevels" Association="Self.FK_Clients_LoyaltyLevels">
+            <End Role="LoyaltyLevels" EntitySet="LoyaltyLevels" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_Persons" Association="Self.FK_Clients_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GroupMembers_Groups" Association="Self.FK_GroupMembers_Groups">
+            <End Role="Groups" EntitySet="Groups" />
+            <End Role="GroupMembers" EntitySet="GroupMembers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GroupMembers_SeasonticketServices" Association="Self.FK_GroupMembers_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="GroupMembers" EntitySet="GroupMembers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Groups_Services" Association="Self.FK_Groups_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="Groups" EntitySet="Groups" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Clients" Association="Self.FK_Guardianships_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Persons" Association="Self.FK_Guardianships_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Relationships" Association="Self.FK_Guardianships_Relationships">
+            <End Role="Relationships" EntitySet="Relationships" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Lockers_LockerRoomTypes" Association="Self.FK_Lockers_LockerRoomTypes">
+            <End Role="LockerRoomTypes" EntitySet="LockerRoomTypes" />
+            <End Role="Lockers" EntitySet="Lockers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payments_PaymentMethods" Association="Self.FK_Payments_PaymentMethods">
+            <End Role="PaymentMethods" EntitySet="PaymentMethods" />
+            <End Role="Payments" EntitySet="Payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payments_Sales" Association="Self.FK_Payments_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="Payments" EntitySet="Payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Classifications" Association="Self.FK_Sales_Classifications">
+            <End Role="Classifications" EntitySet="Classifications" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Seasontickets" Association="Self.FK_Sales_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_SeasonticketServices" Association="Self.FK_Sales_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Staffs" Association="Self.FK_Sales_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Users" Association="Self.FK_Sales_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Vatrates" Association="Self.FK_Sales_Vatrates">
+            <End Role="Vatrates" EntitySet="Vatrates" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Clients" Association="Self.FK_Schedules_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Groups" Association="Self.FK_Schedules_Groups">
+            <End Role="Groups" EntitySet="Groups" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Rooms" Association="Self.FK_Schedules_Rooms">
+            <End Role="Rooms" EntitySet="Rooms" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Staffs" Association="Self.FK_Schedules_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketClients_Clients" Association="Self.FK_SeasonticketClients_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="SeasonticketClients" EntitySet="SeasonticketClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketClients_Seasontickets" Association="Self.FK_SeasonticketClients_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketClients" EntitySet="SeasonticketClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketSales_Sales" Association="Self.FK_SeasonticketSales_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="SeasonticketSales" EntitySet="SeasonticketSales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketSales_Seasontickets" Association="Self.FK_SeasonticketSales_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketSales" EntitySet="SeasonticketSales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_Seasontickets" Association="Self.FK_SeasonticketServices_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_ServiceNumberClassTypes" Association="Self.FK_SeasonticketServices_ServiceNumberClassTypes">
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_Services" Association="Self.FK_SeasonticketServices_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Sales" Association="Self.FK_SeasonticketsFreezes_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Seasontickets" Association="Self.FK_SeasonticketsFreezes_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Users" Association="Self.FK_SeasonticketsFreezes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceNumberClassTypes_NumberTrainings" Association="Self.FK_ServiceNumberClassTypes_NumberTrainings">
+            <End Role="NumberTrainings" EntitySet="NumberTrainings" />
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceNumberClassTypes_Services" Association="Self.FK_ServiceNumberClassTypes_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Services_ServiceClassifications" Association="Self.FK_Services_ServiceClassifications">
+            <End Role="ServiceClassifications" EntitySet="ServiceClassifications" />
+            <End Role="Services" EntitySet="Services" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Services_ServiceTypes" Association="Self.FK_Services_ServiceTypes">
+            <End Role="ServiceTypes" EntitySet="ServiceTypes" />
+            <End Role="Services" EntitySet="Services" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceTrainer_Services" Association="Self.FK_ServiceTrainer_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="ServiceTrainer" EntitySet="ServiceTrainer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceTrainer_Staffs" Association="Self.FK_ServiceTrainer_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="ServiceTrainer" EntitySet="ServiceTrainer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffs_Persons" Association="Self.FK_Staffs_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Staffs" EntitySet="Staffs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffs_Roles" Association="Self.FK_Staffs_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="Staffs" EntitySet="Staffs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Clients" Association="Self.FK_Tasks_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_TaskPriorities" Association="Self.FK_Tasks_TaskPriorities">
+            <End Role="TaskPriorities" EntitySet="TaskPriorities" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_TaskStatuses" Association="Self.FK_Tasks_TaskStatuses">
+            <End Role="TaskStatuses" EntitySet="TaskStatuses" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Users" Association="Self.FK_Tasks_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Users1" Association="Self.FK_Tasks_Users1">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Staffs" Association="Self.FK_Users_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingListClients_Clients" Association="Self.FK_WaitingListClients_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="WaitingListClients" EntitySet="WaitingListClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingListClients_WaitingLists" Association="Self.FK_WaitingListClients_WaitingLists">
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+            <End Role="WaitingListClients" EntitySet="WaitingListClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingLists_Schedules" Association="Self.FK_WaitingLists_Schedules">
+            <End Role="Schedules" EntitySet="Schedules" />
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingLists_SeasonticketServices" Association="Self.FK_WaitingLists_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="BDFitnessClubDipModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="BDFitnessClubDipEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Attendances" EntityType="BDFitnessClubDipModel.Attendances" />
+          <EntitySet Name="Classifications" EntityType="BDFitnessClubDipModel.Classifications" />
+          <EntitySet Name="Clients" EntityType="BDFitnessClubDipModel.Clients" />
+          <EntitySet Name="GroupMembers" EntityType="BDFitnessClubDipModel.GroupMembers" />
+          <EntitySet Name="Groups" EntityType="BDFitnessClubDipModel.Groups" />
+          <EntitySet Name="Guardianships" EntityType="BDFitnessClubDipModel.Guardianships" />
+          <EntitySet Name="LockerRoomTypes" EntityType="BDFitnessClubDipModel.LockerRoomTypes" />
+          <EntitySet Name="Lockers" EntityType="BDFitnessClubDipModel.Lockers" />
+          <EntitySet Name="LoyaltyLevels" EntityType="BDFitnessClubDipModel.LoyaltyLevels" />
+          <EntitySet Name="NumberTrainings" EntityType="BDFitnessClubDipModel.NumberTrainings" />
+          <EntitySet Name="PaymentMethods" EntityType="BDFitnessClubDipModel.PaymentMethods" />
+          <EntitySet Name="Payments" EntityType="BDFitnessClubDipModel.Payments" />
+          <EntitySet Name="Persons" EntityType="BDFitnessClubDipModel.Persons" />
+          <EntitySet Name="Relationships" EntityType="BDFitnessClubDipModel.Relationships" />
+          <EntitySet Name="Roles" EntityType="BDFitnessClubDipModel.Roles" />
+          <EntitySet Name="Rooms" EntityType="BDFitnessClubDipModel.Rooms" />
+          <EntitySet Name="Sales" EntityType="BDFitnessClubDipModel.Sales" />
+          <EntitySet Name="Schedules" EntityType="BDFitnessClubDipModel.Schedules" />
+          <EntitySet Name="SeasonticketClients" EntityType="BDFitnessClubDipModel.SeasonticketClients" />
+          <EntitySet Name="Seasontickets" EntityType="BDFitnessClubDipModel.Seasontickets" />
+          <EntitySet Name="SeasonticketSales" EntityType="BDFitnessClubDipModel.SeasonticketSales" />
+          <EntitySet Name="SeasonticketServices" EntityType="BDFitnessClubDipModel.SeasonticketServices" />
+          <EntitySet Name="SeasonticketsFreezes" EntityType="BDFitnessClubDipModel.SeasonticketsFreezes" />
+          <EntitySet Name="ServiceClassifications" EntityType="BDFitnessClubDipModel.ServiceClassifications" />
+          <EntitySet Name="ServiceNumberClassTypes" EntityType="BDFitnessClubDipModel.ServiceNumberClassTypes" />
+          <EntitySet Name="Services" EntityType="BDFitnessClubDipModel.Services" />
+          <EntitySet Name="ServiceTrainer" EntityType="BDFitnessClubDipModel.ServiceTrainer" />
+          <EntitySet Name="ServiceTypes" EntityType="BDFitnessClubDipModel.ServiceTypes" />
+          <EntitySet Name="Staffs" EntityType="BDFitnessClubDipModel.Staffs" />
+          <EntitySet Name="sysdiagrams" EntityType="BDFitnessClubDipModel.sysdiagrams" />
+          <EntitySet Name="TaskPriorities" EntityType="BDFitnessClubDipModel.TaskPriorities" />
+          <EntitySet Name="Tasks" EntityType="BDFitnessClubDipModel.Tasks" />
+          <EntitySet Name="TaskStatuses" EntityType="BDFitnessClubDipModel.TaskStatuses" />
+          <EntitySet Name="Users" EntityType="BDFitnessClubDipModel.Users" />
+          <EntitySet Name="Vatrates" EntityType="BDFitnessClubDipModel.Vatrates" />
+          <EntitySet Name="WaitingListClients" EntityType="BDFitnessClubDipModel.WaitingListClients" />
+          <EntitySet Name="WaitingLists" EntityType="BDFitnessClubDipModel.WaitingLists" />
+          <AssociationSet Name="FK_Attendances_Clients" Association="BDFitnessClubDipModel.FK_Attendances_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Lockers" Association="BDFitnessClubDipModel.FK_Attendances_Lockers">
+            <End Role="Lockers" EntitySet="Lockers" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Sales" Association="BDFitnessClubDipModel.FK_Attendances_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Staffs" Association="BDFitnessClubDipModel.FK_Attendances_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Attendances_Staffs1" Association="BDFitnessClubDipModel.FK_Attendances_Staffs1">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Attendances" EntitySet="Attendances" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Classifications" Association="BDFitnessClubDipModel.FK_Sales_Classifications">
+            <End Role="Classifications" EntitySet="Classifications" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_LoyaltyLevels" Association="BDFitnessClubDipModel.FK_Clients_LoyaltyLevels">
+            <End Role="LoyaltyLevels" EntitySet="LoyaltyLevels" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Clients_Persons" Association="BDFitnessClubDipModel.FK_Clients_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Clients" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Clients" Association="BDFitnessClubDipModel.FK_Guardianships_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Clients" Association="BDFitnessClubDipModel.FK_Schedules_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketClients_Clients" Association="BDFitnessClubDipModel.FK_SeasonticketClients_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="SeasonticketClients" EntitySet="SeasonticketClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Clients" Association="BDFitnessClubDipModel.FK_Tasks_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingListClients_Clients" Association="BDFitnessClubDipModel.FK_WaitingListClients_Clients">
+            <End Role="Clients" EntitySet="Clients" />
+            <End Role="WaitingListClients" EntitySet="WaitingListClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GroupMembers_Groups" Association="BDFitnessClubDipModel.FK_GroupMembers_Groups">
+            <End Role="Groups" EntitySet="Groups" />
+            <End Role="GroupMembers" EntitySet="GroupMembers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_GroupMembers_SeasonticketServices" Association="BDFitnessClubDipModel.FK_GroupMembers_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="GroupMembers" EntitySet="GroupMembers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Groups_Services" Association="BDFitnessClubDipModel.FK_Groups_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="Groups" EntitySet="Groups" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Groups" Association="BDFitnessClubDipModel.FK_Schedules_Groups">
+            <End Role="Groups" EntitySet="Groups" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Persons" Association="BDFitnessClubDipModel.FK_Guardianships_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Guardianships_Relationships" Association="BDFitnessClubDipModel.FK_Guardianships_Relationships">
+            <End Role="Relationships" EntitySet="Relationships" />
+            <End Role="Guardianships" EntitySet="Guardianships" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Lockers_LockerRoomTypes" Association="BDFitnessClubDipModel.FK_Lockers_LockerRoomTypes">
+            <End Role="LockerRoomTypes" EntitySet="LockerRoomTypes" />
+            <End Role="Lockers" EntitySet="Lockers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceNumberClassTypes_NumberTrainings" Association="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_NumberTrainings">
+            <End Role="NumberTrainings" EntitySet="NumberTrainings" />
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payments_PaymentMethods" Association="BDFitnessClubDipModel.FK_Payments_PaymentMethods">
+            <End Role="PaymentMethods" EntitySet="PaymentMethods" />
+            <End Role="Payments" EntitySet="Payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Payments_Sales" Association="BDFitnessClubDipModel.FK_Payments_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="Payments" EntitySet="Payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffs_Persons" Association="BDFitnessClubDipModel.FK_Staffs_Persons">
+            <End Role="Persons" EntitySet="Persons" />
+            <End Role="Staffs" EntitySet="Staffs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Staffs_Roles" Association="BDFitnessClubDipModel.FK_Staffs_Roles">
+            <End Role="Roles" EntitySet="Roles" />
+            <End Role="Staffs" EntitySet="Staffs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Rooms" Association="BDFitnessClubDipModel.FK_Schedules_Rooms">
+            <End Role="Rooms" EntitySet="Rooms" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Seasontickets" Association="BDFitnessClubDipModel.FK_Sales_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_SeasonticketServices" Association="BDFitnessClubDipModel.FK_Sales_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Staffs" Association="BDFitnessClubDipModel.FK_Sales_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Users" Association="BDFitnessClubDipModel.FK_Sales_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Sales_Vatrates" Association="BDFitnessClubDipModel.FK_Sales_Vatrates">
+            <End Role="Vatrates" EntitySet="Vatrates" />
+            <End Role="Sales" EntitySet="Sales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketSales_Sales" Association="BDFitnessClubDipModel.FK_SeasonticketSales_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="SeasonticketSales" EntitySet="SeasonticketSales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Sales" Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Sales">
+            <End Role="Sales" EntitySet="Sales" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Schedules_Staffs" Association="BDFitnessClubDipModel.FK_Schedules_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Schedules" EntitySet="Schedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingLists_Schedules" Association="BDFitnessClubDipModel.FK_WaitingLists_Schedules">
+            <End Role="Schedules" EntitySet="Schedules" />
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketClients_Seasontickets" Association="BDFitnessClubDipModel.FK_SeasonticketClients_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketClients" EntitySet="SeasonticketClients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketSales_Seasontickets" Association="BDFitnessClubDipModel.FK_SeasonticketSales_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketSales" EntitySet="SeasonticketSales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_Seasontickets" Association="BDFitnessClubDipModel.FK_SeasonticketServices_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Seasontickets" Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Seasontickets">
+            <End Role="Seasontickets" EntitySet="Seasontickets" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_ServiceNumberClassTypes" Association="BDFitnessClubDipModel.FK_SeasonticketServices_ServiceNumberClassTypes">
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketServices_Services" Association="BDFitnessClubDipModel.FK_SeasonticketServices_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingLists_SeasonticketServices" Association="BDFitnessClubDipModel.FK_WaitingLists_SeasonticketServices">
+            <End Role="SeasonticketServices" EntitySet="SeasonticketServices" />
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SeasonticketsFreezes_Users" Association="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="SeasonticketsFreezes" EntitySet="SeasonticketsFreezes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Services_ServiceClassifications" Association="BDFitnessClubDipModel.FK_Services_ServiceClassifications">
+            <End Role="ServiceClassifications" EntitySet="ServiceClassifications" />
+            <End Role="Services" EntitySet="Services" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceNumberClassTypes_Services" Association="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="ServiceNumberClassTypes" EntitySet="ServiceNumberClassTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Services_ServiceTypes" Association="BDFitnessClubDipModel.FK_Services_ServiceTypes">
+            <End Role="ServiceTypes" EntitySet="ServiceTypes" />
+            <End Role="Services" EntitySet="Services" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceTrainer_Services" Association="BDFitnessClubDipModel.FK_ServiceTrainer_Services">
+            <End Role="Services" EntitySet="Services" />
+            <End Role="ServiceTrainer" EntitySet="ServiceTrainer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ServiceTrainer_Staffs" Association="BDFitnessClubDipModel.FK_ServiceTrainer_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="ServiceTrainer" EntitySet="ServiceTrainer" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Staffs" Association="BDFitnessClubDipModel.FK_Users_Staffs">
+            <End Role="Staffs" EntitySet="Staffs" />
+            <End Role="Users" EntitySet="Users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_TaskPriorities" Association="BDFitnessClubDipModel.FK_Tasks_TaskPriorities">
+            <End Role="TaskPriorities" EntitySet="TaskPriorities" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_TaskStatuses" Association="BDFitnessClubDipModel.FK_Tasks_TaskStatuses">
+            <End Role="TaskStatuses" EntitySet="TaskStatuses" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Users" Association="BDFitnessClubDipModel.FK_Tasks_Users">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Tasks_Users1" Association="BDFitnessClubDipModel.FK_Tasks_Users1">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Tasks" EntitySet="Tasks" />
+          </AssociationSet>
+          <AssociationSet Name="FK_WaitingListClients_WaitingLists" Association="BDFitnessClubDipModel.FK_WaitingListClients_WaitingLists">
+            <End Role="WaitingLists" EntitySet="WaitingLists" />
+            <End Role="WaitingListClients" EntitySet="WaitingListClients" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Attendances">
+          <Key>
+            <PropertyRef Name="AttendanceID" />
+          </Key>
+          <Property Name="AttendanceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientID" Type="Int32" />
+          <Property Name="StaffID" Type="Int32" />
+          <Property Name="SaleID" Type="Int32" />
+          <Property Name="EntryDateTime" Type="DateTime" Precision="3" />
+          <Property Name="ExitDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LockerID" Type="Int32" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Attendances_Clients" FromRole="Attendances" ToRole="Clients" />
+          <NavigationProperty Name="Lockers" Relationship="BDFitnessClubDipModel.FK_Attendances_Lockers" FromRole="Attendances" ToRole="Lockers" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Attendances_Sales" FromRole="Attendances" ToRole="Sales" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Attendances_Staffs" FromRole="Attendances" ToRole="Staffs" />
+          <NavigationProperty Name="Staffs1" Relationship="BDFitnessClubDipModel.FK_Attendances_Staffs1" FromRole="Attendances" ToRole="Staffs" />
+        </EntityType>
+        <EntityType Name="Classifications">
+          <Key>
+            <PropertyRef Name="ClassificationID" />
+          </Key>
+          <Property Name="ClassificationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_Classifications" FromRole="Classifications" ToRole="Sales" />
+        </EntityType>
+        <EntityType Name="Clients">
+          <Key>
+            <PropertyRef Name="ClientID" />
+          </Key>
+          <Property Name="ClientID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PersonID" Type="Int32" />
+          <Property Name="BonuseBalance" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="DepositBalance" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="LoyaltyLevelID" Type="Int32" />
+          <Property Name="StatusClient" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="NumberCard" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="QRCode" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Attendances" Relationship="BDFitnessClubDipModel.FK_Attendances_Clients" FromRole="Clients" ToRole="Attendances" />
+          <NavigationProperty Name="LoyaltyLevels" Relationship="BDFitnessClubDipModel.FK_Clients_LoyaltyLevels" FromRole="Clients" ToRole="LoyaltyLevels" />
+          <NavigationProperty Name="Persons" Relationship="BDFitnessClubDipModel.FK_Clients_Persons" FromRole="Clients" ToRole="Persons" />
+          <NavigationProperty Name="Guardianships" Relationship="BDFitnessClubDipModel.FK_Guardianships_Clients" FromRole="Clients" ToRole="Guardianships" />
+          <NavigationProperty Name="Schedules" Relationship="BDFitnessClubDipModel.FK_Schedules_Clients" FromRole="Clients" ToRole="Schedules" />
+          <NavigationProperty Name="SeasonticketClients" Relationship="BDFitnessClubDipModel.FK_SeasonticketClients_Clients" FromRole="Clients" ToRole="SeasonticketClients" />
+          <NavigationProperty Name="Tasks" Relationship="BDFitnessClubDipModel.FK_Tasks_Clients" FromRole="Clients" ToRole="Tasks" />
+          <NavigationProperty Name="WaitingListClients" Relationship="BDFitnessClubDipModel.FK_WaitingListClients_Clients" FromRole="Clients" ToRole="WaitingListClients" />
+        </EntityType>
+        <EntityType Name="GroupMembers">
+          <Key>
+            <PropertyRef Name="GroupMemberID" />
+          </Key>
+          <Property Name="GroupMemberID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GroupID" Type="Int32" />
+          <Property Name="SeasonticketServiceID" Type="Int32" />
+          <Property Name="CreateDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Groups" Relationship="BDFitnessClubDipModel.FK_GroupMembers_Groups" FromRole="GroupMembers" ToRole="Groups" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_GroupMembers_SeasonticketServices" FromRole="GroupMembers" ToRole="SeasonticketServices" />
+        </EntityType>
+        <EntityType Name="Groups">
+          <Key>
+            <PropertyRef Name="GroupID" />
+          </Key>
+          <Property Name="GroupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Discount" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="ServiceID" Type="Int32" />
+          <Property Name="StatusActivity" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="LimitCapacity" Type="Int32" />
+          <NavigationProperty Name="GroupMembers" Relationship="BDFitnessClubDipModel.FK_GroupMembers_Groups" FromRole="Groups" ToRole="GroupMembers" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_Groups_Services" FromRole="Groups" ToRole="Services" />
+          <NavigationProperty Name="Schedules" Relationship="BDFitnessClubDipModel.FK_Schedules_Groups" FromRole="Groups" ToRole="Schedules" />
+        </EntityType>
+        <EntityType Name="Guardianships">
+          <Key>
+            <PropertyRef Name="GuardianshipID" />
+          </Key>
+          <Property Name="GuardianshipID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClientID" Type="Int32" />
+          <Property Name="ResponsiblePersonID" Type="Int32" />
+          <Property Name="RelationshipID" Type="Int32" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Guardianships_Clients" FromRole="Guardianships" ToRole="Clients" />
+          <NavigationProperty Name="Persons" Relationship="BDFitnessClubDipModel.FK_Guardianships_Persons" FromRole="Guardianships" ToRole="Persons" />
+          <NavigationProperty Name="Relationships" Relationship="BDFitnessClubDipModel.FK_Guardianships_Relationships" FromRole="Guardianships" ToRole="Relationships" />
+        </EntityType>
+        <EntityType Name="LockerRoomTypes">
+          <Key>
+            <PropertyRef Name="LockerRoomTypeID" />
+          </Key>
+          <Property Name="LockerRoomTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Lockers" Relationship="BDFitnessClubDipModel.FK_Lockers_LockerRoomTypes" FromRole="LockerRoomTypes" ToRole="Lockers" />
+        </EntityType>
+        <EntityType Name="Lockers">
+          <Key>
+            <PropertyRef Name="LockerID" />
+          </Key>
+          <Property Name="LockerID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LockerRoomTypeID" Type="Int32" />
+          <Property Name="IsAvailable" Type="Boolean" />
+          <Property Name="KeyNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Attendances" Relationship="BDFitnessClubDipModel.FK_Attendances_Lockers" FromRole="Lockers" ToRole="Attendances" />
+          <NavigationProperty Name="LockerRoomTypes" Relationship="BDFitnessClubDipModel.FK_Lockers_LockerRoomTypes" FromRole="Lockers" ToRole="LockerRoomTypes" />
+        </EntityType>
+        <EntityType Name="LoyaltyLevels">
+          <Key>
+            <PropertyRef Name="LoyaltyLevelID" />
+          </Key>
+          <Property Name="LoyaltyLevelID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Clients_LoyaltyLevels" FromRole="LoyaltyLevels" ToRole="Clients" />
+        </EntityType>
+        <EntityType Name="NumberTrainings">
+          <Key>
+            <PropertyRef Name="NumberTrainingID" />
+          </Key>
+          <Property Name="NumberTrainingID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Number" Type="Int32" />
+          <NavigationProperty Name="ServiceNumberClassTypes" Relationship="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_NumberTrainings" FromRole="NumberTrainings" ToRole="ServiceNumberClassTypes" />
+        </EntityType>
+        <EntityType Name="PaymentMethods">
+          <Key>
+            <PropertyRef Name="PaymentMethodID" />
+          </Key>
+          <Property Name="PaymentMethodID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Payments" Relationship="BDFitnessClubDipModel.FK_Payments_PaymentMethods" FromRole="PaymentMethods" ToRole="Payments" />
+        </EntityType>
+        <EntityType Name="Payments">
+          <Key>
+            <PropertyRef Name="PaymentID" />
+          </Key>
+          <Property Name="PaymentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SaleID" Type="Int32" />
+          <Property Name="Amount" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="PaymentMethodID" Type="Int32" />
+          <Property Name="DateTime" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="PaymentMethods" Relationship="BDFitnessClubDipModel.FK_Payments_PaymentMethods" FromRole="Payments" ToRole="PaymentMethods" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Payments_Sales" FromRole="Payments" ToRole="Sales" />
+        </EntityType>
+        <EntityType Name="Persons">
+          <Key>
+            <PropertyRef Name="PersonID" />
+          </Key>
+          <Property Name="PersonID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Surname" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="MiddleName" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="16" FixedLength="false" Unicode="true" />
+          <Property Name="DateOfBirth" Type="DateTime" Precision="0" />
+          <Property Name="ImagePerson" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Gender" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Clients_Persons" FromRole="Persons" ToRole="Clients" />
+          <NavigationProperty Name="Guardianships" Relationship="BDFitnessClubDipModel.FK_Guardianships_Persons" FromRole="Persons" ToRole="Guardianships" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Staffs_Persons" FromRole="Persons" ToRole="Staffs" />
+        </EntityType>
+        <EntityType Name="Relationships">
+          <Key>
+            <PropertyRef Name="RelationshipID" />
+          </Key>
+          <Property Name="RelationshipID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Guardianships" Relationship="BDFitnessClubDipModel.FK_Guardianships_Relationships" FromRole="Relationships" ToRole="Guardianships" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="RoleID" />
+          </Key>
+          <Property Name="RoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Staffs_Roles" FromRole="Roles" ToRole="Staffs" />
+        </EntityType>
+        <EntityType Name="Rooms">
+          <Key>
+            <PropertyRef Name="RoomID" />
+          </Key>
+          <Property Name="RoomID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Schedules" Relationship="BDFitnessClubDipModel.FK_Schedules_Rooms" FromRole="Rooms" ToRole="Schedules" />
+        </EntityType>
+        <EntityType Name="Sales">
+          <Key>
+            <PropertyRef Name="SaleID" />
+          </Key>
+          <Property Name="SaleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AdministratorID" Type="Int32" />
+          <Property Name="TrainerID" Type="Int32" />
+          <Property Name="SeasonticketID" Type="Int32" />
+          <Property Name="SeasonticketServiceID" Type="Int32" />
+          <Property Name="SaleDateTime" Type="DateTime" Precision="3" />
+          <Property Name="DiscountAmount" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="PriceSold" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="RemainingVisits" Type="Int32" />
+          <Property Name="StatusSale" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="VatRateID" Type="Int32" />
+          <Property Name="ClassificationID" Type="Int32" />
+          <Property Name="StartDateTime" Type="DateTime" Precision="3" />
+          <Property Name="EndDateTime" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Attendances" Relationship="BDFitnessClubDipModel.FK_Attendances_Sales" FromRole="Sales" ToRole="Attendances" />
+          <NavigationProperty Name="Classifications" Relationship="BDFitnessClubDipModel.FK_Sales_Classifications" FromRole="Sales" ToRole="Classifications" />
+          <NavigationProperty Name="Payments" Relationship="BDFitnessClubDipModel.FK_Payments_Sales" FromRole="Sales" ToRole="Payments" />
+          <NavigationProperty Name="Seasontickets" Relationship="BDFitnessClubDipModel.FK_Sales_Seasontickets" FromRole="Sales" ToRole="Seasontickets" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_Sales_SeasonticketServices" FromRole="Sales" ToRole="SeasonticketServices" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Sales_Staffs" FromRole="Sales" ToRole="Staffs" />
+          <NavigationProperty Name="Users" Relationship="BDFitnessClubDipModel.FK_Sales_Users" FromRole="Sales" ToRole="Users" />
+          <NavigationProperty Name="Vatrates" Relationship="BDFitnessClubDipModel.FK_Sales_Vatrates" FromRole="Sales" ToRole="Vatrates" />
+          <NavigationProperty Name="SeasonticketSales" Relationship="BDFitnessClubDipModel.FK_SeasonticketSales_Sales" FromRole="Sales" ToRole="SeasonticketSales" />
+          <NavigationProperty Name="SeasonticketsFreezes" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Sales" FromRole="Sales" ToRole="SeasonticketsFreezes" />
+        </EntityType>
+        <EntityType Name="Schedules">
+          <Key>
+            <PropertyRef Name="ScheduleID" />
+          </Key>
+          <Property Name="ScheduleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Title" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="SeasonticketServiceID" Type="Int32" />
+          <Property Name="TrainerID" Type="Int32" />
+          <Property Name="RoomID" Type="Int32" />
+          <Property Name="StartDateTime" Type="DateTime" Precision="3" />
+          <Property Name="EndDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ClientID" Type="Int32" />
+          <Property Name="GroupID" Type="Int32" />
+          <Property Name="ScheduleStatus" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Schedules_Clients" FromRole="Schedules" ToRole="Clients" />
+          <NavigationProperty Name="Groups" Relationship="BDFitnessClubDipModel.FK_Schedules_Groups" FromRole="Schedules" ToRole="Groups" />
+          <NavigationProperty Name="Rooms" Relationship="BDFitnessClubDipModel.FK_Schedules_Rooms" FromRole="Schedules" ToRole="Rooms" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Schedules_Staffs" FromRole="Schedules" ToRole="Staffs" />
+          <NavigationProperty Name="WaitingLists" Relationship="BDFitnessClubDipModel.FK_WaitingLists_Schedules" FromRole="Schedules" ToRole="WaitingLists" />
+        </EntityType>
+        <EntityType Name="SeasonticketClients">
+          <Key>
+            <PropertyRef Name="SeasonticketClientID" />
+          </Key>
+          <Property Name="SeasonticketClientID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SeasonticketID" Type="Int32" />
+          <Property Name="ClientID" Type="Int32" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_SeasonticketClients_Clients" FromRole="SeasonticketClients" ToRole="Clients" />
+          <NavigationProperty Name="Seasontickets" Relationship="BDFitnessClubDipModel.FK_SeasonticketClients_Seasontickets" FromRole="SeasonticketClients" ToRole="Seasontickets" />
+        </EntityType>
+        <EntityType Name="Seasontickets">
+          <Key>
+            <PropertyRef Name="SeasonticketID" />
+          </Key>
+          <Property Name="SeasonticketID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Price" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ValidityDuration" Type="Int32" />
+          <Property Name="CreatedDateTime" Type="DateTime" Precision="3" />
+          <Property Name="StatusSeasonticket" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_Seasontickets" FromRole="Seasontickets" ToRole="Sales" />
+          <NavigationProperty Name="SeasonticketClients" Relationship="BDFitnessClubDipModel.FK_SeasonticketClients_Seasontickets" FromRole="Seasontickets" ToRole="SeasonticketClients" />
+          <NavigationProperty Name="SeasonticketSales" Relationship="BDFitnessClubDipModel.FK_SeasonticketSales_Seasontickets" FromRole="Seasontickets" ToRole="SeasonticketSales" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_Seasontickets" FromRole="Seasontickets" ToRole="SeasonticketServices" />
+          <NavigationProperty Name="SeasonticketsFreezes" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Seasontickets" FromRole="Seasontickets" ToRole="SeasonticketsFreezes" />
+        </EntityType>
+        <EntityType Name="SeasonticketSales">
+          <Key>
+            <PropertyRef Name="SeasonticketSaleID" />
+          </Key>
+          <Property Name="SeasonticketSaleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SaleID" Type="Int32" />
+          <Property Name="SeasonticketID" Type="Int32" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_SeasonticketSales_Sales" FromRole="SeasonticketSales" ToRole="Sales" />
+          <NavigationProperty Name="Seasontickets" Relationship="BDFitnessClubDipModel.FK_SeasonticketSales_Seasontickets" FromRole="SeasonticketSales" ToRole="Seasontickets" />
+        </EntityType>
+        <EntityType Name="SeasonticketServices">
+          <Key>
+            <PropertyRef Name="SeasonticketServiceID" />
+          </Key>
+          <Property Name="SeasonticketServiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SeasonticketID" Type="Int32" />
+          <Property Name="ServiceID" Type="Int32" />
+          <Property Name="AccessAllowed" Type="Boolean" />
+          <Property Name="SaleID" Type="Int32" />
+          <Property Name="ServiceNumberClassTypeID" Type="Int32" />
+          <Property Name="VisitLimit" Type="Int32" />
+          <Property Name="DateTime" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="GroupMembers" Relationship="BDFitnessClubDipModel.FK_GroupMembers_SeasonticketServices" FromRole="SeasonticketServices" ToRole="GroupMembers" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_SeasonticketServices" FromRole="SeasonticketServices" ToRole="Sales" />
+          <NavigationProperty Name="Seasontickets" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_Seasontickets" FromRole="SeasonticketServices" ToRole="Seasontickets" />
+          <NavigationProperty Name="ServiceNumberClassTypes" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_ServiceNumberClassTypes" FromRole="SeasonticketServices" ToRole="ServiceNumberClassTypes" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_Services" FromRole="SeasonticketServices" ToRole="Services" />
+          <NavigationProperty Name="WaitingLists" Relationship="BDFitnessClubDipModel.FK_WaitingLists_SeasonticketServices" FromRole="SeasonticketServices" ToRole="WaitingLists" />
+        </EntityType>
+        <EntityType Name="SeasonticketsFreezes">
+          <Key>
+            <PropertyRef Name="SeasonticketsFreezes1" />
+          </Key>
+          <Property Name="SeasonticketsFreezes1" Type="Int32" Nullable="false" />
+          <Property Name="SaleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AdministratorID" Type="Int32" />
+          <Property Name="StartDateTime" Type="DateTime" Precision="3" />
+          <Property Name="EndDateTime" Type="DateTime" Precision="3" />
+          <Property Name="FreezeStatus" Type="Boolean" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="SeasonticketID" Type="Int32" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Sales" FromRole="SeasonticketsFreezes" ToRole="Sales" />
+          <NavigationProperty Name="Seasontickets" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Seasontickets" FromRole="SeasonticketsFreezes" ToRole="Seasontickets" />
+          <NavigationProperty Name="Users" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Users" FromRole="SeasonticketsFreezes" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="ServiceClassifications">
+          <Key>
+            <PropertyRef Name="ServiceClassificationID" />
+          </Key>
+          <Property Name="ServiceClassificationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_Services_ServiceClassifications" FromRole="ServiceClassifications" ToRole="Services" />
+        </EntityType>
+        <EntityType Name="ServiceNumberClassTypes">
+          <Key>
+            <PropertyRef Name="ServiceNumberClassTypeID" />
+          </Key>
+          <Property Name="ServiceNumberClassTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ServiceID" Type="Int32" />
+          <Property Name="NumberTrainingID" Type="Int32" />
+          <NavigationProperty Name="NumberTrainings" Relationship="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_NumberTrainings" FromRole="ServiceNumberClassTypes" ToRole="NumberTrainings" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_ServiceNumberClassTypes" FromRole="ServiceNumberClassTypes" ToRole="SeasonticketServices" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_Services" FromRole="ServiceNumberClassTypes" ToRole="Services" />
+        </EntityType>
+        <EntityType Name="Services">
+          <Key>
+            <PropertyRef Name="ServiceID" />
+          </Key>
+          <Property Name="ServiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Price" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="ServiceClassificationID" Type="Int32" />
+          <Property Name="SeviceTypeID" Type="Int32" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="TrialService" Type="Boolean" />
+          <Property Name="MinAge" Type="Int32" />
+          <Property Name="Capacity" Type="Int32" />
+          <Property Name="BonusQuantity" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="IsFreezable" Type="Boolean" />
+          <Property Name="FreezeDaysLimit" Type="Int32" />
+          <Property Name="StatusService" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Groups" Relationship="BDFitnessClubDipModel.FK_Groups_Services" FromRole="Services" ToRole="Groups" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_SeasonticketServices_Services" FromRole="Services" ToRole="SeasonticketServices" />
+          <NavigationProperty Name="ServiceClassifications" Relationship="BDFitnessClubDipModel.FK_Services_ServiceClassifications" FromRole="Services" ToRole="ServiceClassifications" />
+          <NavigationProperty Name="ServiceNumberClassTypes" Relationship="BDFitnessClubDipModel.FK_ServiceNumberClassTypes_Services" FromRole="Services" ToRole="ServiceNumberClassTypes" />
+          <NavigationProperty Name="ServiceTypes" Relationship="BDFitnessClubDipModel.FK_Services_ServiceTypes" FromRole="Services" ToRole="ServiceTypes" />
+          <NavigationProperty Name="ServiceTrainer" Relationship="BDFitnessClubDipModel.FK_ServiceTrainer_Services" FromRole="Services" ToRole="ServiceTrainer" />
+        </EntityType>
+        <EntityType Name="ServiceTrainer">
+          <Key>
+            <PropertyRef Name="ServiceTrainerID" />
+          </Key>
+          <Property Name="ServiceTrainerID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TrainerID" Type="Int32" />
+          <Property Name="ServiceID" Type="Int32" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_ServiceTrainer_Services" FromRole="ServiceTrainer" ToRole="Services" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_ServiceTrainer_Staffs" FromRole="ServiceTrainer" ToRole="Staffs" />
+        </EntityType>
+        <EntityType Name="ServiceTypes">
+          <Key>
+            <PropertyRef Name="ServiceTypeID" />
+          </Key>
+          <Property Name="ServiceTypeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Services" Relationship="BDFitnessClubDipModel.FK_Services_ServiceTypes" FromRole="ServiceTypes" ToRole="Services" />
+        </EntityType>
+        <EntityType Name="Staffs">
+          <Key>
+            <PropertyRef Name="StaffID" />
+          </Key>
+          <Property Name="StaffID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PersonID" Type="Int32" />
+          <Property Name="RoleID" Type="Int32" />
+          <Property Name="HireDate" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Attendances" Relationship="BDFitnessClubDipModel.FK_Attendances_Staffs" FromRole="Staffs" ToRole="Attendances" />
+          <NavigationProperty Name="Attendances1" Relationship="BDFitnessClubDipModel.FK_Attendances_Staffs1" FromRole="Staffs" ToRole="Attendances" />
+          <NavigationProperty Name="Persons" Relationship="BDFitnessClubDipModel.FK_Staffs_Persons" FromRole="Staffs" ToRole="Persons" />
+          <NavigationProperty Name="Roles" Relationship="BDFitnessClubDipModel.FK_Staffs_Roles" FromRole="Staffs" ToRole="Roles" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_Staffs" FromRole="Staffs" ToRole="Sales" />
+          <NavigationProperty Name="Schedules" Relationship="BDFitnessClubDipModel.FK_Schedules_Staffs" FromRole="Staffs" ToRole="Schedules" />
+          <NavigationProperty Name="ServiceTrainer" Relationship="BDFitnessClubDipModel.FK_ServiceTrainer_Staffs" FromRole="Staffs" ToRole="ServiceTrainer" />
+          <NavigationProperty Name="Users" Relationship="BDFitnessClubDipModel.FK_Users_Staffs" FromRole="Staffs" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="sysdiagrams">
+          <Key>
+            <PropertyRef Name="diagram_id" />
+          </Key>
+          <Property Name="name" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="principal_id" Type="Int32" Nullable="false" />
+          <Property Name="diagram_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="version" Type="Int32" />
+          <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
+        </EntityType>
+        <EntityType Name="TaskPriorities">
+          <Key>
+            <PropertyRef Name="TaskPrioritieID" />
+          </Key>
+          <Property Name="TaskPrioritieID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Tasks" Relationship="BDFitnessClubDipModel.FK_Tasks_TaskPriorities" FromRole="TaskPriorities" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="Tasks">
+          <Key>
+            <PropertyRef Name="TaskID" />
+          </Key>
+          <Property Name="TaskID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TaskPrioritieID" Type="Int32" />
+          <Property Name="TaskStatusID" Type="Int32" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="AdministratorID" Type="Int32" />
+          <Property Name="ResponsibleAdministratorID" Type="Int32" />
+          <Property Name="ClientID" Type="Int32" />
+          <Property Name="StartDedlainDateTime" Type="DateTime" Precision="3" />
+          <Property Name="EndDedlainDateTime" Type="DateTime" Precision="3" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_Tasks_Clients" FromRole="Tasks" ToRole="Clients" />
+          <NavigationProperty Name="TaskPriorities" Relationship="BDFitnessClubDipModel.FK_Tasks_TaskPriorities" FromRole="Tasks" ToRole="TaskPriorities" />
+          <NavigationProperty Name="TaskStatuses" Relationship="BDFitnessClubDipModel.FK_Tasks_TaskStatuses" FromRole="Tasks" ToRole="TaskStatuses" />
+          <NavigationProperty Name="Users" Relationship="BDFitnessClubDipModel.FK_Tasks_Users" FromRole="Tasks" ToRole="Users" />
+          <NavigationProperty Name="Users1" Relationship="BDFitnessClubDipModel.FK_Tasks_Users1" FromRole="Tasks" ToRole="Users" />
+        </EntityType>
+        <EntityType Name="TaskStatuses">
+          <Key>
+            <PropertyRef Name="TaskStatusID" />
+          </Key>
+          <Property Name="TaskStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Tasks" Relationship="BDFitnessClubDipModel.FK_Tasks_TaskStatuses" FromRole="TaskStatuses" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserID" />
+          </Key>
+          <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StaffID" Type="Int32" />
+          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Login" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_Users" FromRole="Users" ToRole="Sales" />
+          <NavigationProperty Name="SeasonticketsFreezes" Relationship="BDFitnessClubDipModel.FK_SeasonticketsFreezes_Users" FromRole="Users" ToRole="SeasonticketsFreezes" />
+          <NavigationProperty Name="Staffs" Relationship="BDFitnessClubDipModel.FK_Users_Staffs" FromRole="Users" ToRole="Staffs" />
+          <NavigationProperty Name="Tasks" Relationship="BDFitnessClubDipModel.FK_Tasks_Users" FromRole="Users" ToRole="Tasks" />
+          <NavigationProperty Name="Tasks1" Relationship="BDFitnessClubDipModel.FK_Tasks_Users1" FromRole="Users" ToRole="Tasks" />
+        </EntityType>
+        <EntityType Name="Vatrates">
+          <Key>
+            <PropertyRef Name="VatRateID" />
+          </Key>
+          <Property Name="VatRateID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="Rate" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Sales" Relationship="BDFitnessClubDipModel.FK_Sales_Vatrates" FromRole="Vatrates" ToRole="Sales" />
+        </EntityType>
+        <EntityType Name="WaitingListClients">
+          <Key>
+            <PropertyRef Name="WaitingID" />
+          </Key>
+          <Property Name="WaitingID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="WaitingListID" Type="Int32" />
+          <Property Name="ClientID" Type="Int32" />
+          <Property Name="EnrollmentDateTime" Type="DateTime" Precision="3" />
+          <Property Name="IsProcessed" Type="Boolean" />
+          <Property Name="Notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Clients" Relationship="BDFitnessClubDipModel.FK_WaitingListClients_Clients" FromRole="WaitingListClients" ToRole="Clients" />
+          <NavigationProperty Name="WaitingLists" Relationship="BDFitnessClubDipModel.FK_WaitingListClients_WaitingLists" FromRole="WaitingListClients" ToRole="WaitingLists" />
+        </EntityType>
+        <EntityType Name="WaitingLists">
+          <Key>
+            <PropertyRef Name="WaitingListID" />
+          </Key>
+          <Property Name="WaitingListID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="SheduleID" Type="Int32" />
+          <Property Name="SeasonticketServiceID" Type="Int32" />
+          <Property Name="DateTime" Type="DateTime" Precision="3" />
+          <Property Name="IsActivite" Type="Boolean" />
+          <NavigationProperty Name="Schedules" Relationship="BDFitnessClubDipModel.FK_WaitingLists_Schedules" FromRole="WaitingLists" ToRole="Schedules" />
+          <NavigationProperty Name="SeasonticketServices" Relationship="BDFitnessClubDipModel.FK_WaitingLists_SeasonticketServices" FromRole="WaitingLists" ToRole="SeasonticketServices" />
+          <NavigationProperty Name="WaitingListClients" Relationship="BDFitnessClubDipModel.FK_WaitingListClients_WaitingLists" FromRole="WaitingLists" ToRole="WaitingListClients" />
+        </EntityType>
+        <Association Name="FK_Attendances_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Attendances" Role="Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Lockers">
+          <End Type="BDFitnessClubDipModel.Lockers" Role="Lockers" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Attendances" Role="Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Lockers">
+              <PropertyRef Name="LockerID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="LockerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Sales">
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Attendances" Role="Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Staffs">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Attendances" Role="Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Attendances_Staffs1">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Attendances" Role="Attendances" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Attendances">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Classifications">
+          <End Type="BDFitnessClubDipModel.Classifications" Role="Classifications" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Classifications">
+              <PropertyRef Name="ClassificationID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="ClassificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_LoyaltyLevels">
+          <End Type="BDFitnessClubDipModel.LoyaltyLevels" Role="LoyaltyLevels" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoyaltyLevels">
+              <PropertyRef Name="LoyaltyLevelID" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="LoyaltyLevelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Clients_Persons">
+          <End Type="BDFitnessClubDipModel.Persons" Role="Persons" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Clients">
+              <PropertyRef Name="PersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Guardianships" Role="Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Schedules" Role="Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketClients_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketClients" Role="SeasonticketClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="SeasonticketClients">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Tasks" Role="Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingListClients_Clients">
+          <End Type="BDFitnessClubDipModel.Clients" Role="Clients" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.WaitingListClients" Role="WaitingListClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Clients">
+              <PropertyRef Name="ClientID" />
+            </Principal>
+            <Dependent Role="WaitingListClients">
+              <PropertyRef Name="ClientID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GroupMembers_Groups">
+          <End Type="BDFitnessClubDipModel.Groups" Role="Groups" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.GroupMembers" Role="GroupMembers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Groups">
+              <PropertyRef Name="GroupID" />
+            </Principal>
+            <Dependent Role="GroupMembers">
+              <PropertyRef Name="GroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_GroupMembers_SeasonticketServices">
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.GroupMembers" Role="GroupMembers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="GroupMembers">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Groups_Services">
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Groups" Role="Groups" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="Groups">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Groups">
+          <End Type="BDFitnessClubDipModel.Groups" Role="Groups" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Schedules" Role="Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Groups">
+              <PropertyRef Name="GroupID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="GroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Persons">
+          <End Type="BDFitnessClubDipModel.Persons" Role="Persons" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Guardianships" Role="Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="ResponsiblePersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Guardianships_Relationships">
+          <End Type="BDFitnessClubDipModel.Relationships" Role="Relationships" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Guardianships" Role="Guardianships" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Relationships">
+              <PropertyRef Name="RelationshipID" />
+            </Principal>
+            <Dependent Role="Guardianships">
+              <PropertyRef Name="RelationshipID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Lockers_LockerRoomTypes">
+          <End Type="BDFitnessClubDipModel.LockerRoomTypes" Role="LockerRoomTypes" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Lockers" Role="Lockers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LockerRoomTypes">
+              <PropertyRef Name="LockerRoomTypeID" />
+            </Principal>
+            <Dependent Role="Lockers">
+              <PropertyRef Name="LockerRoomTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceNumberClassTypes_NumberTrainings">
+          <End Type="BDFitnessClubDipModel.NumberTrainings" Role="NumberTrainings" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.ServiceNumberClassTypes" Role="ServiceNumberClassTypes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="NumberTrainings">
+              <PropertyRef Name="NumberTrainingID" />
+            </Principal>
+            <Dependent Role="ServiceNumberClassTypes">
+              <PropertyRef Name="NumberTrainingID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payments_PaymentMethods">
+          <End Type="BDFitnessClubDipModel.PaymentMethods" Role="PaymentMethods" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Payments" Role="Payments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PaymentMethods">
+              <PropertyRef Name="PaymentMethodID" />
+            </Principal>
+            <Dependent Role="Payments">
+              <PropertyRef Name="PaymentMethodID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Payments_Sales">
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Payments" Role="Payments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="Payments">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffs_Persons">
+          <End Type="BDFitnessClubDipModel.Persons" Role="Persons" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Persons">
+              <PropertyRef Name="PersonID" />
+            </Principal>
+            <Dependent Role="Staffs">
+              <PropertyRef Name="PersonID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Staffs_Roles">
+          <End Type="BDFitnessClubDipModel.Roles" Role="Roles" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Roles">
+              <PropertyRef Name="RoleID" />
+            </Principal>
+            <Dependent Role="Staffs">
+              <PropertyRef Name="RoleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Rooms">
+          <End Type="BDFitnessClubDipModel.Rooms" Role="Rooms" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Schedules" Role="Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Rooms">
+              <PropertyRef Name="RoomID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="RoomID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Seasontickets">
+          <End Type="BDFitnessClubDipModel.Seasontickets" Role="Seasontickets" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_SeasonticketServices">
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Staffs">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Users">
+          <End Type="BDFitnessClubDipModel.Users" Role="Users" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Sales_Vatrates">
+          <End Type="BDFitnessClubDipModel.Vatrates" Role="Vatrates" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vatrates">
+              <PropertyRef Name="VatRateID" />
+            </Principal>
+            <Dependent Role="Sales">
+              <PropertyRef Name="VatRateID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketSales_Sales">
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketSales" Role="SeasonticketSales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="SeasonticketSales">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Sales">
+          <End Type="BDFitnessClubDipModel.Sales" Role="Sales" Multiplicity="1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketsFreezes" Role="SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Sales">
+              <PropertyRef Name="SaleID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="SaleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Schedules_Staffs">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Schedules" Role="Schedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Schedules">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingLists_Schedules">
+          <End Type="BDFitnessClubDipModel.Schedules" Role="Schedules" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.WaitingLists" Role="WaitingLists" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Schedules">
+              <PropertyRef Name="ScheduleID" />
+            </Principal>
+            <Dependent Role="WaitingLists">
+              <PropertyRef Name="SheduleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketClients_Seasontickets">
+          <End Type="BDFitnessClubDipModel.Seasontickets" Role="Seasontickets" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketClients" Role="SeasonticketClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketClients">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketSales_Seasontickets">
+          <End Type="BDFitnessClubDipModel.Seasontickets" Role="Seasontickets" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketSales" Role="SeasonticketSales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketSales">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_Seasontickets">
+          <End Type="BDFitnessClubDipModel.Seasontickets" Role="Seasontickets" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Seasontickets">
+          <End Type="BDFitnessClubDipModel.Seasontickets" Role="Seasontickets" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketsFreezes" Role="SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Seasontickets">
+              <PropertyRef Name="SeasonticketID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="SeasonticketID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_ServiceNumberClassTypes">
+          <End Type="BDFitnessClubDipModel.ServiceNumberClassTypes" Role="ServiceNumberClassTypes" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceNumberClassTypes">
+              <PropertyRef Name="ServiceNumberClassTypeID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="ServiceNumberClassTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketServices_Services">
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="SeasonticketServices">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingLists_SeasonticketServices">
+          <End Type="BDFitnessClubDipModel.SeasonticketServices" Role="SeasonticketServices" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.WaitingLists" Role="WaitingLists" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SeasonticketServices">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Principal>
+            <Dependent Role="WaitingLists">
+              <PropertyRef Name="SeasonticketServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_SeasonticketsFreezes_Users">
+          <End Type="BDFitnessClubDipModel.Users" Role="Users" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.SeasonticketsFreezes" Role="SeasonticketsFreezes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="SeasonticketsFreezes">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Services_ServiceClassifications">
+          <End Type="BDFitnessClubDipModel.ServiceClassifications" Role="ServiceClassifications" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceClassifications">
+              <PropertyRef Name="ServiceClassificationID" />
+            </Principal>
+            <Dependent Role="Services">
+              <PropertyRef Name="ServiceClassificationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceNumberClassTypes_Services">
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.ServiceNumberClassTypes" Role="ServiceNumberClassTypes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="ServiceNumberClassTypes">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Services_ServiceTypes">
+          <End Type="BDFitnessClubDipModel.ServiceTypes" Role="ServiceTypes" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceTypes">
+              <PropertyRef Name="ServiceTypeID" />
+            </Principal>
+            <Dependent Role="Services">
+              <PropertyRef Name="SeviceTypeID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceTrainer_Services">
+          <End Type="BDFitnessClubDipModel.Services" Role="Services" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.ServiceTrainer" Role="ServiceTrainer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Services">
+              <PropertyRef Name="ServiceID" />
+            </Principal>
+            <Dependent Role="ServiceTrainer">
+              <PropertyRef Name="ServiceID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ServiceTrainer_Staffs">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.ServiceTrainer" Role="ServiceTrainer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="ServiceTrainer">
+              <PropertyRef Name="TrainerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Users_Staffs">
+          <End Type="BDFitnessClubDipModel.Staffs" Role="Staffs" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Users" Role="Users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Staffs">
+              <PropertyRef Name="StaffID" />
+            </Principal>
+            <Dependent Role="Users">
+              <PropertyRef Name="StaffID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_TaskPriorities">
+          <End Type="BDFitnessClubDipModel.TaskPriorities" Role="TaskPriorities" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Tasks" Role="Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskPriorities">
+              <PropertyRef Name="TaskPrioritieID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="TaskPrioritieID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_TaskStatuses">
+          <End Type="BDFitnessClubDipModel.TaskStatuses" Role="TaskStatuses" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Tasks" Role="Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskStatuses">
+              <PropertyRef Name="TaskStatusID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="TaskStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Users">
+          <End Type="BDFitnessClubDipModel.Users" Role="Users" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Tasks" Role="Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="AdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Tasks_Users1">
+          <End Type="BDFitnessClubDipModel.Users" Role="Users" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.Tasks" Role="Tasks" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="Tasks">
+              <PropertyRef Name="ResponsibleAdministratorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_WaitingListClients_WaitingLists">
+          <End Type="BDFitnessClubDipModel.WaitingLists" Role="WaitingLists" Multiplicity="0..1" />
+          <End Type="BDFitnessClubDipModel.WaitingListClients" Role="WaitingListClients" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="WaitingLists">
+              <PropertyRef Name="WaitingListID" />
+            </Principal>
+            <Dependent Role="WaitingListClients">
+              <PropertyRef Name="WaitingListID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="BDFitnessClubDipModelStoreContainer" CdmEntityContainer="BDFitnessClubDipEntities">
+          <EntitySetMapping Name="Attendances">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Attendances">
+              <MappingFragment StoreEntitySet="Attendances">
+                <ScalarProperty Name="LockerID" ColumnName="LockerID" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="ExitDateTime" ColumnName="ExitDateTime" />
+                <ScalarProperty Name="EntryDateTime" ColumnName="EntryDateTime" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="StaffID" ColumnName="StaffID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="AttendanceID" ColumnName="AttendanceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Classifications">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Classifications">
+              <MappingFragment StoreEntitySet="Classifications">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ClassificationID" ColumnName="ClassificationID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clients">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Clients">
+              <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="QRCode" ColumnName="QRCode" />
+                <ScalarProperty Name="NumberCard" ColumnName="NumberCard" />
+                <ScalarProperty Name="StatusClient" ColumnName="StatusClient" />
+                <ScalarProperty Name="LoyaltyLevelID" ColumnName="LoyaltyLevelID" />
+                <ScalarProperty Name="DepositBalance" ColumnName="DepositBalance" />
+                <ScalarProperty Name="BonuseBalance" ColumnName="BonuseBalance" />
+                <ScalarProperty Name="PersonID" ColumnName="PersonID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="GroupMembers">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.GroupMembers">
+              <MappingFragment StoreEntitySet="GroupMembers">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="CreateDateTime" ColumnName="CreateDateTime" />
+                <ScalarProperty Name="SeasonticketServiceID" ColumnName="SeasonticketServiceID" />
+                <ScalarProperty Name="GroupID" ColumnName="GroupID" />
+                <ScalarProperty Name="GroupMemberID" ColumnName="GroupMemberID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Groups">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Groups">
+              <MappingFragment StoreEntitySet="Groups">
+                <ScalarProperty Name="LimitCapacity" ColumnName="LimitCapacity" />
+                <ScalarProperty Name="StatusActivity" ColumnName="StatusActivity" />
+                <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
+                <ScalarProperty Name="Discount" ColumnName="Discount" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="GroupID" ColumnName="GroupID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Guardianships">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Guardianships">
+              <MappingFragment StoreEntitySet="Guardianships">
+                <ScalarProperty Name="RelationshipID" ColumnName="RelationshipID" />
+                <ScalarProperty Name="ResponsiblePersonID" ColumnName="ResponsiblePersonID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="GuardianshipID" ColumnName="GuardianshipID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LockerRoomTypes">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.LockerRoomTypes">
+              <MappingFragment StoreEntitySet="LockerRoomTypes">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="LockerRoomTypeID" ColumnName="LockerRoomTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Lockers">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Lockers">
+              <MappingFragment StoreEntitySet="Lockers">
+                <ScalarProperty Name="KeyNumber" ColumnName="KeyNumber" />
+                <ScalarProperty Name="IsAvailable" ColumnName="IsAvailable" />
+                <ScalarProperty Name="LockerRoomTypeID" ColumnName="LockerRoomTypeID" />
+                <ScalarProperty Name="LockerID" ColumnName="LockerID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LoyaltyLevels">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.LoyaltyLevels">
+              <MappingFragment StoreEntitySet="LoyaltyLevels">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="LoyaltyLevelID" ColumnName="LoyaltyLevelID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="NumberTrainings">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.NumberTrainings">
+              <MappingFragment StoreEntitySet="NumberTrainings">
+                <ScalarProperty Name="Number" ColumnName="Number" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="NumberTrainingID" ColumnName="NumberTrainingID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PaymentMethods">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.PaymentMethods">
+              <MappingFragment StoreEntitySet="PaymentMethods">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="PaymentMethodID" ColumnName="PaymentMethodID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Payments">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Payments">
+              <MappingFragment StoreEntitySet="Payments">
+                <ScalarProperty Name="DateTime" ColumnName="DateTime" />
+                <ScalarProperty Name="PaymentMethodID" ColumnName="PaymentMethodID" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="PaymentID" ColumnName="PaymentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Persons">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Persons">
+              <MappingFragment StoreEntitySet="Persons">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="ImagePerson" ColumnName="ImagePerson" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="MiddleName" ColumnName="MiddleName" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Surname" ColumnName="Surname" />
+                <ScalarProperty Name="PersonID" ColumnName="PersonID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Relationships">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Relationships">
+              <MappingFragment StoreEntitySet="Relationships">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="RelationshipID" ColumnName="RelationshipID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Roles">
+              <MappingFragment StoreEntitySet="Roles">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="RoleID" ColumnName="RoleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Rooms">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Rooms">
+              <MappingFragment StoreEntitySet="Rooms">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="RoomID" ColumnName="RoomID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Sales">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Sales">
+              <MappingFragment StoreEntitySet="Sales">
+                <ScalarProperty Name="EndDateTime" ColumnName="EndDateTime" />
+                <ScalarProperty Name="StartDateTime" ColumnName="StartDateTime" />
+                <ScalarProperty Name="ClassificationID" ColumnName="ClassificationID" />
+                <ScalarProperty Name="VatRateID" ColumnName="VatRateID" />
+                <ScalarProperty Name="StatusSale" ColumnName="StatusSale" />
+                <ScalarProperty Name="RemainingVisits" ColumnName="RemainingVisits" />
+                <ScalarProperty Name="PriceSold" ColumnName="PriceSold" />
+                <ScalarProperty Name="DiscountAmount" ColumnName="DiscountAmount" />
+                <ScalarProperty Name="SaleDateTime" ColumnName="SaleDateTime" />
+                <ScalarProperty Name="SeasonticketServiceID" ColumnName="SeasonticketServiceID" />
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+                <ScalarProperty Name="TrainerID" ColumnName="TrainerID" />
+                <ScalarProperty Name="AdministratorID" ColumnName="AdministratorID" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Schedules">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Schedules">
+              <MappingFragment StoreEntitySet="Schedules">
+                <ScalarProperty Name="ScheduleStatus" ColumnName="ScheduleStatus" />
+                <ScalarProperty Name="GroupID" ColumnName="GroupID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="EndDateTime" ColumnName="EndDateTime" />
+                <ScalarProperty Name="StartDateTime" ColumnName="StartDateTime" />
+                <ScalarProperty Name="RoomID" ColumnName="RoomID" />
+                <ScalarProperty Name="TrainerID" ColumnName="TrainerID" />
+                <ScalarProperty Name="SeasonticketServiceID" ColumnName="SeasonticketServiceID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="ScheduleID" ColumnName="ScheduleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SeasonticketClients">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.SeasonticketClients">
+              <MappingFragment StoreEntitySet="SeasonticketClients">
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+                <ScalarProperty Name="SeasonticketClientID" ColumnName="SeasonticketClientID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Seasontickets">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Seasontickets">
+              <MappingFragment StoreEntitySet="Seasontickets">
+                <ScalarProperty Name="StatusSeasonticket" ColumnName="StatusSeasonticket" />
+                <ScalarProperty Name="CreatedDateTime" ColumnName="CreatedDateTime" />
+                <ScalarProperty Name="ValidityDuration" ColumnName="ValidityDuration" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SeasonticketSales">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.SeasonticketSales">
+              <MappingFragment StoreEntitySet="SeasonticketSales">
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="SeasonticketSaleID" ColumnName="SeasonticketSaleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SeasonticketServices">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.SeasonticketServices">
+              <MappingFragment StoreEntitySet="SeasonticketServices">
+                <ScalarProperty Name="DateTime" ColumnName="DateTime" />
+                <ScalarProperty Name="VisitLimit" ColumnName="VisitLimit" />
+                <ScalarProperty Name="ServiceNumberClassTypeID" ColumnName="ServiceNumberClassTypeID" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="AccessAllowed" ColumnName="AccessAllowed" />
+                <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+                <ScalarProperty Name="SeasonticketServiceID" ColumnName="SeasonticketServiceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SeasonticketsFreezes">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.SeasonticketsFreezes">
+              <MappingFragment StoreEntitySet="SeasonticketsFreezes">
+                <ScalarProperty Name="SeasonticketID" ColumnName="SeasonticketID" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="FreezeStatus" ColumnName="FreezeStatus" />
+                <ScalarProperty Name="EndDateTime" ColumnName="EndDateTime" />
+                <ScalarProperty Name="StartDateTime" ColumnName="StartDateTime" />
+                <ScalarProperty Name="AdministratorID" ColumnName="AdministratorID" />
+                <ScalarProperty Name="SaleID" ColumnName="SaleID" />
+                <ScalarProperty Name="SeasonticketsFreezes1" ColumnName="SeasonticketsFreezes" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ServiceClassifications">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.ServiceClassifications">
+              <MappingFragment StoreEntitySet="ServiceClassifications">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ServiceClassificationID" ColumnName="ServiceClassificationID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ServiceNumberClassTypes">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.ServiceNumberClassTypes">
+              <MappingFragment StoreEntitySet="ServiceNumberClassTypes">
+                <ScalarProperty Name="NumberTrainingID" ColumnName="NumberTrainingID" />
+                <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
+                <ScalarProperty Name="ServiceNumberClassTypeID" ColumnName="ServiceNumberClassTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Services">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Services">
+              <MappingFragment StoreEntitySet="Services">
+                <ScalarProperty Name="StatusService" ColumnName="StatusService" />
+                <ScalarProperty Name="FreezeDaysLimit" ColumnName="FreezeDaysLimit" />
+                <ScalarProperty Name="IsFreezable" ColumnName="IsFreezable" />
+                <ScalarProperty Name="BonusQuantity" ColumnName="BonusQuantity" />
+                <ScalarProperty Name="Capacity" ColumnName="Capacity" />
+                <ScalarProperty Name="MinAge" ColumnName="MinAge" />
+                <ScalarProperty Name="TrialService" ColumnName="TrialService" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="SeviceTypeID" ColumnName="SeviceTypeID" />
+                <ScalarProperty Name="ServiceClassificationID" ColumnName="ServiceClassificationID" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ServiceTrainer">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.ServiceTrainer">
+              <MappingFragment StoreEntitySet="ServiceTrainer">
+                <ScalarProperty Name="ServiceID" ColumnName="ServiceID" />
+                <ScalarProperty Name="TrainerID" ColumnName="TrainerID" />
+                <ScalarProperty Name="ServiceTrainerID" ColumnName="ServiceTrainerID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ServiceTypes">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.ServiceTypes">
+              <MappingFragment StoreEntitySet="ServiceTypes">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ServiceTypeID" ColumnName="ServiceTypeID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Staffs">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Staffs">
+              <MappingFragment StoreEntitySet="Staffs">
+                <ScalarProperty Name="HireDate" ColumnName="HireDate" />
+                <ScalarProperty Name="RoleID" ColumnName="RoleID" />
+                <ScalarProperty Name="PersonID" ColumnName="PersonID" />
+                <ScalarProperty Name="StaffID" ColumnName="StaffID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sysdiagrams">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.sysdiagrams">
+              <MappingFragment StoreEntitySet="sysdiagrams">
+                <ScalarProperty Name="definition" ColumnName="definition" />
+                <ScalarProperty Name="version" ColumnName="version" />
+                <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
+                <ScalarProperty Name="principal_id" ColumnName="principal_id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskPriorities">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.TaskPriorities">
+              <MappingFragment StoreEntitySet="TaskPriorities">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="TaskPrioritieID" ColumnName="TaskPrioritieID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tasks">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Tasks">
+              <MappingFragment StoreEntitySet="Tasks">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="EndDedlainDateTime" ColumnName="EndDedlainDateTime" />
+                <ScalarProperty Name="StartDedlainDateTime" ColumnName="StartDedlainDateTime" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="ResponsibleAdministratorID" ColumnName="ResponsibleAdministratorID" />
+                <ScalarProperty Name="AdministratorID" ColumnName="AdministratorID" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="TaskStatusID" ColumnName="TaskStatusID" />
+                <ScalarProperty Name="TaskPrioritieID" ColumnName="TaskPrioritieID" />
+                <ScalarProperty Name="TaskID" ColumnName="TaskID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskStatuses">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.TaskStatuses">
+              <MappingFragment StoreEntitySet="TaskStatuses">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="TaskStatusID" ColumnName="TaskStatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Users">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="Login" ColumnName="Login" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="StaffID" ColumnName="StaffID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Vatrates">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.Vatrates">
+              <MappingFragment StoreEntitySet="Vatrates">
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Rate" ColumnName="Rate" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="VatRateID" ColumnName="VatRateID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WaitingListClients">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.WaitingListClients">
+              <MappingFragment StoreEntitySet="WaitingListClients">
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="IsProcessed" ColumnName="IsProcessed" />
+                <ScalarProperty Name="EnrollmentDateTime" ColumnName="EnrollmentDateTime" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="WaitingListID" ColumnName="WaitingListID" />
+                <ScalarProperty Name="WaitingID" ColumnName="WaitingID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="WaitingLists">
+            <EntityTypeMapping TypeName="BDFitnessClubDipModel.WaitingLists">
+              <MappingFragment StoreEntitySet="WaitingLists">
+                <ScalarProperty Name="IsActivite" ColumnName="IsActivite" />
+                <ScalarProperty Name="DateTime" ColumnName="DateTime" />
+                <ScalarProperty Name="SeasonticketServiceID" ColumnName="SeasonticketServiceID" />
+                <ScalarProperty Name="SheduleID" ColumnName="SheduleID" />
+                <ScalarProperty Name="WaitingListID" ColumnName="WaitingListID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

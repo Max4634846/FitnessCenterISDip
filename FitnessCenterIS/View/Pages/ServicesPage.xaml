@@ -1,0 +1,78 @@
+﻿<Page x:Class="FitnessCenterIS.View.Pages.ServicesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:FitnessCenterIS.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Услуги">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="1" Background="#f0f0f0" Margin="10 15" 
+                CornerRadius="5" BorderThickness="0 3 0 3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <WrapPanel VerticalAlignment="Center" Margin="10 0">
+                    <Button Width="50" Foreground="#fff" Background="#090909" 
+                            BorderBrush="Transparent" Click="AddService_Click" Margin="0 0 5 0">
+                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="AddBox" Height="20"/>
+                        </WrapPanel>
+                    </Button>
+
+                    <Button Width="50" Foreground="#fff" Background="#090909" 
+                            BorderBrush="Transparent" Margin="5 0" Click="DeleteService_Click">
+                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Delete" Height="20"/>
+                        </WrapPanel>
+                    </Button>
+
+                    <Button Width="50" Foreground="#fff" Background="#090909" 
+                            BorderBrush="Transparent" Margin="5 0" Click="EditService_Click">
+                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Edit" Height="20"/>
+                        </WrapPanel>
+                    </Button>
+
+                    <StackPanel Margin="10">
+                        <TextBox x:Name="SearchTextBox" 
+                                 Width="250" materialDesign:HintAssist.Hint="Найти услугу..."
+                                 TextChanged="SearchTextBox_TextChanged" Padding="5" 
+                                 BorderThickness="1" BorderBrush="Gray"
+                                 Foreground="#090909"
+                                 Style="{StaticResource MaterialDesignTextBox}"/>
+                    </StackPanel>
+                </WrapPanel>
+
+                <DataGrid x:Name="ServicesDataGrid" Grid.Row="1" 
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          HeadersVisibility="Column"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          Background="Transparent" 
+                          SelectionChanged="ServicesDataGrid_SelectionChanged"
+                          MouseDoubleClick="ServicesDataGrid_MouseDoubleClick">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat=\{0:C\}, ConverterCulture='ru-RU'}" Width="*"/>
+                        <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="*"/>
+                        <DataGridTextColumn Header="Статус" Binding="{Binding StatusService}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>
