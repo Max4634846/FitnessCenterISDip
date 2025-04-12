@@ -341,6 +341,9 @@
     <Compile Include="Vatrates.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
+    <Compile Include="View\Pages\AttendanceHistoryPage.xaml.cs">
+      <DependentUpon>AttendanceHistoryPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Pages\ClientPage.xaml.cs">
       <DependentUpon>ClientPage.xaml</DependentUpon>
     </Compile>
@@ -429,6 +432,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\TextBoxStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\AttendanceHistoryPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

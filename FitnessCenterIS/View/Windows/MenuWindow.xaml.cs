@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace FitnessCenterIS.View.Windows
@@ -128,6 +129,11 @@ namespace FitnessCenterIS.View.Windows
         private void WaitingList_Click(object sender, RoutedEventArgs e)
         {
             MainFrame.Navigate(new WaitingListPage());
+        }
+
+        private void AttendanceHistoryBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AttendanceHistoryPage());
         }
     }
 }

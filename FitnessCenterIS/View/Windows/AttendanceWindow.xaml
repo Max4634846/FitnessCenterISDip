@@ -37,7 +37,17 @@
             <!-- Основное содержимое -->
             <ScrollViewer Grid.Row="1" Margin="0,15,0,0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="Поиск клиента" FontSize="14" Margin="0,0,0,5"/>
+                    <TextBlock Text="Тип пользователя" FontSize="14" Margin="0,0,0,5"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <RadioButton x:Name="ClientRadioButton" Content="Клиент" 
+                                     GroupName="UserType" IsChecked="True" Margin="0,0,15,0"
+                                     Checked="UserType_Changed"/>
+                        <RadioButton x:Name="StaffRadioButton" Content="Сотрудник" 
+                                     GroupName="UserType" Margin="0,0,15,0"
+                                     Checked="UserType_Changed"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Поиск" FontSize="14" Margin="0,0,0,5"/>
                     <Grid>
                         <TextBox x:Name="ClientTextBox" TextChanged="ClientTextBox_TextChanged" Padding="10,8" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
                         <Popup x:Name="ClientsPopup" PlacementTarget="{Binding ElementName=ClientTextBox}"
@@ -51,27 +61,26 @@
                     <TextBlock x:Name="LockerInfoTextBlock" Text="" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" 
                                Foreground="#4CAF50" Visibility="Collapsed"/>
 
-                    <TextBlock Text="Абонементы клиента" FontSize="14" Margin="0,0,0,5"/>
-                    <Border CornerRadius="8" BorderBrush="#ddd" BorderThickness="1" Margin="0,0,0,15" Height="200">
-                        <ListBox x:Name="SeasonTicketsListBox" Style="{StaticResource MaterialDesignListBox}">
+                    <TextBlock Text="Абонементы клиента" FontSize="14" Margin="0,0,0,5" x:Name="SeasonTicketsLabel"/>
+                    <Border x:Name="SeasonTicketsBorder" CornerRadius="8" BorderBrush="#ddd" BorderThickness="1" Margin="0,0,0,15" Height="200">
+                        <ListBox x:Name="SeasonTicketsListBox" Style="{StaticResource MaterialDesignListBox}" SelectionChanged="SeasonTicketsListBox_SelectionChanged">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="5">
                                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
                                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                            <TextBlock Text="Осталось посещений: "/>
+                                            <!--<TextBlock Text="Осталось посещений: "/>-->
                                             <TextBlock Text="{Binding RemainingVisits}" FontWeight="Bold"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-
                     </Border>
-                    
-                    <TextBlock Text="Услуги абонемента" FontSize="14" Margin="0,0,0,5"/>
-                    <Border CornerRadius="8" BorderBrush="#ddd" BorderThickness="1" Margin="0,0,0,15" Height="150">
+
+                    <TextBlock Text="Услуги абонемента" FontSize="14" Margin="0,0,0,5" x:Name="ServicesLabel"/>
+                    <Border x:Name="ServicesBorder" CornerRadius="8" BorderBrush="#ddd" BorderThickness="1" Margin="0,0,0,15" Height="150">
                         <ListBox x:Name="ServicesListBox" Style="{StaticResource MaterialDesignListBox}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -86,7 +95,6 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </Border>
-
                 </StackPanel>
             </ScrollViewer>
 

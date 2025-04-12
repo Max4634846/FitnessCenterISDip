@@ -5,21 +5,43 @@ using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using FitnessCenterIS.Model;
 
 namespace FitnessCenterIS.View.Windows
 {
-    public partial class TaskWindow : Window
+    public partial class TaskWindow : Window, INotifyPropertyChanged
     {
         private readonly BDFitnessClubDipEntities _dbContext;
         public event EventHandler TaskCreated;
         public event EventHandler TaskUpdated;
         public ObservableCollection<TaskPriorities> Priorities { get; set; }
         public ObservableCollection<TaskStatuses> Statuses { get; set; }
+        public ObservableCollection<AdminInfo> Administrators { get; set; }
         private ObservableCollection<ClientInfo> _allClients;
         private ClientInfo _selectedClient;
         private Tasks _taskToEdit;
         private bool _isEditMode = false;
-        private int _taskIdToEdit; // Добавляем поле для хранения ID редактируемой задачи
+        private int _taskIdToEdit;
+        private bool _isTaskClosed = false;
+
+        public bool IsTaskClosed
+        {
+            get { return _isTaskClosed; }
+            set
+            {
+                if (_isTaskClosed != value)
+                {
+                    _isTaskClosed = value;
+                    OnPropertyChanged("IsTaskClosed");
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         // Конструктор для создания новой задачи
         public TaskWindow()
@@ -29,14 +51,22 @@ namespace FitnessCenterIS.View.Windows
             LoadPriorities();
             LoadStatuses();
             LoadClients();
+            LoadAdministrators();
             DataContext = this;
             _isEditMode = false;
             WindowTitleTextBlock.Text = "Создание новой задачи";
             AddButton.Visibility = Visibility.Visible;
             SaveButton.Visibility = Visibility.Collapsed;
+
+            // Установка текущей даты и времени для начала задачи
+            StartDatePicker.SelectedDate = DateTime.Now.Date;
+            StartTimeTextBox.Text = DateTime.Now.ToString("HH:mm");
+
+            // Установка текущего администратора как создателя
+            SetCurrentAdministratorAsCreator();
         }
 
-        // Новый конструктор для редактирования существующей задачи по ID
+        // Конструктор для редактирования существующей задачи по ID
         public TaskWindow(int taskId)
         {
             InitializeComponent();
@@ -44,6 +74,7 @@ namespace FitnessCenterIS.View.Windows
             LoadPriorities();
             LoadStatuses();
             LoadClients();
+            LoadAdministrators();
             DataContext = this;
             _taskIdToEdit = taskId;
             _isEditMode = true;
@@ -51,6 +82,20 @@ namespace FitnessCenterIS.View.Windows
             AddButton.Visibility = Visibility.Collapsed;
             SaveButton.Visibility = Visibility.Visible;
             LoadTaskForEdit(); // Загружаем задачу по ID
+        }
+
+        private void SetCurrentAdministratorAsCreator()
+        {
+            if (UserSession.CurrentAdmin != null)
+            {
+                var currentAdminId = UserSession.CurrentAdmin.UserID;
+                var currentAdmin = Administrators.FirstOrDefault(a => a.AdminID == currentAdminId);
+
+                if (currentAdmin != null)
+                {
+                    CreatorAdminComboBox.SelectedItem = currentAdmin;
+                }
+            }
         }
 
         public void SetClient(int clientId)
@@ -61,13 +106,9 @@ namespace FitnessCenterIS.View.Windows
             {
                 _selectedClient = clientInfo;
                 ClientTextBox.Text = clientInfo.ToString();
-
-                // Можно также заблокировать поле выбора клиента, 
-                // чтобы пользователь не мог его изменить
                 ClientTextBox.IsEnabled = false;
             }
         }
-
 
         private void LoadTaskForEdit()
         {
@@ -75,6 +116,8 @@ namespace FitnessCenterIS.View.Windows
             {
                 _taskToEdit = _dbContext.Tasks
                     .Include(t => t.Clients.Persons)
+                    .Include(t => t.Users) // Для администратора, создавшего задачу
+                    .Include(t => t.Users1) // Для администратора, закрывшего задачу
                     .FirstOrDefault(t => t.TaskID == _taskIdToEdit);
                 if (_taskToEdit != null)
                 {
@@ -93,15 +136,32 @@ namespace FitnessCenterIS.View.Windows
             }
         }
 
+
         private void PopulateFields()
         {
             TaskNameTextBox.Text = _taskToEdit.Name;
             TaskDescriptionTextBox.Text = _taskToEdit.Description;
+
+            // Заполняем поля даты и времени начала
+            StartDatePicker.SelectedDate = _taskToEdit.StartDedlainDateTime?.Date;
+            StartTimeTextBox.Text = _taskToEdit.StartDedlainDateTime?.ToString("HH:mm");
+
+            // Заполняем поля даты и времени завершения
             DeadlineDatePicker.SelectedDate = _taskToEdit.EndDedlainDateTime?.Date;
             DeadlineTimeTextBox.Text = _taskToEdit.EndDedlainDateTime?.ToString("HH:mm");
 
             PriorityComboBox.SelectedItem = Priorities.FirstOrDefault(p => p.TaskPrioritieID == _taskToEdit.TaskPrioritieID);
-            StatusComboBox.SelectedItem = Statuses.FirstOrDefault(s => s.TaskStatusID == _taskToEdit.TaskStatusID);
+
+            var selectedStatus = Statuses.FirstOrDefault(s => s.TaskStatusID == _taskToEdit.TaskStatusID);
+            StatusComboBox.SelectedItem = selectedStatus;
+
+            // Проверяем, закрыта ли задача
+            IsTaskClosed = selectedStatus?.Name.ToLower().Contains("завершен") ?? false;
+            ClosedByAdminComboBox.IsEnabled = IsTaskClosed;
+
+            // Заполняем поля администраторов
+            CreatorAdminComboBox.SelectedItem = Administrators.FirstOrDefault(a => a.AdminID == _taskToEdit.AdministratorID);
+            ClosedByAdminComboBox.SelectedItem = Administrators.FirstOrDefault(a => a.AdminID == _taskToEdit.ResponsibleAdministratorID);
 
             var clientInfo = _allClients.FirstOrDefault(c => c.ClientID == _taskToEdit.ClientID);
             if (clientInfo != null)
@@ -110,6 +170,7 @@ namespace FitnessCenterIS.View.Windows
                 ClientTextBox.Text = clientInfo.ToString();
             }
         }
+
 
         private void LoadPriorities()
         {
@@ -137,6 +198,39 @@ namespace FitnessCenterIS.View.Windows
                 .OrderBy(c => c.FullName)
                 .ToList();
             _allClients = new ObservableCollection<ClientInfo>(clients);
+        }
+
+        private void LoadAdministrators()
+        {
+            var admins = _dbContext.Users
+                .Where(u => u.Staffs.Roles.Name.Contains("Администратор"))
+                .Select(u => new AdminInfo
+                {
+                    AdminID = u.UserID,
+                    FullName = u.Staffs.Persons.Name + " " + u.Staffs.Persons.Surname,
+                    Login = u.Login
+                })
+                .OrderBy(a => a.FullName)
+                .ToList();
+            Administrators = new ObservableCollection<AdminInfo>(admins);
+
+            CreatorAdminComboBox.ItemsSource = Administrators;
+            ClosedByAdminComboBox.ItemsSource = Administrators;
+        }
+
+        public class AdminInfo : INotifyPropertyChanged
+        {
+            public int AdminID { get; set; }
+            public string FullName { get; set; }
+            public string Login { get; set; }
+
+            public string DisplayName => $"{FullName} ({Login})";
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected virtual void OnPropertyChanged(string propertyName)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         public class ClientInfo : INotifyPropertyChanged
@@ -191,6 +285,33 @@ namespace FitnessCenterIS.View.Windows
             }
         }
 
+        private void StatusComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (StatusComboBox.SelectedItem is TaskStatuses selectedStatus)
+            {
+                // Проверяем, является ли выбранный статус "Завершен" или подобным
+                IsTaskClosed = selectedStatus.Name.ToLower().Contains("завершен");
+
+                // Обновляем доступность поля выбора закрывшего администратора
+                ClosedByAdminComboBox.IsEnabled = IsTaskClosed;
+
+                // Если задача закрыта, устанавливаем текущего администратора как закрывшего
+                if (IsTaskClosed)
+                {
+                    if (UserSession.CurrentAdmin != null)
+                    {
+                        var currentAdminId = UserSession.CurrentAdmin.UserID;
+                        var currentAdmin = Administrators.FirstOrDefault(a => a.AdminID == currentAdminId);
+
+                        if (currentAdmin != null)
+                        {
+                            ClosedByAdminComboBox.SelectedItem = currentAdmin;
+                        }
+                    }
+                }
+            }
+        }
+
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
@@ -202,21 +323,43 @@ namespace FitnessCenterIS.View.Windows
             {
                 string taskName = TaskNameTextBox.Text;
                 string description = TaskDescriptionTextBox.Text;
+
+                // Получаем дату и время начала
+                DateTime? startDate = StartDatePicker.SelectedDate;
+                TimeSpan? startTime = null;
+                if (!string.IsNullOrWhiteSpace(StartTimeTextBox.Text))
+                {
+                    if (TimeSpan.TryParse(StartTimeTextBox.Text, out var parsedStartTime))
+                    {
+                        startTime = parsedStartTime;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Некорректный формат времени начала.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                // Получаем дату и время завершения
                 DateTime? deadlineDate = DeadlineDatePicker.SelectedDate;
                 TimeSpan? deadlineTime = null;
-
                 if (!string.IsNullOrWhiteSpace(DeadlineTimeTextBox.Text))
                 {
-                    TimeSpan parsedTime;
-                    if (TimeSpan.TryParse(DeadlineTimeTextBox.Text, out parsedTime))
+                    if (TimeSpan.TryParse(DeadlineTimeTextBox.Text, out var parsedTime))
                     {
                         deadlineTime = parsedTime;
                     }
                     else
                     {
-                        MessageBox.Show("Некорректный формат времени.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Некорректный формат времени завершения.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
+                }
+
+                DateTime? startDateTime = null;
+                if (startDate.HasValue)
+                {
+                    startDateTime = startDate.Value.Date + (startTime ?? TimeSpan.Zero);
                 }
 
                 DateTime? endDeadlineDateTime = null;
@@ -235,14 +378,46 @@ namespace FitnessCenterIS.View.Windows
                 {
                     if (StatusComboBox.SelectedItem is TaskStatuses selectedStatus)
                     {
+                        // Получаем администраторов
+                        int? creatorAdminId = null;
+                        int? closedByAdminId = null;
+
+                        if (CreatorAdminComboBox.SelectedItem is AdminInfo creatorAdmin)
+                        {
+                            creatorAdminId = creatorAdmin.AdminID;
+                        }
+                        else if (UserSession.CurrentAdmin != null)
+                        {
+                            // Если администратор не выбран, используем текущего
+                            creatorAdminId = UserSession.CurrentAdmin.UserID;
+                        }
+
+                        // Если задача закрыта, устанавливаем закрывшего администратора
+                        bool isTaskClosed = selectedStatus.Name.ToLower().Contains("завершен");
+                        if (isTaskClosed)
+                        {
+                            if (ClosedByAdminComboBox.SelectedItem is AdminInfo closedByAdmin)
+                            {
+                                closedByAdminId = closedByAdmin.AdminID;
+                            }
+                            else if (UserSession.CurrentAdmin != null)
+                            {
+                                // Если администратор не выбран, используем текущего
+                                closedByAdminId = UserSession.CurrentAdmin.UserID;
+                            }
+                        }
+
                         var newTask = new Tasks
                         {
                             Name = taskName,
                             Description = description,
+                            StartDedlainDateTime = startDateTime,
                             EndDedlainDateTime = endDeadlineDateTime,
                             TaskPrioritieID = selectedPriority.TaskPrioritieID,
                             TaskStatusID = selectedStatus.TaskStatusID,
-                            ClientID = _selectedClient.ClientID
+                            ClientID = _selectedClient.ClientID,
+                            AdministratorID = creatorAdminId,
+                            ResponsibleAdministratorID = closedByAdminId
                         };
 
                         try
@@ -255,7 +430,6 @@ namespace FitnessCenterIS.View.Windows
                         catch (Exception ex)
                         {
                             MessageBox.Show($"Ошибка при добавлении задачи: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                            // Рассмотрите возможность логирования более подробной информации об ошибке
                         }
                     }
                     else
@@ -280,16 +454,66 @@ namespace FitnessCenterIS.View.Windows
             {
                 _taskToEdit.Name = TaskNameTextBox.Text;
                 _taskToEdit.Description = TaskDescriptionTextBox.Text;
-                _taskToEdit.EndDedlainDateTime = DeadlineDatePicker.SelectedDate?.Date + (TimeSpan.TryParse(DeadlineTimeTextBox.Text, out var time) ? time : TimeSpan.Zero);
+
+                // Обновляем дату и время начала
+                _taskToEdit.StartDedlainDateTime = StartDatePicker.SelectedDate?.Date +
+                    (TimeSpan.TryParse(StartTimeTextBox.Text, out var startTime) ? startTime : TimeSpan.Zero);
+
+                // Обновляем дату и время завершения
+                _taskToEdit.EndDedlainDateTime = DeadlineDatePicker.SelectedDate?.Date +
+                    (TimeSpan.TryParse(DeadlineTimeTextBox.Text, out var time) ? time : TimeSpan.Zero);
 
                 if (PriorityComboBox.SelectedItem is TaskPriorities selectedPriority)
                 {
                     _taskToEdit.TaskPrioritieID = selectedPriority.TaskPrioritieID;
                 }
-                if (StatusComboBox.SelectedItem is TaskStatuses selectedStatus)
+
+                bool wasTaskClosedBefore = _taskToEdit.TaskStatuses.Name.ToLower().Contains("завершен");
+                TaskStatuses selectedStatus = null;
+
+                if (StatusComboBox.SelectedItem is TaskStatuses status)
                 {
-                    _taskToEdit.TaskStatusID = selectedStatus.TaskStatusID;
+                    selectedStatus = status;
+                    _taskToEdit.TaskStatusID = status.TaskStatusID;
                 }
+
+                // Проверяем, закрыта ли задача сейчас
+                bool isTaskClosedNow = selectedStatus?.Name.ToLower().Contains("завершен") ?? false;
+
+                // Обновляем администратора, создавшего задачу
+                if (CreatorAdminComboBox.SelectedItem is AdminInfo creatorAdmin)
+                {
+                    _taskToEdit.AdministratorID = creatorAdmin.AdminID;
+                }
+
+                // Если задача только что была закрыта, устанавливаем текущего администратора как закрывшего
+                if (!wasTaskClosedBefore && isTaskClosedNow)
+                {
+                    if (UserSession.CurrentAdmin != null)
+                    {
+                        _taskToEdit.ResponsibleAdministratorID = UserSession.CurrentAdmin.UserID;
+
+                        // Обновляем выбранный элемент в комбобоксе для отображения
+                        var currentAdmin = Administrators.FirstOrDefault(a => a.AdminID == UserSession.CurrentAdmin.UserID);
+                        if (currentAdmin != null)
+                        {
+                            ClosedByAdminComboBox.SelectedItem = currentAdmin;
+                        }
+                    }
+                    else if (ClosedByAdminComboBox.SelectedItem is AdminInfo closedByAdmin)
+                    {
+                        _taskToEdit.ResponsibleAdministratorID = closedByAdmin.AdminID;
+                    }
+                }
+                // Если задача уже была закрыта, сохраняем выбранного администратора
+                else if (isTaskClosedNow)
+                {
+                    if (ClosedByAdminComboBox.SelectedItem is AdminInfo closedByAdmin)
+                    {
+                        _taskToEdit.ResponsibleAdministratorID = closedByAdmin.AdminID;
+                    }
+                }
+
                 if (_selectedClient != null)
                 {
                     _taskToEdit.ClientID = _selectedClient.ClientID;

@@ -128,6 +128,7 @@
                            Margin="10 0 0 0" FontSize="20" Foreground="#333333"/>
                 </StackPanel>
                 
+                
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
                         Padding="15 8" Foreground="#090909" BorderBrush="#090909"
@@ -150,17 +151,32 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                
+
                 <!-- Фильтры задач -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0 0 0 15">
-                    <Button x:Name="NewTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Новые (0)" Foreground="#090909" Click="FilterTasksByStatus_Click" Tag="1"/>
-                    <Button x:Name="InProgressTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="В работе (0)" Margin="10 0 0 0" Foreground="#333333" Click="FilterTasksByStatus_Click" Tag="2"/>
-                    <Button x:Name="CompletedTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Завершенные (0)" Margin="10 0 0 0" Foreground="#333333" Click="FilterTasksByStatus_Click" Tag="3"/>
+                <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0 0 0 15">
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                        <TextBlock Text="Статус:" VerticalAlignment="Center" Margin="0 0 10 0" FontWeight="Medium"/>
+                        <Button x:Name="NewTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Новые (0)" Foreground="#090909" Click="FilterTasksByStatus_Click" Tag="1"/>
+                        <Button x:Name="InProgressTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="В работе (0)" Margin="10 0 0 0" Foreground="#333333" Click="FilterTasksByStatus_Click" Tag="2"/>
+                        <Button x:Name="CompletedTasksButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Завершенные (0)" Margin="10 0 0 0" Foreground="#333333" Click="FilterTasksByStatus_Click" Tag="3"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Приоритет:" VerticalAlignment="Center" Margin="0 0 10 0" FontWeight="Medium"/>
+                        <Button x:Name="HighPriorityButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Высокий (0)" Foreground="#D32F2F" Click="FilterTasksByPriority_Click" Tag="Высокий"/>
+                        <Button x:Name="MediumPriorityButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Средний (0)" Margin="10 0 0 0" Foreground="#FB8C00" Click="FilterTasksByPriority_Click" Tag="Средний"/>
+                        <Button x:Name="LowPriorityButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Низкий (0)" Margin="10 0 0 0" Foreground="#388E3C" Click="FilterTasksByPriority_Click" Tag="Низкий"/>
+                        <Button x:Name="AllPrioritiesButton" Style="{StaticResource MaterialDesignFlatButton}"
+                Content="Все" Margin="10 0 0 0" Foreground="#333333" Click="FilterTasksByPriority_Click" Tag="All"/>
+                    </StackPanel>
                 </StackPanel>
-                
+
                 <!-- Список задач -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <ListBox x:Name="TasksListBox" ItemsSource="{Binding}" Background="Transparent" BorderThickness="0"

@@ -37,7 +37,8 @@ namespace FitnessCenterIS.View.Windows
             {
                 var maleLockers = _dbContext.Lockers
                     .Where(l => l.LockerRoomTypeID == maleLockerRoomType.LockerRoomTypeID)
-                    .OrderBy(l => l.KeyNumber)
+                    .ToList()
+                    .OrderBy(l => int.Parse(l.KeyNumber))
                     .ToList();
                 MaleLockersList.ItemsSource = maleLockers;
             }
@@ -48,11 +49,13 @@ namespace FitnessCenterIS.View.Windows
             {
                 var femaleLockers = _dbContext.Lockers
                     .Where(l => l.LockerRoomTypeID == femaleLockerRoomType.LockerRoomTypeID)
-                    .OrderBy(l => l.KeyNumber)
+                    .ToList()
+                    .OrderBy(l => int.Parse(l.KeyNumber))
                     .ToList();
                 FemaleLockersList.ItemsSource = femaleLockers;
             }
         }
+
 
         private void LockerButton_Click(object sender, RoutedEventArgs e)
         {

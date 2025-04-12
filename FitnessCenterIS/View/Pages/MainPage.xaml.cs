@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using FitnessCenterIS.View.Windows;
 using System.Data.Entity;
+using System.Collections.Generic;
 
 namespace FitnessCenterIS.View.Pages
 {
@@ -15,6 +16,13 @@ namespace FitnessCenterIS.View.Pages
     {
         private readonly BDFitnessClubDipEntities _dbContext = new BDFitnessClubDipEntities();
         private ObservableCollection<object> _allTasks;
+
+        public int HighPriorityTasksCount { get; set; }
+        public int MediumPriorityTasksCount { get; set; }
+        public int LowPriorityTasksCount { get; set; }
+        private int _currentStatusFilter = 1; // По умолчанию показываем новые задачи
+        private string _currentPriorityFilter = "All"; // По умолчанию показываем все приоритеты
+
 
         public int NewTasksCount { get; set; }
         public int InProgressTasksCount { get; set; }
@@ -38,7 +46,7 @@ namespace FitnessCenterIS.View.Pages
                         t.EndDedlainDateTime,
                         TaskPrioritie = t.TaskPriorities.Name,
                         TaskStatus = t.TaskStatuses.Name,
-                        Client = t.Clients.Persons.Surname + " " + t.Clients.Persons.Name + " " +  t.Clients.Persons.MiddleName,
+                        Client = t.Clients.Persons.Surname + " " + t.Clients.Persons.Name + " " + t.Clients.Persons.MiddleName,
                         t.TaskStatusID,
                         t.TaskID
                     })
@@ -47,30 +55,51 @@ namespace FitnessCenterIS.View.Pages
                 _allTasks = new ObservableCollection<object>(tasks);
                 UpdateTaskCounts(_allTasks);
 
-                var initialTasks = _allTasks.Where(task => (task as dynamic)?.TaskStatusID == 1).ToList();
-                TasksListBox.ItemsSource = new ObservableCollection<object>(initialTasks);
+                // Применяем текущие фильтры при загрузке
+                ApplyFilters();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка при загрузке задач: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                // Рассмотрите возможность логирования более подробной информации об ошибке
             }
         }
+
 
         private void UpdateTaskCounts(ObservableCollection<object> tasks)
         {
             NewTasksCount = tasks.Count(task => (task as dynamic)?.TaskStatusID == 1);
             InProgressTasksCount = tasks.Count(task => (task as dynamic)?.TaskStatusID == 2);
             CompletedTasksCount = tasks.Count(task => (task as dynamic)?.TaskStatusID == 3);
+
+            HighPriorityTasksCount = tasks.Count(task => ((task as dynamic)?.TaskPrioritie)?.ToString() == "Высокий");
+            MediumPriorityTasksCount = tasks.Count(task => ((task as dynamic)?.TaskPrioritie)?.ToString() == "Средний");
+            LowPriorityTasksCount = tasks.Count(task => ((task as dynamic)?.TaskPrioritie)?.ToString() == "Низкий");
+
             UpdateButtonsContent();
         }
 
+
         private void UpdateButtonsContent()
         {
-            NewTasksButton.Content = $"Новый ({NewTasksCount})";
+            NewTasksButton.Content = $"Новые ({NewTasksCount})";
             InProgressTasksButton.Content = $"В работе ({InProgressTasksCount})";
             CompletedTasksButton.Content = $"Завершенные ({CompletedTasksCount})";
+
+            HighPriorityButton.Content = $"Высокий ({HighPriorityTasksCount})";
+            MediumPriorityButton.Content = $"Средний ({MediumPriorityTasksCount})";
+            LowPriorityButton.Content = $"Низкий ({LowPriorityTasksCount})";
         }
+
+        private void FilterTasksByPriority_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button clickedButton && clickedButton.Tag is string priority)
+            {
+                _currentPriorityFilter = priority;
+                ApplyFilters();
+            }
+        }
+
+
 
         private void AddNewClientButton_Click(object sender, RoutedEventArgs e)
         {
@@ -96,11 +125,28 @@ namespace FitnessCenterIS.View.Pages
             {
                 if (clickedButton.Tag is string tagString && int.TryParse(tagString, out int statusId))
                 {
-                    var filteredTasks = _allTasks.Where(task => (task as dynamic)?.TaskStatusID == statusId).ToList();
-                    TasksListBox.ItemsSource = new ObservableCollection<object>(filteredTasks);
+                    _currentStatusFilter = statusId;
+                    ApplyFilters();
                 }
             }
         }
+
+        private void ApplyFilters()
+        {
+            IEnumerable<object> filteredTasks = _allTasks;
+
+            // Применяем фильтр по статусу
+            filteredTasks = filteredTasks.Where(task => (task as dynamic)?.TaskStatusID == _currentStatusFilter);
+
+            // Применяем фильтр по приоритету, если выбран конкретный приоритет
+            if (_currentPriorityFilter != "All")
+            {
+                filteredTasks = filteredTasks.Where(task => ((task as dynamic)?.TaskPrioritie)?.ToString() == _currentPriorityFilter);
+            }
+
+            TasksListBox.ItemsSource = new ObservableCollection<object>(filteredTasks);
+        }
+
 
         private void TasksListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

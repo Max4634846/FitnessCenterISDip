@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FitnessCenterIS.View.Windows"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Задача" Height="560" Width="400"
+        Title="Задача" Height="800" Width="400"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
@@ -14,6 +14,10 @@
     <Border Background="#f0f0f0" CornerRadius="15" BorderBrush="#090909" BorderThickness="1">
         <Grid Margin="10">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -35,7 +39,8 @@
                       DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Приоритет задачи" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
 
             <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StatusComboBox" Margin="5"
-                      DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Статус задачи" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+                      DisplayMemberPath="Name" materialDesign:HintAssist.Hint="Статус задачи" Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      SelectionChanged="StatusComboBox_SelectionChanged"/>
 
             <TextBox Grid.Row="4" Grid.Column="1" x:Name="ClientTextBox" Margin="5"
                      materialDesign:HintAssist.Hint="Клиент" Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -48,17 +53,30 @@
                 </Border>
             </Popup>
 
-            <DatePicker Grid.Row="5" Grid.Column="1" x:Name="DeadlineDatePicker" Margin="5" materialDesign:HintAssist.Hint="Дата завершения" Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+            <!-- Дата и время начала -->
+            <DatePicker Grid.Row="5" Grid.Column="1" x:Name="StartDatePicker" Margin="5" materialDesign:HintAssist.Hint="Дата начала" Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
 
+            <TextBox Grid.Row="6" Grid.Column="1" x:Name="StartTimeTextBox" Margin="5"
+                     materialDesign:HintAssist.Hint="Время начала" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
-            <TextBox Grid.Row="6" Grid.Column="1" x:Name="DeadlineTimeTextBox" Margin="5"
+            <!-- Дата и время завершения -->
+            <DatePicker Grid.Row="7" Grid.Column="1" x:Name="DeadlineDatePicker" Margin="5" materialDesign:HintAssist.Hint="Дата завершения" Style="{StaticResource MaterialDesignOutlinedDatePicker}"/>
+
+            <TextBox Grid.Row="8" Grid.Column="1" x:Name="DeadlineTimeTextBox" Margin="5"
                      materialDesign:HintAssist.Hint="Время завершения" Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
 
-            <TextBox Grid.Row="7" Grid.Column="1" x:Name="TaskDescriptionTextBox" Margin="5" Height="80" AcceptsReturn="True" TextWrapping="Wrap" materialDesign:HintAssist.Hint="Описание задачи..."
+            <!-- Администраторы -->
+            <ComboBox Grid.Row="9" Grid.Column="1" x:Name="CreatorAdminComboBox" Margin="5"
+                      DisplayMemberPath="DisplayName" materialDesign:HintAssist.Hint="Назначивший администратор" Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+
+            <ComboBox Grid.Row="10" Grid.Column="1" x:Name="ClosedByAdminComboBox" Margin="5"
+                      DisplayMemberPath="DisplayName" materialDesign:HintAssist.Hint="Закрывший администратор" Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                      IsEnabled="{Binding IsTaskClosed}"/>
+
+            <TextBox Grid.Row="11" Grid.Column="1" x:Name="TaskDescriptionTextBox" Margin="5" Height="80" AcceptsReturn="True" TextWrapping="Wrap" materialDesign:HintAssist.Hint="Описание задачи..."
                      Style="{StaticResource MaterialDesignFilledTextBox}"/>
 
-
-            <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <StackPanel Grid.Row="12" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
                 <Button x:Name="AddButton" Content="Добавить" Height="40" 
                         Margin="5" Background="#090909" BorderBrush="Transparent" Click="AddButton_Click"/>
                 <Button x:Name="SaveButton" Content="Сохранить" Height="40"

@@ -14,16 +14,24 @@ namespace FitnessCenterIS.View.Windows
     {
         private readonly BDFitnessClubDipEntities _dbContext;
         private ObservableCollection<ClientInfo> _allClients;
+        private ObservableCollection<StaffInfo> _allStaff;
         private ClientInfo _selectedClient;
+        private StaffInfo _selectedStaff;
         private int _selectedClientId;
+        private int _selectedStaffId;
         private Attendances _currentAttendance;
+        private bool _isClientMode = true;
 
         public AttendanceWindow()
         {
             InitializeComponent();
             _dbContext = new BDFitnessClubDipEntities();
             LoadClients();
+            LoadStaff();
             this.DataContext = this;
+
+            // Устанавливаем начальную видимость элементов
+            UpdateUIVisibility();
         }
 
         private void LoadClients()
@@ -34,11 +42,111 @@ namespace FitnessCenterIS.View.Windows
                     ClientID = c.ClientID,
                     FullName = c.Persons.Surname + " " + c.Persons.Name + " " + c.Persons.MiddleName,
                     CardNumber = c.NumberCard,
-                    Gender = c.Persons.Gender
+                    Gender = c.Persons.Gender,
+                    Status = c.StatusClient
                 })
                 .OrderBy(c => c.FullName)
                 .ToList();
             _allClients = new ObservableCollection<ClientInfo>(clients);
+        }
+
+        private void LoadStaff()
+        {
+            var staff = _dbContext.Staffs
+                .Select(s => new StaffInfo
+                {
+                    StaffID = s.StaffID,
+                    FullName = s.Persons.Surname + " " + s.Persons.Name + " " + s.Persons.MiddleName,
+                    Role = s.Roles.Name,
+                    Gender = s.Persons.Gender
+                })
+                .OrderBy(s => s.FullName)
+                .ToList();
+            _allStaff = new ObservableCollection<StaffInfo>(staff);
+        }
+
+        private void UserType_Changed(object sender, RoutedEventArgs e)
+        {
+            _isClientMode = ClientRadioButton.IsChecked ?? true;
+
+            // Сбрасываем выбранные значения
+            _selectedClient = null;
+            _selectedStaff = null;
+            _selectedClientId = 0;
+            _selectedStaffId = 0;
+
+            if (ClientTextBox != null)
+            {
+                ClientTextBox.Text = string.Empty;
+            }
+
+            // Обновляем видимость элементов UI
+            UpdateUIVisibility();
+        }
+
+
+        private void UpdateUIVisibility()
+        {
+            bool showClientElements = _isClientMode;
+            bool isLead = _selectedClient != null && _selectedClient.Status == "Лид";
+
+            // Элементы для абонементов скрыты для "Лид" и сотрудников
+            bool showSeasonTickets = _isClientMode && !isLead;
+
+            // Элементы для услуг показываем только для клиентов
+            bool showServices = _isClientMode;
+
+            // Заголовок поиска
+            var searchLabel = (_isClientMode) ? "Поиск клиента" : "Поиск сотрудника";
+            var textBlocks = FindVisualChildren<TextBlock>(this);
+            var searchTextBlock = textBlocks.FirstOrDefault(t => t.Text == "Поиск клиента" || t.Text == "Поиск сотрудника");
+            if (searchTextBlock != null)
+                searchTextBlock.Text = searchLabel;
+
+            // Полное скрытие секции абонементов
+            var seasonTicketsLabel = FindName("SeasonTicketsLabel") as TextBlock;
+            if (seasonTicketsLabel != null)
+                seasonTicketsLabel.Visibility = showSeasonTickets ? Visibility.Visible : Visibility.Collapsed;
+
+            var seasonTicketsBorder = FindName("SeasonTicketsBorder") as Border;
+            if (seasonTicketsBorder != null)
+                seasonTicketsBorder.Visibility = showSeasonTickets ? Visibility.Visible : Visibility.Collapsed;
+
+            // Полное скрытие секции услуг
+            var servicesLabel = FindName("ServicesLabel") as TextBlock;
+            if (servicesLabel != null)
+            {
+                servicesLabel.Visibility = showServices ? Visibility.Visible : Visibility.Collapsed;
+                if (isLead && showServices)
+                    servicesLabel.Text = "Доступные услуги";
+                else if (showServices)
+                    servicesLabel.Text = "Услуги абонемента";
+            }
+
+            var servicesBorder = FindName("ServicesBorder") as Border;
+            if (servicesBorder != null)
+                servicesBorder.Visibility = showServices ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child != null && child is T)
+                    {
+                        yield return (T)child;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         private void ClientTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -50,39 +158,154 @@ namespace FitnessCenterIS.View.Windows
                 return;
             }
 
-            var filteredClients = _allClients.Where(c =>
-                c.FullName.ToLower().Contains(searchText) ||
-                c.CardNumber.ToLower().Contains(searchText)).ToList();
-
-            ClientsListBoxInPopup.ItemsSource = new ObservableCollection<ClientInfo>(filteredClients);
-            if (filteredClients.Any())
+            if (_isClientMode)
             {
-                ClientsPopup.IsOpen = true;
+                var filteredClients = _allClients.Where(c =>
+                    c.FullName.ToLower().Contains(searchText) ||
+                    (c.CardNumber != null && c.CardNumber.ToLower().Contains(searchText))).ToList();
+
+                ClientsListBoxInPopup.ItemsSource = new ObservableCollection<ClientInfo>(filteredClients);
+                if (filteredClients.Any())
+                {
+                    ClientsPopup.IsOpen = true;
+                }
+                else
+                {
+                    ClientsPopup.IsOpen = false;
+                }
             }
             else
             {
-                ClientsPopup.IsOpen = false;
+                var filteredStaff = _allStaff.Where(s =>
+                    s.FullName.ToLower().Contains(searchText) ||
+                    s.Role.ToLower().Contains(searchText)).ToList();
+
+                ClientsListBoxInPopup.ItemsSource = new ObservableCollection<StaffInfo>(filteredStaff);
+                if (filteredStaff.Any())
+                {
+                    ClientsPopup.IsOpen = true;
+                }
+                else
+                {
+                    ClientsPopup.IsOpen = false;
+                }
             }
         }
 
         private void ClientsListBoxInPopup_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ClientsListBoxInPopup.SelectedItem is ClientInfo selectedClient)
+            if (_isClientMode)
             {
-                _selectedClient = selectedClient;
-                _selectedClientId = selectedClient.ClientID;
-                ClientTextBox.Text = selectedClient.ToString();
-                ClientsPopup.IsOpen = false;
+                if (ClientsListBoxInPopup.SelectedItem is ClientInfo selectedClient)
+                {
+                    _selectedClient = selectedClient;
+                    _selectedClientId = selectedClient.ClientID;
+                    ClientTextBox.Text = selectedClient.ToString();
+                    ClientsPopup.IsOpen = false;
 
-                // Проверяем, есть ли у клиента активное посещение
-                CheckClientActiveAttendance(_selectedClientId);
-                // Загружаем абонементы клиента
-                LoadClientSeasonTickets(_selectedClientId);
+                    // Проверяем, есть ли у клиента активное посещение
+                    CheckClientActiveAttendance(_selectedClientId);
+
+                    bool isLead = selectedClient.Status == "Лид";
+
+                    if (!isLead)
+                    {
+                        // Загружаем абонементы для обычных клиентов
+                        LoadClientSeasonTickets(_selectedClientId);
+                    }
+                    else
+                    {
+                        // Для Лид-клиентов загружаем все доступные услуги
+                        LoadAllServices();
+                    }
+
+                    // Обновляем UI на основе статуса клиента
+                    UpdateUIVisibility();
+                }
+            }
+            else
+            {
+                if (ClientsListBoxInPopup.SelectedItem is StaffInfo selectedStaff)
+                {
+                    _selectedStaff = selectedStaff;
+                    _selectedStaffId = selectedStaff.StaffID;
+                    ClientTextBox.Text = selectedStaff.ToString();
+                    ClientsPopup.IsOpen = false;
+
+                    // Проверяем, есть ли у сотрудника активное посещение
+                    CheckStaffActiveAttendance(_selectedStaffId);
+
+                    // Обновляем UI для сотрудника
+                    UpdateUIVisibility();
+                }
             }
         }
+
+        private void LoadAllServices()
+        {
+            // Загружаем все доступные услуги для клиентов со статусом "Лид"
+            var services = _dbContext.Services
+                .Where(s => s.StatusService == "Активен" && s.TrialService == true)
+                .Select(s => new {
+                    s.ServiceID,
+                    s.Name,
+                    s.Description,
+                    s.Price,
+                    RemainingVisits = 1 // Одно пробное посещение
+                })
+                .ToList();
+
+            ServicesListBox.ItemsSource = services;
+            ServicesListBox.SelectedValuePath = "ServiceID";
+        }
+
+        private void CheckStaffActiveAttendance(int staffId)
+        {
+            // Проверяем, есть ли у сотрудника активное посещение
+            _currentAttendance = _dbContext.Attendances
+                .FirstOrDefault(a => a.StaffID == staffId && a.ExitDateTime == null);
+
+            if (_currentAttendance != null)
+            {
+                // Сотрудник уже в зале
+                if (_currentAttendance.LockerID.HasValue)
+                {
+                    var locker = _dbContext.Lockers.FirstOrDefault(l => l.LockerID == _currentAttendance.LockerID.Value);
+                    if (locker != null)
+                    {
+                        LockerInfoTextBlock.Text = $"Сотрудник уже на территории. Шкафчик №{locker.KeyNumber}";
+                    }
+                    else
+                    {
+                        LockerInfoTextBlock.Text = "Сотрудник уже на территории";
+                    }
+                }
+                else
+                {
+                    LockerInfoTextBlock.Text = "Сотрудник уже на территории";
+                }
+
+                LockerInfoTextBlock.Visibility = Visibility.Visible;
+
+                // Скрываем кнопку отметки посещения и показываем кнопку завершения
+                MarkAttendanceButton.Visibility = Visibility.Collapsed;
+                CompleteAttendanceButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Сотрудник не в зале
+                LockerInfoTextBlock.Visibility = Visibility.Collapsed;
+
+                // Показываем кнопку отметки посещения и скрываем кнопку завершения
+                MarkAttendanceButton.Visibility = Visibility.Visible;
+                CompleteAttendanceButton.Visibility = Visibility.Collapsed;
+            }
+        }
+
+
         private void LoadClientSeasonTickets(int clientId)
         {
-            // Загружаем абонементы клиента
+            // Загружаем абонементы клиента через SeasonticketClients
             var clientSeasonTickets = _dbContext.SeasonticketClients
                 .Where(stc => stc.ClientID == clientId)
                 .Join(_dbContext.Seasontickets,
@@ -99,9 +322,12 @@ namespace FitnessCenterIS.View.Windows
                 .Where(st => st.Status == "Активен")
                 .ToList();
 
+            // Очищаем коллекцию перед установкой ItemsSource
+            //SeasonTicketsListBox.Items.Clear();
             SeasonTicketsListBox.ItemsSource = clientSeasonTickets;
-            SeasonTicketsListBox.SelectedValuePath = "SeasonticketClientID";
+            SeasonTicketsListBox.SelectedValuePath = "SeasonticketID";
         }
+
 
         private void LoadSeasonTicketServices(int seasonTicketId)
         {
@@ -113,7 +339,7 @@ namespace FitnessCenterIS.View.Windows
                     (sts, s) => new {
                         s.ServiceID,
                         s.Name,
-                        sts.VisitLimit,
+                        RemainingVisits = sts.VisitLimit
                     })
                 .ToList();
 
@@ -121,7 +347,6 @@ namespace FitnessCenterIS.View.Windows
             ServicesListBox.SelectedValuePath = "ServiceID";
         }
 
-        // Обработчик выбора абонемента
         private void SeasonTicketsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (SeasonTicketsListBox.SelectedValue is int seasonTicketId)
@@ -129,7 +354,6 @@ namespace FitnessCenterIS.View.Windows
                 LoadSeasonTicketServices(seasonTicketId);
             }
         }
-
 
         private void CheckClientActiveAttendance(int clientId)
         {
@@ -167,7 +391,20 @@ namespace FitnessCenterIS.View.Windows
                 SeasonTicketsListBox.IsEnabled = true;
             }
         }
+
         private void MarkAttendance_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isClientMode)
+            {
+                MarkClientAttendance();
+            }
+            else
+            {
+                MarkStaffAttendance();
+            }
+        }
+
+        private void MarkClientAttendance()
         {
             if (_selectedClientId <= 0)
             {
@@ -175,7 +412,9 @@ namespace FitnessCenterIS.View.Windows
                 return;
             }
 
-            if (SeasonTicketsListBox.SelectedValue == null)
+            bool isLead = _selectedClient.Status == "Лид";
+
+            if (!isLead && (SeasonTicketsListBox.SelectedValue == null))
             {
                 MessageBox.Show("Пожалуйста, выберите абонемент.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -187,32 +426,92 @@ namespace FitnessCenterIS.View.Windows
                 return;
             }
 
-            // Получаем выбранные значения
-            int seasonTicketClientId = (int)SeasonTicketsListBox.SelectedValue;
             int serviceId = (int)ServicesListBox.SelectedValue;
+            int? seasonTicketId = isLead ? null : (int?)SeasonTicketsListBox.SelectedValue;
 
-            // Открываем окно выбора шкафчика...
-
-            // После выбора шкафчика создаем запись о посещении
-            var attendance = new Attendances
+            // Открываем окно выбора шкафчика
+            var lockerWindow = new LockerSelectionWindow(_dbContext, _selectedClient.Gender == "Мужской");
+            if (lockerWindow.ShowDialog() == true)
             {
-                ClientID = _selectedClientId,
-                EntryDateTime = DateTime.Now,
-                Note = "Посещение отмечено через систему"
-            };
+                int lockerId = lockerWindow.SelectedLockerId;
 
-            _dbContext.Attendances.Add(attendance);
+                // После выбора шкафчика создаем запись о посещении
+                var attendance = new Attendances
+                {
+                    ClientID = _selectedClientId,
+                    EntryDateTime = DateTime.Now,
+                    Note = isLead ? "Пробное посещение" : "Посещение отмечено через систему",
+                    LockerID = lockerId
+                };
 
-            // Уменьшаем количество доступных посещений для конкретной услуги
-            var serviceInSeasonTicket = _dbContext.SeasonticketServices
-                .FirstOrDefault(sts => sts.SeasonticketID == seasonTicketClientId && sts.ServiceID == serviceId);
+                // Занимаем шкафчик
+                var locker = _dbContext.Lockers.FirstOrDefault(l => l.LockerID == lockerId);
+                if (locker != null)
+                {
+                    locker.IsAvailable = false;
+                }
 
-            if (serviceInSeasonTicket != null && serviceInSeasonTicket.VisitLimit > 0) 
+                _dbContext.Attendances.Add(attendance);
+
+                if (!isLead && seasonTicketId.HasValue)
+                {
+                    // Уменьшаем количество доступных посещений для конкретной услуги
+                    var serviceInSeasonTicket = _dbContext.SeasonticketServices
+                        .FirstOrDefault(sts => sts.SeasonticketID == seasonTicketId.Value && sts.ServiceID == serviceId);
+
+                    if (serviceInSeasonTicket != null && serviceInSeasonTicket.VisitLimit > 0)
+                    {
+                        serviceInSeasonTicket.VisitLimit--;
+                    }
+                }
+
+                _dbContext.SaveChanges();
+
+                MessageBox.Show("Посещение успешно отмечено.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Обновляем интерфейс
+                CheckClientActiveAttendance(_selectedClientId);
+            }
+        }
+
+        private void MarkStaffAttendance()
+        {
+            if (_selectedStaffId <= 0)
             {
-                serviceInSeasonTicket.VisitLimit--;
+                MessageBox.Show("Пожалуйста, выберите сотрудника.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            _dbContext.SaveChanges();
+            // Открываем окно выбора шкафчика для сотрудника
+            var lockerWindow = new LockerSelectionWindow(_dbContext, _selectedStaff.Gender == "Мужской");
+            if (lockerWindow.ShowDialog() == true)
+            {
+                int lockerId = lockerWindow.SelectedLockerId;
+
+                // Создаем запись о посещении с указанием шкафчика
+                var attendance = new Attendances
+                {
+                    StaffID = _selectedStaffId,
+                    EntryDateTime = DateTime.Now,
+                    Note = "Отметка сотрудника",
+                    LockerID = lockerId // Добавляем шкафчик
+                };
+
+                // Занимаем шкафчик
+                var locker = _dbContext.Lockers.FirstOrDefault(l => l.LockerID == lockerId);
+                if (locker != null)
+                {
+                    locker.IsAvailable = false;
+                }
+
+                _dbContext.Attendances.Add(attendance);
+                _dbContext.SaveChanges();
+
+                MessageBox.Show("Посещение сотрудника успешно отмечено.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Обновляем интерфейс
+                CheckStaffActiveAttendance(_selectedStaffId);
+            }
         }
 
 
@@ -227,25 +526,33 @@ namespace FitnessCenterIS.View.Windows
             // Завершаем посещение
             _currentAttendance.ExitDateTime = DateTime.Now;
 
-            // Освобождаем шкафчик
+            // Освобождаем шкафчик для клиента или сотрудника
             if (_currentAttendance.LockerID.HasValue)
             {
                 var locker = _dbContext.Lockers.FirstOrDefault(l => l.LockerID == _currentAttendance.LockerID.Value);
                 if (locker != null)
                 {
                     locker.IsAvailable = true;
+                    MessageBox.Show("Посещение успешно завершено. Шкафчик освобожден.",
+                        "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Посещение успешно завершено.",
+                    "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             _dbContext.SaveChanges();
 
-            MessageBox.Show("Посещение успешно завершено. Шкафчик освобожден.",
-                "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-
             // Обновляем интерфейс
             _currentAttendance = null;
-            CheckClientActiveAttendance(_selectedClientId);
+            if (_isClientMode && _selectedClientId > 0)
+                CheckClientActiveAttendance(_selectedClientId);
+            else if (!_isClientMode && _selectedStaffId > 0)
+                CheckStaffActiveAttendance(_selectedStaffId);
         }
+
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
@@ -259,7 +566,6 @@ namespace FitnessCenterIS.View.Windows
                 DragMove();
         }
 
-
         // Класс для хранения информации о клиенте
         public class ClientInfo : INotifyPropertyChanged
         {
@@ -267,10 +573,31 @@ namespace FitnessCenterIS.View.Windows
             public string FullName { get; set; }
             public string CardNumber { get; set; }
             public string Gender { get; set; }
+            public string Status { get; set; }
 
             public override string ToString()
             {
                 return $"{FullName} (Карта №{CardNumber})";
+            }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+            protected virtual void OnPropertyChanged(string propertyName)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        // Класс для хранения информации о сотруднике
+        public class StaffInfo : INotifyPropertyChanged
+        {
+            public int StaffID { get; set; }
+            public string FullName { get; set; }
+            public string Role { get; set; }
+            public string Gender { get; set; }
+
+            public override string ToString()
+            {
+                return $"{FullName} ({Role})";
             }
 
             public event PropertyChangedEventHandler PropertyChanged;
