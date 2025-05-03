@@ -34,7 +34,7 @@ namespace FitnessCenterIS.View.Windows
             MainPage dashboardView = new MainPage();
             MainFrame.Content = dashboardView;
 
-            LoggedInAdminNameTextBlock.Text = $"{UserSession.CurrentAdmin.Name} {UserSession.CurrentAdmin.Surname}";
+            LoggedInAdminNameButton.Content = $"{UserSession.CurrentAdmin.Name} {UserSession.CurrentAdmin.Surname}";
         }
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
@@ -135,5 +135,28 @@ namespace FitnessCenterIS.View.Windows
         {
             MainFrame.Navigate(new AttendanceHistoryPage());
         }
+
+        private void LoggedInAdminNameButton_Click(object sender, RoutedEventArgs e)
+        {
+            UserProfileWindow userProfileWindow = new UserProfileWindow(UserSession.CurrentAdmin);
+            userProfileWindow.ShowDialog();
+        }
+
+        private void Staff_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new StaffPage());
+        }
+
+        private void User_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new UserPage());
+        }
+
+        private void Role_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new RolesPage());
+        }
+
+        
     }
 }

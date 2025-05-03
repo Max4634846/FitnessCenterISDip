@@ -65,16 +65,15 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Левая колонка - фото и карта -->
+                            <!-- Левая колонка - фото -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Фотография" Style="{StaticResource HeaderTextStyle}"/>
+                                <TextBlock Text="Фотография" Style="{StaticResource HeaderTextStyle}" Margin="25 0"/>
                                 <Border Width="250" Height="250" Background="#f5f5f5"
                                         BorderBrush="#e0e0e0" BorderThickness="1" Margin="0 0 0 20">
                                     <Button Style="{StaticResource MaterialDesignFlatButton}" BorderBrush="#090909" 
                                             BorderThickness="1"
                                             Width="250" Height="250" Padding="0" Click="BtnImage_Click">
                                         <Grid>
-
                                             <Image x:Name="ClientImage" Source="/Resource/NewPerson.jpg" Stretch="Fill"/>
                                             <materialDesign:PackIcon Kind="CameraPlus" Width="40" Height="40" 
                                                                      Foreground="#90ffffff" Background="#80000000" 
@@ -83,12 +82,7 @@
                                     </Button>
                                 </Border>
 
-                                <TextBlock Text="Информация о карте" Style="{StaticResource HeaderTextStyle}" Margin="0 20 0 8"/>
-                                <TextBox x:Name="NumberCardTextBox" Width="250" 
-                                         materialDesign:HintAssist.Hint="Номер карты"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0 0 0 15"/>
-
-                                <TextBlock Text="Статус клиента" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBlock Text="Статус клиента" HorizontalAlignment="Center" Style="{StaticResource FormLabelStyle}"/>
                                 <ComboBox x:Name="StatusClientComboBox" Width="250" Margin="0 0 0 10"
                                           Style="{StaticResource MaterialDesignOutlinedComboBox}">
                                     <ComboBoxItem x:Name="StatusCL" Content="Клиент"/>
@@ -246,6 +240,37 @@
                                     </ComboBox>
                                 </StackPanel>
                             </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Вкладка для карты и QR-кода -->
+                <TabItem Header="Карточка клиента">
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="25" HorizontalAlignment="Center">
+
+                            <StackPanel Margin="0 20" HorizontalAlignment="Center">
+                                <TextBlock Text="Информация о карте" HorizontalAlignment="Center" Style="{StaticResource SectionHeaderStyle}"/>
+
+                                <TextBox x:Name="NumberCardTextBox" Width="300" 
+                                         materialDesign:HintAssist.Hint="Номер карты"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                         Margin="0 0 0 15"
+                                         TextChanged="NumberCardTextBox_TextChanged"/>
+
+                                <Button x:Name="GenerateCardButton" Width="300" Height="40" 
+                                        Content="Сгенерировать номер карты"
+                                        Click="GenerateCardButton_Click" 
+                                        Background="#090909" BorderBrush="Transparent" Foreground="White"
+                                        Margin="0 0 0 30"/>
+
+                                <TextBlock Text="QR-Код" Style="{StaticResource HeaderTextStyle}" HorizontalAlignment="Center" Margin="0 15 0 15"/>
+                                <Border Width="200" Height="200" BorderBrush="#e0e0e0" BorderThickness="1" Margin="0 0 0 20">
+                                    <Image x:Name="QRCodeImage" Width="180" Height="180"/>
+                                </Border>
+
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>

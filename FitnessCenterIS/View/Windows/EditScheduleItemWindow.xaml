@@ -126,7 +126,7 @@
                         <ComboBox x:Name="ClientComboBox" SelectedValue="{Binding ClientID}" 
                                   Padding="10,8" Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                   DisplayMemberPath="FullName" SelectedValuePath="ClientID"/>
-                    </Border>   
+                    </Border>
 
                     <TextBlock Text="Группа" FontSize="14" Margin="0,0,0,5"/>
                     <Border CornerRadius="8" BorderBrush="#ddd" BorderThickness="1" Margin="0,0,0,15">

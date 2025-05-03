@@ -18,16 +18,25 @@ namespace FitnessCenterIS.View.Windows
         private ScheduleItem _scheduleItemWrapper;
 
 
-        public EditScheduleWindow(BDFitnessClubDipEntities dbContext, Schedules item = null)
+        public EditScheduleWindow(BDFitnessClubDipEntities dbContext, Schedules item = null, Dictionary<int, string> scheduleColors = null)
         {
             InitializeComponent();
             _dbContext = dbContext;
+            _scheduleColors = scheduleColors ?? new Dictionary<int, string>();
 
             if (item != null)
             {
                 _scheduleItem = item;
                 _isEditMode = true;
                 WindowTitle.Text = "Редактирование занятия";
+
+                // Получаем цвет из словаря, если он существует
+                string itemColor = _scheduleColors.ContainsKey(item.ScheduleID)
+                    ? _scheduleColors[item.ScheduleID]
+                    : "#3498db";
+
+                // Создаем обертку ScheduleItem
+                _scheduleItemWrapper = new ScheduleItem(item, itemColor);
 
                 // Загружаем списки перед установкой значений
                 LoadComboBoxes();
@@ -56,6 +65,28 @@ namespace FitnessCenterIS.View.Windows
 
                     if (item.SeasonticketServiceID.HasValue)
                         ServiceComboBox.SelectedValue = item.SeasonticketServiceID.Value;
+
+                    if (item.ClientID.HasValue)
+                        ClientComboBox.SelectedValue = item.ClientID.Value;
+
+                    if (item.GroupID.HasValue)
+                        GroupComboBox.SelectedValue = item.GroupID.Value;
+
+                    // Установка статуса
+                    if (!string.IsNullOrEmpty(item.ScheduleStatus))
+                    {
+                        switch (item.ScheduleStatus)
+                        {
+                            case "Активно": StatusComboBox.SelectedIndex = 0; break;
+                            case "Отменено": StatusComboBox.SelectedIndex = 1; break;
+                            case "Завершено": StatusComboBox.SelectedIndex = 2; break;
+                            default: StatusComboBox.SelectedIndex = 0; break;
+                        }
+                    }
+                    else
+                    {
+                        StatusComboBox.SelectedIndex = 0;
+                    }
                 };
             }
             else
@@ -64,10 +95,14 @@ namespace FitnessCenterIS.View.Windows
                 _scheduleItem = new Schedules
                 {
                     StartDateTime = DateTime.Today.AddHours(9),
-                    EndDateTime = DateTime.Today.AddHours(10)
+                    EndDateTime = DateTime.Today.AddHours(10),
+                    ScheduleStatus = "Активно"
                 };
                 _isEditMode = false;
                 WindowTitle.Text = "Новое занятие";
+
+                // Создаем обертку для нового ScheduleItem с цветом по умолчанию
+                _scheduleItemWrapper = new ScheduleItem(_scheduleItem);
 
                 // Устанавливаем значения по умолчанию
                 DatePicker.SelectedDate = DateTime.Today;
@@ -76,7 +111,13 @@ namespace FitnessCenterIS.View.Windows
 
                 // Загружаем выпадающие списки
                 LoadComboBoxes();
+
+                // По умолчанию - "Активно"
+                StatusComboBox.SelectedIndex = 0;
             }
+
+            // Устанавливаем DataContext для привязки данных
+            this.DataContext = _scheduleItem;
         }
 
 
@@ -223,7 +264,6 @@ namespace FitnessCenterIS.View.Windows
                     _scheduleItem.GroupID = GroupComboBox.SelectedValue != null ?
                         (int?)GroupComboBox.SelectedValue : null;
 
-
                     if (CheckScheduleConflict())
                     {
                         // Если есть конфликт, добавляем клиента в список ожидания
@@ -234,13 +274,15 @@ namespace FitnessCenterIS.View.Windows
                         Close();
                         return;
                     }
+
                     // Обновляем статус
                     if (StatusComboBox.SelectedItem is ComboBoxItem selectedStatus)
                     {
                         _scheduleItem.ScheduleStatus = selectedStatus.Content.ToString();
                     }
 
-                    // Удалите код, связанный с сохранением цвета
+                    // Обновляем объект-обертку ScheduleItem
+                    _scheduleItemWrapper.UpdateSchedule(_scheduleItem);
 
                     if (_isEditMode)
                     {
@@ -252,8 +294,6 @@ namespace FitnessCenterIS.View.Windows
                         // Добавляем новую запись
                         _dbContext.Schedules.Add(_scheduleItem);
                     }
-
-
 
                     _dbContext.SaveChanges();
 

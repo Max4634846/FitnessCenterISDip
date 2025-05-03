@@ -54,11 +54,11 @@ namespace FitnessCenterIS.View.Pages
                     LoadClientImage(_currentClient.Persons.ImagePerson);
 
                     // Загрузка QR-кода
-                    LoadQRCode(_currentClient.QRCode);
+                    LoadQRCode(_currentClient.Persons.QRCode);
 
                     // Загрузка дополнительной информации о клиенте
                     ClientIDTextBlock.Text = _currentClient.ClientID.ToString();
-                    ClientCardNumber.Text = _currentClient.NumberCard;
+                    ClientCardNumber.Text = _currentClient.Persons.NumberCard;
                     ClientBonusBalance.Text = _currentClient.BonuseBalance.ToString();
                     ClientDepositBalance.Text = _currentClient.DepositBalance.ToString();
                     ClientStatus.Text = _currentClient.StatusClient;
@@ -131,13 +131,13 @@ namespace FitnessCenterIS.View.Pages
                 {
                     System.Diagnostics.Debug.WriteLine($"Ошибка загрузки изображения: {ex.Message}");
                     // Установка изображения по умолчанию
-                    ClientImage.ImageSource = new BitmapImage(new Uri("/Resources/default_avatar.png", UriKind.Relative));
+                    ClientImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\ultra\\source\\repos\\FitnessCenterIS\\FitnessCenterIS\\Resource\\NewPerson.jpg", UriKind.Relative));
                 }
             }
             else
             {
                 // Установка изображения по умолчанию
-                ClientImage.ImageSource = new BitmapImage(new Uri("/Resources/default_avatar.png", UriKind.Relative));
+                ClientImage.ImageSource = new BitmapImage(new Uri("C:\\Users\\ultra\\source\\repos\\FitnessCenterIS\\FitnessCenterIS\\Resource\\NewPerson.jpg", UriKind.Relative));
             }
         }
 
@@ -290,19 +290,6 @@ namespace FitnessCenterIS.View.Pages
                 LoadTasks(context);
             }
         }
-
-
-        private void EditClientButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Открытие окна для редактирования данных клиента
-            var editClientWindow = new AddEditNewClientWindow(_currentClient.ClientID);
-            if (editClientWindow.ShowDialog() == true)
-            {
-                // Перезагрузка данных после редактирования
-                LoadClientData();
-            }
-        }
-
         private void ViewSeasonTicketDetails_Click(object sender, RoutedEventArgs e)
         {
             //// Получение выбранного абонемента

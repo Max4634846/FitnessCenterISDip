@@ -35,7 +35,7 @@ namespace FitnessCenterIS.View.Pages
         {
             InitializeComponent();
             _dbContext = new BDFitnessClubDipEntities();
-            _menuWindow = menuWindow; // Store the MenuWindow instance
+            _menuWindow = menuWindow;
             UpdateBDPeople();
         }
 
@@ -56,7 +56,7 @@ namespace FitnessCenterIS.View.Pages
                         Gender = person.Gender,
                         PhoneNumber = person.PhoneNumber,
                         Email = person.Email,
-                        QRCode = client.QRCode,
+                        QRCode = client.Persons.QRCode,
                     })
                 .ToList();
 
@@ -138,10 +138,9 @@ namespace FitnessCenterIS.View.Pages
 
         private void QRCodeOpenScan_Click(object sender, RoutedEventArgs e)
         {
-            // Fetch Clients entities from the database
             var clientsList = _dbContext.Clients
                 .Where(client => client.StatusClient != "Лид")
-                .Include(c => c.Persons) // Include Persons if VisitClientWindow needs it
+                .Include(c => c.Persons)
                 .ToList();
 
             ObservableCollection<Clients> clientsObservableCollection = new ObservableCollection<Clients>(clientsList);

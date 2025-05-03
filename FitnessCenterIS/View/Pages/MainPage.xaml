@@ -85,7 +85,7 @@
                     <StackPanel>
                         <iconPacks:PackIconMaterialDesign Kind="Visibility" Width="40" Height="40" 
                                                      HorizontalAlignment="Center" Foreground="#090909"/>
-                        <TextBlock Text="Поиск клиента" HorizontalAlignment="Center" 
+                        <TextBlock Text="Поиск профиля" HorizontalAlignment="Center" 
                                Margin="0 10 0 0" FontWeight="Medium"/>
                     </StackPanel>
                 </Button>

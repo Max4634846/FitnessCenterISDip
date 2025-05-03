@@ -10,5 +10,6 @@ namespace FitnessCenterIS.Model
     {
         public static UsersCollection CurrentAdmin { get; set; }
 
+
     }
 }

@@ -31,7 +31,7 @@
 
                 <TextBlock Grid.Row="1" Text="Scan QR code" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0 5"
                            FontSize="25" FontWeight="DemiBold"/>
-                <TextBlock Grid.Row="1" Text="Отсканируйте QR-код, чтобы найти клиента в системе"
+                <TextBlock Grid.Row="1" Text="Отсканируйте QR-код, чтобы найти профиль человека в системе"
                            HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0 45 0 0"
                            FontSize="12" FontWeight="DemiBold"/>
 

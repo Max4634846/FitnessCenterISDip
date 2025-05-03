@@ -41,7 +41,7 @@ namespace FitnessCenterIS.View.Windows
                 {
                     ClientID = c.ClientID,
                     FullName = c.Persons.Surname + " " + c.Persons.Name + " " + c.Persons.MiddleName,
-                    CardNumber = c.NumberCard,
+                    CardNumber = c.Persons.NumberCard,
                     Gender = c.Persons.Gender,
                     Status = c.StatusClient
                 })

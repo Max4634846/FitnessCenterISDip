@@ -64,14 +64,7 @@
                         </WrapPanel>
                     </Button>
 
-                    <Button Width="50" Foreground="#fff" Background="#090909" 
-                         BorderBrush="Transparent" Click="QRCodeOpenScan_Click" Margin="5 0">
-                        <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <materialDesign:PackIcon  Kind="QrcodeScan" Height="20"/>
-                        </WrapPanel>
-                    </Button>
 
-                    
                     <StackPanel Margin="10">
                         <TextBox x:Name="SearchTextBox" 
                                  Width="250"  materialDesign:HintAssist.Hint="Найти клиента..."

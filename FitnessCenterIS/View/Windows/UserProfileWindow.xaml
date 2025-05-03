@@ -1,0 +1,58 @@
+﻿<Window x:Class="FitnessCenterIS.View.Windows.UserProfileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Профиль пользователя" Height="430" Width="680" WindowStartupLocation="CenterScreen"
+        Background="Transparent"  WindowStyle="None" AllowsTransparency="True">
+    <Border CornerRadius="5" Background="White" BorderBrush="#090909" BorderThickness="1"  Effect="{DynamicResource ShadowEffect}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="24,24,24,0" VerticalAlignment="Top">
+                <Ellipse Width="68" Height="68">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="{Binding ImagePerson, FallbackValue='pack://application:,,,/Assets/default_avatar.png'}" Stretch="UniformToFill"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding FullName, FallbackValue='Александр Машанов'}" 
+                               FontSize="22" FontWeight="SemiBold" Foreground="#222"/>
+                    <TextBlock Text="{Binding RoleName, FallbackValue='Администратор'}" 
+                               FontSize="14" Foreground="#757575"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Info -->
+            <StackPanel Grid.Row="1" Margin="36,30,36,10" >
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Text="📧" FontSize="16"/>
+                    <TextBlock Text="{Binding Email, FallbackValue='email@fitness.ru'}" FontSize="15" Foreground="#444"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Text="📱" FontSize="16"/>
+                    <TextBlock Text="{Binding PhoneNumber, FallbackValue='+7 (999) 123-45-67'}" FontSize="15" Foreground="#444"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Text="🗓" FontSize="16"/>
+                    <TextBlock Text="{Binding HireDate, FallbackValue='01.03.2024'}" FontSize="15" Foreground="#444"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Text="🏠" FontSize="16"/>
+                    <TextBlock Text="{Binding Address, FallbackValue='Адрес не указан'}" FontSize="15" Foreground="#444"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Actions -->
+            <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,0,0,24">
+                <Button Content="Выйти из профиля" Padding="18,6" Background="#090909" Foreground="White"
+                        BorderThickness="0" Cursor="Hand" Click="Logout_Click" Margin="0 5"/>
+                <Button Content="Назад" Padding="18,6" BorderBrush="#090909" BorderThickness="1"
+                        Foreground="#090909" Background="Transparent" Cursor="Hand" Click="Close_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

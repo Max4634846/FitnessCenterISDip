@@ -56,7 +56,7 @@ namespace FitnessCenterIS.View.Pages
                         Gender = person.Gender,
                         PhoneNumber = person.PhoneNumber,
                         Email = person.Email,
-                        QRCode = client.QRCode,
+                        QRCode = client.Persons.NumberCard,
                     })
                 .ToList();
 

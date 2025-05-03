@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using FitnessCenterIS.Model;
 
 
@@ -13,6 +14,7 @@ namespace FitnessCenterIS.View.Windows
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private WindowState _previousWindowState;
         private string PasswordBox;
         private string _errorMessage;
         private string _adminName;
@@ -103,16 +105,25 @@ namespace FitnessCenterIS.View.Windows
                     UserSession.CurrentAdmin = new UsersCollection
                     {
                         UserID = user1.UserID,
-                        Name = user1.Staffs.Persons.Name, 
-                        Surname = user1.Staffs.Persons.Surname   
+                        Name = user1.Staffs.Persons.Name,
+                        Surname = user1.Staffs.Persons.Surname
                     };
 
-                    //AdminName = $"{UserSession.CurrentAdmin.Name} {UserSession.CurrentAdmin.Surname}";
-
-                    MenuWindow menuApplication = new MenuWindow();
-                    menuApplication.Show();
-                    Window mainWindow = Window.GetWindow(this);
-                    mainWindow.Close();
+                    if (user1.Staffs.RoleID == 1)
+                    {
+                        MenuWindow menuApplication = new MenuWindow();
+                        menuApplication.Show();
+                        Window mainWindow = Window.GetWindow(this);
+                        mainWindow.Close();
+                    }
+                    else if(user1.Staffs.RoleID == 2)
+                    {
+                        MenuWindow menuApplication = new MenuWindow();
+                        menuApplication.Personal.Visibility = Visibility.Collapsed;
+                        menuApplication.Show();
+                        Window mainWindow = Window.GetWindow(this);
+                        mainWindow.Close();
+                    }
                 }
                 else
                 {
@@ -124,6 +135,30 @@ namespace FitnessCenterIS.View.Windows
         private void CloseApp_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                if (this.WindowState == WindowState.Maximized)
+                {
+                    this.WindowState = _previousWindowState;
+                }
+                else
+                {
+                    _previousWindowState = this.WindowState;
+                    this.WindowState = WindowState.Maximized;
+                }
+            }
         }
     }
 }

@@ -16,7 +16,7 @@
     
     <Grid>
 
-        <Border CornerRadius="10" Background="#fff">
+        <Border CornerRadius="10" Background="#fff" MouseDown="Border_MouseDown" MouseLeftButtonDown="Border_MouseLeftButtonDown">
 
             <Grid>
 

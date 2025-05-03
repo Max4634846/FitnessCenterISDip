@@ -193,7 +193,7 @@ namespace FitnessCenterIS.View.Windows
                 {
                     ClientID = c.ClientID,
                     FullName = c.Persons.Name + " " + c.Persons.Surname,
-                    CardNumber = c.NumberCard,
+                    CardNumber = c.Persons.NumberCard,
                 })
                 .OrderBy(c => c.FullName)
                 .ToList();

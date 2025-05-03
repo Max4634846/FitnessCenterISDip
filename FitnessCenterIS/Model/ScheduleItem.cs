@@ -8,23 +8,38 @@ namespace FitnessCenterIS.Model
 {
     public class ScheduleItem
     {
-        public int ID { get; set; }
-        public string Title { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string Description { get; set; }
-        public string Location { get; set; }
-        public string Instructor { get; set; }
-        public string Color { get; set; } // Цвет для отображения в расписании
-        public int CategoryID { get; set; } // Связь с категорией занятия
-        public virtual Category Category { get; set; }
-
         public Schedules Schedule { get; set; }
+        public string Color { get; set; }
 
+        // Свойства для быстрого доступа к полям из Schedules
+        public int ScheduleID => Schedule?.ScheduleID ?? 0;
+        public string Title => Schedule?.Title ?? "";
+        public DateTime? StartDateTime => Schedule?.StartDateTime;
+        public DateTime? EndDateTime => Schedule?.EndDateTime;
+        public string Note => Schedule?.Note;
+        public string FormattedTimeRange => $"{StartDateTime:HH:mm} - {EndDateTime:HH:mm}";
+
+        // Связанные данные
+        public string RoomName => Schedule?.Rooms?.Name ?? "";
+        public string TrainerName => Schedule?.Staffs?.Persons != null
+            ? $"{Schedule.Staffs.Persons.Surname} {Schedule.Staffs.Persons.Name}"
+            : "";
+        public string ClientName => Schedule?.Clients?.Persons != null
+            ? $"{Schedule.Clients.Persons.Surname} {Schedule.Clients.Persons.Name}"
+            : "";
+        public string GroupName => Schedule?.Groups?.Name ?? "";
+
+        // Конструкторы
         public ScheduleItem(Schedules schedule, string color = "#3498db")
         {
             Schedule = schedule;
             Color = color;
+        }
+
+        // Метод для обновления базовой сущности Schedule
+        public void UpdateSchedule(Schedules updatedSchedule)
+        {
+            Schedule = updatedSchedule;
         }
     }
 }

@@ -31,8 +31,6 @@ namespace FitnessCenterIS
         public Nullable<decimal> DepositBalance { get; set; }
         public Nullable<int> LoyaltyLevelID { get; set; }
         public string StatusClient { get; set; }
-        public string NumberCard { get; set; }
-        public string QRCode { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Attendances> Attendances { get; set; }

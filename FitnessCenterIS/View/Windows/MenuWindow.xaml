@@ -100,7 +100,7 @@
                                     </Expander.Content>
                                 </Expander>
                                 
-                                <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
+                                <Expander x:Name="Personal"  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
                                     <Expander.Header>
                                         <WrapPanel Margin="-55,0,-49,0">
                                             <iconPacks:PackIconMaterial Kind="AccountDetails" Width="20" Height="20"
@@ -112,9 +112,9 @@
                                     </Expander.Header>
                                     <Expander.Content>
                                         <StackPanel Margin="45,0,0,0">
-                                            <Button Content="Сотрудники" Style="{StaticResource TransparentButton}" Foreground="#fff"/>
-                                            <Button Content="Пользователи" Style="{StaticResource TransparentButton}" Foreground="#fff" />
-                                            <Button Content="Роли" Style="{StaticResource TransparentButton}" Foreground="#fff" />
+                                            <Button Content="Сотрудники" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="Staff_Click"/>
+                                            <Button Content="Пользователи" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="User_Click" />
+                                            <Button Content="Роли" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="Role_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>
@@ -231,17 +231,23 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="80"/>
+
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"  x:Name="LoggedInAdminNameTextBlock"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center" 
-                                           Foreground="#fff" FontSize="14"
-                                           Text="Александр Машанов"/>
-                                <Button Grid.Column="1" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" Height="40" Margin="0 0 15 0" Foreground="#fff" Click="BtnExit_Click">
-                                    <iconPacks:PackIconMaterial Kind="ExitToApp" Width="15" Height="15" />
-                                </Button>
+                                <Button Grid.Column="0"
+                                        x:Name="LoggedInAdminNameButton"
+                                        Content="Александр Машанов"
+                                        Click="LoggedInAdminNameButton_Click"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Foreground="#fff"
+                                        FontSize="14"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        Margin="0 0 10 0"/>
                             </Grid>
                         </Border>
+
 
                         <Border Grid.Row="1" Background="#fff" CornerRadius="0 0 15 0">
                             <Frame x:Name="MainFrame"

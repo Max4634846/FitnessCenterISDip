@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Collections.Generic; // Добавляем пространство имен для List
+using System.Collections.Generic;
 
 namespace FitnessCenterIS.View.Windows
 {
@@ -16,14 +16,14 @@ namespace FitnessCenterIS.View.Windows
     {
         private readonly BDFitnessClubDipEntities _dbContext;
         private bool _isEditMode = false;
-        private int _clientId; // Для хранения ID клиента в режиме редактирования
-        private List<Relationships> _relationships; // Добавляем поле для хранения типов родства
+        private int _clientId;
+        private List<Relationships> _relationships;
 
         public AddEditNewClientWindow(bool isLead = false)
         {
             InitializeComponent();
             _dbContext = new BDFitnessClubDipEntities();
-            LoadRelationships(); // Загружаем типы родства при инициализации
+            LoadRelationships();
 
             StatusClientComboBox.SelectedIndex = isLead ? 1 : 0;
 
@@ -31,11 +31,11 @@ namespace FitnessCenterIS.View.Windows
             AddBtn.Content = isLead ? "Добавить" : "Добавить";
             StatusCL.Content = isLead ? "Лид" : "Клиент";
 
-            StatusClientComboBox.SelectedIndex = 0; // Устанавливаем "Клиент" по умолчанию
+            StatusClientComboBox.SelectedIndex = 0;
             EditBtn.Visibility = Visibility.Collapsed;
-            IdClient.Visibility = Visibility.Collapsed; // Скрываем поле ID при добавлении
-            IdClientLabel.Visibility = Visibility.Collapsed; // Скрываем поле ID при добавлении
-            GuardianTabItem.Visibility = Visibility.Collapsed; // Скрываем вкладку "Опекун" по умолчанию
+            IdClient.Visibility = Visibility.Collapsed;
+            IdClientLabel.Visibility = Visibility.Collapsed;
+            GuardianTabItem.Visibility = Visibility.Collapsed;
         }
 
         // Конструктор для режима редактирования
@@ -43,17 +43,16 @@ namespace FitnessCenterIS.View.Windows
         {
             InitializeComponent();
             _dbContext = new BDFitnessClubDipEntities();
-            LoadRelationships(); // Загружаем типы родства при инициализации
+            LoadRelationships();
             _isEditMode = true;
             _clientId = clientId;
             AddBtn.Content = "Сохранить изменения";
             EditBtn.Visibility = Visibility.Visible;
             AddBtn.Visibility = Visibility.Collapsed;
-            IdClient.Visibility = Visibility.Visible; // Показываем поле ID при редактировании
-            IdClientLabel.Visibility = Visibility.Visible; // Показываем поле ID при редактировании
+            IdClient.Visibility = Visibility.Visible;
+            IdClientLabel.Visibility = Visibility.Visible;
             IdClient.Text = clientId.ToString();
             LoadClientData(clientId);
-            // GuardianTabItem.Visibility = Visibility.Collapsed; // Больше не скрываем здесь, логика в LoadClientData и DateOfBithTextBox_SelectedDateChanged
         }
 
         private void LoadRelationships()
@@ -70,6 +69,79 @@ namespace FitnessCenterIS.View.Windows
                 MessageBox.Show($"Ошибка при загрузке типов родства: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        // Метод генерации номера карты
+        private void GenerateCardButton_Click(object sender, RoutedEventArgs e)
+        {
+            string newCard;
+            do
+            {
+                // Генерируем номер карты только из цифр
+                Random random = new Random();
+                newCard = random.Next(1000, 9999).ToString() + random.Next(10000, 99999).ToString();
+            }
+            while (_dbContext.Clients.Any(c => c.Persons.NumberCard == newCard));
+
+            NumberCardTextBox.Text = newCard;
+        }
+
+        // Метод для генерации и сохранения QR-кода
+        private string GenerateAndSaveQRCode(string cardNumber)
+        {
+            if (string.IsNullOrWhiteSpace(cardNumber))
+                return null;
+
+            string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "QRCodes");
+            Directory.CreateDirectory(folderPath);
+
+            // Удаляем все недопустимые символы из имени файла
+            string safeFileName = string.Concat(cardNumber.Where(c => !Path.GetInvalidFileNameChars().Contains(c)));
+            string fileName = $"ClientQRCode_{safeFileName}_{Guid.NewGuid():N}.png";
+            string filePath = Path.Combine(folderPath, fileName);
+
+            try
+            {
+                using (var qrGenerator = new QRCodeGenerator())
+                using (var qrCodeData = qrGenerator.CreateQrCode(cardNumber, QRCodeGenerator.ECCLevel.Q))
+                using (var qrCode = new QRCode(qrCodeData))
+                using (Bitmap qrCodeImage = qrCode.GetGraphic(20))
+                {
+                    qrCodeImage.Save(filePath, ImageFormat.Png);
+                }
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении QR-кода: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+        }
+
+        // Обработчик события изменения номера карты
+        private void NumberCardTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string cardNumber = NumberCardTextBox.Text.Trim();
+            if (!string.IsNullOrWhiteSpace(cardNumber))
+            {
+                string qrPath = GenerateAndSaveQRCode(cardNumber);
+                if (File.Exists(qrPath))
+                {
+                    QRCodeImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(qrPath));
+                    QRCodeImage.Tag = qrPath;
+                }
+                else
+                {
+                    QRCodeImage.Source = null;
+                    QRCodeImage.Tag = null;
+                }
+            }
+            else
+            {
+                QRCodeImage.Source = null;
+                QRCodeImage.Tag = null;
+            }
+        }
+
 
         private void LoadClientData(int clientId)
         {
@@ -136,7 +208,7 @@ namespace FitnessCenterIS.View.Windows
                             }
                         }
 
-                        NumberCardTextBox.Text = client.NumberCard;
+                        NumberCardTextBox.Text = client.Persons.NumberCard;
 
                         // Загрузка данных об опекуне, если есть
                         if (person.DateOfBirth.HasValue)
@@ -259,15 +331,15 @@ namespace FitnessCenterIS.View.Windows
                         existingPerson.Notes = notes.Length > 0 ? notes : null;
 
                         existingClient.StatusClient = statusClient?.Length > 0 ? statusClient : null;
-                        if (existingClient.NumberCard != numberCard)
+                        if (existingClient.Persons.NumberCard != numberCard)
                         {
-                            if (_dbContext.Clients.Any(c => c.NumberCard == numberCard && c.ClientID != _clientId))
+                            if (_dbContext.Clients.Any(c => c.Persons.NumberCard == numberCard && c.ClientID != _clientId))
                             {
                                 MessageBox.Show($"Клиент с номером карты '{numberCard}' уже существует в базе данных.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                                 return;
                             }
-                            existingClient.NumberCard = numberCard;
-                            existingClient.QRCode = GenerateQRCodeBase64(numberCard); // Обновляем QR-код при изменении номера карты
+                            existingClient.Persons.NumberCard = numberCard;
+                            existingClient.Persons.QRCode = GenerateQRCodeBase64(numberCard); // Обновляем QR-код при изменении номера карты
                         }
 
                         // Обновление информации об опекуне, если клиент младше 18
@@ -382,7 +454,7 @@ namespace FitnessCenterIS.View.Windows
                     return;
                 }
 
-                if (_dbContext.Clients.Any(c => c.NumberCard == numberCard))
+                if (_dbContext.Clients.Any(c => c.Persons.NumberCard == numberCard))
                 {
                     MessageBox.Show($"Клиент с номером карты '{numberCard}' уже существует в базе данных.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return; // Прерываем добавление клиента
@@ -411,7 +483,9 @@ namespace FitnessCenterIS.View.Windows
                     ImagePerson = imagePath?.Length > 0 ? imagePath : null,
                     Address = address.Length > 0 ? address : null,
                     Gender = gender?.Length > 0 ? gender : null,
-                    Notes = notes.Length > 0 ? notes : null
+                    Notes = notes.Length > 0 ? notes : null,
+                    NumberCard = numberCard,
+                    QRCode = GenerateQRCodeBase64(numberCard)
                 };
 
                 _dbContext.Persons.Add(newPerson);
@@ -424,8 +498,6 @@ namespace FitnessCenterIS.View.Windows
                     DepositBalance = 0,
                     LoyaltyLevelID = null,
                     StatusClient = statusClient?.Length > 0 ? statusClient : null,
-                    NumberCard = numberCard,
-                    QRCode = GenerateQRCodeBase64(numberCard) // Сохраняем путь к файлу
                 };
 
                 _dbContext.Clients.Add(newClient);

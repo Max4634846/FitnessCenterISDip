@@ -8,7 +8,7 @@ namespace FitnessCenterIS.Model
 {
     public class StaffsCollection
     {
-         public int StaffID { get; set; }
+        public int StaffID { get; set; }
         public string Surname { get; set; }
         public string Name { get; set; }
         public string MiddleName { get; set; }
@@ -19,5 +19,7 @@ namespace FitnessCenterIS.Model
         public string Gender { get; set; }
         public string QRCode { get; set; }
         public string FullName { get; set; }
+        public string Role { get; set; }
+        public string PhotoPerson { get; set; }
     }
 }
