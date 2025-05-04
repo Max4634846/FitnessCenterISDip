@@ -136,6 +136,24 @@
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>
+                                
+                                <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
+                                    <Expander.Header>
+                                        <WrapPanel Margin="-55,0,-49,0">
+                                            <iconPacks:PackIconMaterial Kind="SelectGroup" Width="20" Height="20"
+                                         VerticalAlignment="Center"
+                                         Foreground="#fff"
+                                         Margin="-0 0 5 0"/>
+                                            <TextBlock Text="Группы" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
+                                        </WrapPanel>
+                                    </Expander.Header>
+                                    <Expander.Content>
+                                        <StackPanel Margin="45,0,0,0">
+                                            <Button Content="Группы" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="ManageGroupsButton_Click"/>
+                                            <Button Content="Клиенты в группах" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="GroupClientsButton_Click"/>
+                                        </StackPanel>
+                                    </Expander.Content>
+                                </Expander>
 
                                 <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
                                     <Expander.Header>
@@ -195,15 +213,50 @@
                                     <Expander.Header>
                                         <WrapPanel Margin="-55,0,-49,0">
                                             <materialDesign:PackIcon Kind="CheckAll" Width="20" Height="20"
-                                      VerticalAlignment="Center"
-                                      Foreground="#fff"
-                                      Margin="-0 0 5 0"/>
+                                                                      VerticalAlignment="Center"
+                                                                      Foreground="#fff"
+                                                                      Margin="-0 0 5 0"/>
                                             <TextBlock Text="Посещаемость" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
                                         </WrapPanel>
                                     </Expander.Header>
                                     <Expander.Content>
                                         <StackPanel Margin="45,0,0,0">
                                             <Button Content="История посещений" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="AttendanceHistoryBtn_Click"/>
+                                        </StackPanel>
+                                    </Expander.Content>
+                                </Expander>
+
+                                <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
+                                    <Expander.Header>
+                                        <WrapPanel Margin="-55,0,-49,0">
+                                            <materialDesign:PackIcon Kind="Dollar" Width="20" Height="20"
+                                                                      VerticalAlignment="Center"
+                                                                      Foreground="#fff"
+                                                                      Margin="-0 0 5 0"/>
+                                            <TextBlock Text="Продажи" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
+                                        </WrapPanel>
+                                    </Expander.Header>
+                                    <Expander.Content>
+                                        <StackPanel Margin="45,0,0,0">
+                                            <Button Content="История продаж" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="SalesBtn_Click"/>
+                                        </StackPanel>
+                                    </Expander.Content>
+                                </Expander>
+
+                                <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
+                                    <Expander.Header>
+                                        <WrapPanel Margin="-55,0,-49,0">
+                                            <materialDesign:PackIcon Kind="DocumentSign" Width="20" Height="20"
+                                      VerticalAlignment="Center"
+                                      Foreground="#fff"
+                                      Margin="-0 0 5 0"/>
+                                            <TextBlock Text="Отчеты" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
+                                        </WrapPanel>
+                                    </Expander.Header>
+                                    <Expander.Content>
+                                        <StackPanel Margin="45,0,0,0">
+                                            <Button Content="Общая аналитика" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="AllAnalesBtn_Click"/>
+                                            <Button Content="Отчет по финансам" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="FinancialBtn_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>

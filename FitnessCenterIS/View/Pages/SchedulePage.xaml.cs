@@ -1698,5 +1698,147 @@ namespace FitnessCenterIS.View.Pages
         {
 
         }
+
+        private void EmailButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Проверяем, есть ли содержимое для отправки
+                if (ScheduleContainerGrid.Children.Count == 0)
+                {
+                    MessageBox.Show("Расписание пусто. Нечего отправлять.", "Информация",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Создаем полный элемент для снимка, включая заголовок
+                StackPanel emailContent = CreateEmailContent();
+
+                // Открываем окно отправки email
+                var sendWindow = new SendScheduleWindow(_dbContext, DateRangeTextBlock.Text, emailContent);
+
+                // Показываем окно
+                bool? result = sendWindow.ShowDialog();
+
+                if (result == true)
+                {
+                    // Письмо успешно отправлено
+                    MessageBox.Show("Расписание успешно отправлено по электронной почте.", "Успех",
+                                    MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при отправке email: {ex.Message}", "Ошибка",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private StackPanel CreateEmailContent()
+        {
+            StackPanel emailContent = new StackPanel();
+            emailContent.Background = Brushes.White;
+
+            // Добавляем заголовок
+            TextBlock headerTitle = new TextBlock
+            {
+                Text = "Расписание занятий",
+                FontSize = 24,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(20, 20, 20, 10)
+            };
+            emailContent.Children.Add(headerTitle);
+
+            // Добавляем текущий период
+            TextBlock periodText = new TextBlock
+            {
+                Text = DateRangeTextBlock.Text,
+                FontSize = 18,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(20, 0, 20, 20)
+            };
+            emailContent.Children.Add(periodText);
+
+            // Добавляем текущий вид расписания
+            if (ScheduleGrid != null)
+            {
+                // Создаем копию сетки расписания
+                Grid scheduleCopy = CloneScheduleGrid();
+                emailContent.Children.Add(scheduleCopy);
+            }
+
+            // Добавляем футер
+            TextBlock footer = new TextBlock
+            {
+                Text = $"Сформировано: {DateTime.Now:dd.MM.yyyy HH:mm}",
+                FontSize = 12,
+                Foreground = Brushes.Gray,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(20, 10, 20, 20)
+            };
+            emailContent.Children.Add(footer);
+
+            // Устанавливаем размеры для корректного снимка
+            emailContent.Width = 1200;
+            emailContent.Measure(new Size(1200, double.PositiveInfinity));
+            emailContent.Arrange(new Rect(0, 0, 1200, emailContent.DesiredSize.Height));
+
+            return emailContent;
+        }
+
+        // Метод для клонирования сетки расписания
+        private Grid CloneScheduleGrid()
+        {
+            Grid clonedGrid = new Grid();
+            clonedGrid.Background = ScheduleGrid.Background;
+            clonedGrid.Margin = new Thickness(10);
+
+            // Копируем определения строк
+            foreach (var rowDef in ScheduleGrid.RowDefinitions)
+            {
+                clonedGrid.RowDefinitions.Add(new RowDefinition { Height = rowDef.Height });
+            }
+
+            // Копируем определения колонок
+            foreach (var colDef in ScheduleGrid.ColumnDefinitions)
+            {
+                clonedGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = colDef.Width });
+            }
+
+            // Копируем все элементы
+            foreach (UIElement child in ScheduleGrid.Children)
+            {
+                if (child is FrameworkElement element)
+                {
+                    try
+                    {
+                        // Используем XAML для клонирования визуальных элементов
+                        string xaml = System.Windows.Markup.XamlWriter.Save(element);
+                        using (var stringReader = new System.IO.StringReader(xaml))
+                        {
+                            using (var xmlReader = System.Xml.XmlReader.Create(stringReader))
+                            {
+                                FrameworkElement clonedElement = (FrameworkElement)System.Windows.Markup.XamlReader.Load(xmlReader);
+
+                                // Копируем свойства привязки к сетке
+                                Grid.SetRow(clonedElement, Grid.GetRow(element));
+                                Grid.SetColumn(clonedElement, Grid.GetColumn(element));
+                                Grid.SetRowSpan(clonedElement, Grid.GetRowSpan(element));
+                                Grid.SetColumnSpan(clonedElement, Grid.GetColumnSpan(element));
+
+                                clonedGrid.Children.Add(clonedElement);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка при клонировании элемента: {ex.Message}");
+                    }
+                }
+            }
+
+            return clonedGrid;
+        }
+
     }
 }

@@ -170,6 +170,12 @@
                                         <TextBlock Text="Добавить задачу"/>
                                     </StackPanel>
                                 </Button>
+                                <Button Style="{StaticResource ActionButtonStyle}" Click="ManageDepositButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Icon:PackIconMaterial Kind="WalletOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Управление депозитом"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Border>
 

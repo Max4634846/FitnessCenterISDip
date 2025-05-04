@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
 
             <!-- Заголовок -->
-            <Border Grid.Row="0" Background="#f0f0f0" CornerRadius="15"> 
+            <Border Grid.Row="0" Background="#f0f0f0" CornerRadius="15">
                 <Grid>
                     <TextBlock Text="Новая продажа" HorizontalAlignment="Left" VerticalAlignment="Center"
                            FontSize="22" FontWeight="SemiBold" Foreground="#333" Margin="20 0 0 0"/>
@@ -48,6 +48,8 @@
                             <!-- Информация о клиенте -->
                             <RowDefinition Height="Auto"/>
                             <!-- Тип продажи -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Выбор группы -->
                             <RowDefinition Height="Auto"/>
                             <!-- Выбор абонемента -->
                             <RowDefinition Height="*"/>
@@ -93,8 +95,27 @@
                             </StackPanel>
                         </StackPanel>
 
+                        <!-- Выбор типа абонемента/занятия -->
+                        <StackPanel Grid.Row="3" Margin="0 0 0 15">
+                            <TextBlock Text="Тип занятия" FontSize="16" FontWeight="SemiBold" Margin="0 0 0 8"/>
+                            <ComboBox x:Name="TrainingTypeComboBox" Padding="8 6" 
+                                  SelectionChanged="TrainingTypeComboBox_SelectionChanged">
+                                <ComboBoxItem Content="Индивидуальное"/>
+                                <ComboBoxItem Content="Групповое"/>
+                                <ComboBoxItem Content="Самостоятельное"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Выбор группы (видимость динамически меняется) -->
+                        <StackPanel Grid.Row="4" Margin="0 0 0 15" x:Name="GroupSelectionPanel" Visibility="Collapsed">
+                            <TextBlock Text="Группа" FontSize="16" FontWeight="SemiBold" Margin="0 0 0 8"/>
+                            <ComboBox x:Name="GroupComboBox" Padding="8 6" 
+                                  DisplayMemberPath="Name" SelectedValuePath="GroupID"
+                                  SelectionChanged="GroupComboBox_SelectionChanged"/>
+                        </StackPanel>
+
                         <!-- Выбор абонемента/услуги -->
-                        <StackPanel Grid.Row="3" Margin="0 0 0 15" x:Name="MembershipSelectionPanel">
+                        <StackPanel Grid.Row="5" Margin="0 0 0 15" x:Name="MembershipSelectionPanel">
                             <TextBlock Text="Выбор абонемента" FontSize="16" FontWeight="SemiBold" Margin="0 0 0 8"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -110,7 +131,7 @@
                             </Grid>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="3" Margin="0 0 0 15" x:Name="ServiceSelectionPanel" Visibility="Collapsed">
+                        <StackPanel Grid.Row="5" Margin="0 0 0 15" x:Name="ServiceSelectionPanel" Visibility="Collapsed">
                             <TextBlock x:Name="ServiceLabel" Text="Выбор услуги" FontSize="16" FontWeight="SemiBold" Margin="0 0 0 8"/>
                             <ComboBox x:Name="ServiceComboBox" Padding="8 6" 
                                   DisplayMemberPath="Name" SelectedValuePath="ServiceID"
@@ -118,7 +139,7 @@
                         </StackPanel>
 
                         <!-- Список выбранных абонементов -->
-                        <Grid Grid.Row="4" x:Name="SelectedMembershipsPanel">
+                        <Grid Grid.Row="6" x:Name="SelectedMembershipsPanel">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
@@ -136,7 +157,7 @@
                         </Grid>
 
                         <!-- Кнопки управления списком -->
-                        <Button Grid.Row="5" Content="Удалить выбранный" Margin="0 10 0 0" Padding="10 6"
+                        <Button Grid.Row="7" Content="Удалить выбранный" Margin="0 10 0 0" Padding="10 6"
                             Background="#f44336" Foreground="White" BorderThickness="0"
                             Click="RemoveMembership_Click" x:Name="RemoveMembershipButton"/>
                     </Grid>

@@ -353,6 +353,15 @@ namespace FitnessCenterIS.View.Pages
                 }
             }
         }
+
+        private void ManageDepositButton_Click(object sender, RoutedEventArgs e)
+        {
+            var depositWindow = new DepositAccountWindow(_clientId);
+            if (depositWindow.ShowDialog() == true)
+            {
+                LoadClientData();
+            }
+        }
     }
 
     // Вспомогательные классы для создания окон, которые будут использоваться в коде выше

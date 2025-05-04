@@ -1,0 +1,159 @@
+﻿<Window x:Class="FitnessCenterIS.View.Windows.GroupClientsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d"
+        Title="Клиенты в группах" Height="650" Width="1000"
+        Background="Transparent"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        AllowsTransparency="True">
+    <Border Background="#f0f0f0" CornerRadius="15" BorderBrush="#090909" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <!-- Заголовок -->
+                <RowDefinition Height="*"/>
+                <!-- Основной контент -->
+                <RowDefinition Height="60"/>
+                <!-- Кнопки внизу -->
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок -->
+            <Border Grid.Row="0" Background="#f0f0f0" CornerRadius="15">
+                <Grid>
+                    <TextBlock Text="Управление клиентами в группах" HorizontalAlignment="Left" VerticalAlignment="Center"
+                             FontSize="22" FontWeight="SemiBold" Foreground="#333" Margin="20 0 0 0"/>
+                </Grid>
+            </Border>
+
+            <!-- Основной контент -->
+            <Grid Grid.Row="1" Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="300"/>
+                    <!-- Левая панель - список групп -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Правая панель - список клиентов -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Левая панель - список групп -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Заголовок и поиск -->
+                        <RowDefinition Height="*"/>
+                        <!-- Список групп -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Кнопки управления -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок и поиск групп -->
+                    <StackPanel Grid.Row="0" Margin="0 0 0 15">
+                        <TextBlock Text="Группы" FontSize="18" FontWeight="SemiBold" Margin="0 0 0 10"/>
+                        <TextBox x:Name="GroupSearchTextBox" Padding="8 6" BorderThickness="1" 
+                               BorderBrush="#ccc" TextChanged="GroupSearchTextBox_TextChanged"
+                               Margin="0 0 0 5"
+                               />
+                    </StackPanel>
+
+                    <!-- Список групп -->
+                    <ListBox Grid.Row="1" x:Name="GroupsListBox" 
+                           BorderThickness="1" BorderBrush="#e0e0e0"
+                           SelectionChanged="GroupsListBox_SelectionChanged"
+                           SelectionMode="Single"
+                           Margin="0 0 0 15">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="14" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding MembersCount, StringFormat='({0})'}" 
+                                             FontSize="12" Foreground="#666" Margin="5 0 0 0" VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Кнопки управления для групп -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <Button Content="Обновить список" Padding="10 6" Margin="0 0 10 0"
+                              Background="#090909" Foreground="White" BorderThickness="0"
+                              Click="RefreshGroups_Click"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Правая панель - список клиентов -->
+                <Grid Grid.Column="1" Margin="20 0 0 0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <!-- Заголовок и поиск -->
+                        <RowDefinition Height="*"/>
+                        <!-- Список клиентов -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Кнопки управления -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Заголовок и поиск клиентов -->
+                    <StackPanel Grid.Row="0" Margin="0 0 0 15">
+                        <TextBlock x:Name="ClientsHeaderTextBlock" Text="Клиенты в группе: Не выбрана" 
+                                 FontSize="18" FontWeight="SemiBold" Margin="0 0 0 10"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" x:Name="ClientSearchTextBox" Padding="8 6" BorderThickness="1" 
+                                   BorderBrush="#ccc" TextChanged="ClientSearchTextBox_TextChanged"
+                                   Margin="0 0 5 0"
+                                   />
+                            <Button Grid.Column="1" Content="Добавить клиента" Padding="10 6"
+                                  Background="#090909" Foreground="White" BorderThickness="0"
+                                  Click="AddClient_Click"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Список клиентов -->
+                    <DataGrid Grid.Row="1" x:Name="ClientsDataGrid" AutoGenerateColumns="False"
+                            BorderThickness="1" BorderBrush="#e0e0e0"
+                            IsReadOnly="True"
+                            SelectionMode="Single"
+                            Margin="0 0 0 15">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ФИО" Binding="{Binding FullName}" Width="*"/>
+                            <DataGridTextColumn Header="Абонемент" Binding="{Binding Membership}" Width="*"/>
+                            <DataGridTextColumn Header="Дата начала" Binding="{Binding StartDate, StringFormat=dd.MM.yyyy}" Width="100"/>
+                            <DataGridTextColumn Header="Осталось занятий" Binding="{Binding RemainingVisits}" Width="120"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Кнопки управления для клиентов -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <Button Content="Удалить из группы" Padding="10 6" Margin="0 0 10 0"
+                              Background="#f44336" Foreground="White" BorderThickness="0"
+                              Click="RemoveClient_Click"/>
+                        <Button Content="Заморозить участие" Padding="10 6" Margin="0 0 10 0"
+                              Background="#ff9800" Foreground="White" BorderThickness="0"
+                              Click="FreezeClient_Click"/>
+                        <Button Content="Возобновить участие" Padding="10 6"
+                              Background="#4caf50" Foreground="White" BorderThickness="0"
+                              Click="UnfreezeClient_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <!-- Кнопки внизу -->
+            <Border Grid.Row="2" Background="#f0f0f0" CornerRadius="15">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="20 10">
+                    <Button Content="Закрыть" Background="#0f0f0f" BorderThickness="1" BorderBrush="Transparent" 
+                          Height="40" Padding="15 0" Click="CloseButton_Click"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

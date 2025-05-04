@@ -19,6 +19,7 @@ namespace FitnessCenterIS
         {
             this.GroupMembers = new HashSet<GroupMembers>();
             this.Sales = new HashSet<Sales>();
+            this.Schedules = new HashSet<Schedules>();
             this.WaitingLists = new HashSet<WaitingLists>();
         }
     
@@ -35,6 +36,8 @@ namespace FitnessCenterIS
         public virtual ICollection<GroupMembers> GroupMembers { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Sales> Sales { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Schedules> Schedules { get; set; }
         public virtual Seasontickets Seasontickets { get; set; }
         public virtual ServiceNumberClassTypes ServiceNumberClassTypes { get; set; }
         public virtual Services Services { get; set; }

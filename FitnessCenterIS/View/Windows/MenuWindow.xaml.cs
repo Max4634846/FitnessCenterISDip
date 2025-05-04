@@ -1,5 +1,6 @@
 ﻿using FitnessCenterIS.Model;
 using FitnessCenterIS.View.Pages;
+using FitnessCenterIS.View.Pages.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -157,6 +158,30 @@ namespace FitnessCenterIS.View.Windows
             MainFrame.Navigate(new RolesPage());
         }
 
-        
+        private void ManageGroupsButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new GroupsPage());
+        }
+
+        private void GroupClientsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var groupClientsWindow = new GroupClientsWindow();
+            groupClientsWindow.ShowDialog();
+        }
+
+        private void SalesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new SalesPage());
+        }
+
+        private void AllAnalesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new DashboardReportPage());
+        }
+
+        private void FinancialBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new FinancialReportPage());
+        }
     }
 }

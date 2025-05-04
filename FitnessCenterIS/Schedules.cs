@@ -35,6 +35,7 @@ namespace FitnessCenterIS
         public virtual Clients Clients { get; set; }
         public virtual Groups Groups { get; set; }
         public virtual Rooms Rooms { get; set; }
+        public virtual SeasonticketServices SeasonticketServices { get; set; }
         public virtual Staffs Staffs { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<WaitingLists> WaitingLists { get; set; }

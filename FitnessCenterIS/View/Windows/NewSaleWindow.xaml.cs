@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Data.Entity;
 using FitnessCenterIS.Model;
-using static FitnessCenterIS.View.Windows.TaskWindow;
 
 namespace FitnessCenterIS.View.Windows
 {
@@ -18,9 +17,6 @@ namespace FitnessCenterIS.View.Windows
         private decimal _basePrice;
         private ObservableCollection<SelectedMembership> _selectedMemberships;
         private decimal _totalBonusPoints;
-        private int _clientId;
-
-
 
         public NewSaleWindow(int clientId)
         {
@@ -36,7 +32,6 @@ namespace FitnessCenterIS.View.Windows
                 SetClientInfo(clientId);
             };
         }
-
 
         private void SetClientInfo(int clientId)
         {
@@ -55,7 +50,6 @@ namespace FitnessCenterIS.View.Windows
                 ClientTextBox.Text = _selectedClient.ToString();
                 ClientInfoTextBlock.Text =
                     $"ФИО: {_selectedClient.FullName}\nНомер карты: {_selectedClient.CardNumber}\nБонусные баллы: {_selectedClient.BonusPoints}";
-                CheckForActiveMembership(clientId);
                 ClientsPopup.IsOpen = false;
                 SaveSaleButton.IsEnabled = true;
             }
@@ -69,7 +63,8 @@ namespace FitnessCenterIS.View.Windows
                 StartDatePanel == null || StartDateTimePicker == null ||
                 EndDatePanel == null || EndDateTimePicker == null ||
                 SelectedMembershipsPanel == null || SelectedMembershipsListView == null ||
-                RemoveMembershipButton == null)
+                RemoveMembershipButton == null || TrainingTypeComboBox == null ||
+                GroupSelectionPanel == null)
                 return;
 
             // Настройка видимости элементов для абонемента
@@ -83,6 +78,12 @@ namespace FitnessCenterIS.View.Windows
             EndDatePanel.Visibility = Visibility.Visible;
             SelectedMembershipsPanel.Visibility = Visibility.Visible;
             RemoveMembershipButton.Visibility = Visibility.Visible;
+
+            // По умолчанию выбираем индивидуальный тип тренировки
+            TrainingTypeComboBox.SelectedIndex = 0; // Индивидуальное
+
+            // Начально скрываем панель выбора группы
+            GroupSelectionPanel.Visibility = Visibility.Collapsed;
 
             // Установка значений по умолчанию
             SaleDatePicker.SelectedDate = DateTime.Now;
@@ -98,6 +99,9 @@ namespace FitnessCenterIS.View.Windows
 
             // Установка значения бонусных баллов
             BonusPointsTextBlock.Text = "0";
+
+            // Фильтруем абонементы и услуги для индивидуального типа тренировки
+            FilterMembershipsAndServices("Индивидуальное");
         }
 
         private void LoadData()
@@ -147,6 +151,11 @@ namespace FitnessCenterIS.View.Windows
             var vatRates = _context.Vatrates.ToList();
             var paymentMethods = _context.PaymentMethods.ToList();
 
+            // Загрузка групп
+            var groups = _context.Groups
+                .Where(g => g.StatusActivity == "Активно")
+                .ToList();
+
             AdministratorComboBox.ItemsSource = administrators;
             AdministratorComboBox.DisplayMemberPath = "Name";
             AdministratorComboBox.SelectedValuePath = "StaffID";
@@ -170,6 +179,24 @@ namespace FitnessCenterIS.View.Windows
             PaymentMethodComboBox.ItemsSource = paymentMethods;
             PaymentMethodComboBox.DisplayMemberPath = "Name";
             PaymentMethodComboBox.SelectedValuePath = "PaymentMethodID";
+
+            GroupComboBox.ItemsSource = groups;
+            GroupComboBox.DisplayMemberPath = "Name";
+            GroupComboBox.SelectedValuePath = "GroupID";
+        }
+
+        private void GroupComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (GroupComboBox.SelectedItem is Groups selectedGroup &&
+                ServiceRadioButton.IsChecked == true)
+            {
+                // Для услуг фильтруем сервисы по выбранной группе
+                var groupServices = _context.Services
+                    .Where(s => s.ServiceID == selectedGroup.ServiceID)
+                    .ToList();
+
+                ServiceComboBox.ItemsSource = groupServices;
+            }
         }
 
         private void ClientTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -211,9 +238,6 @@ namespace FitnessCenterIS.View.Windows
                 ClientTextBox.Text = selectedClient.ToString();
                 ClientInfoTextBlock.Text = $"ФИО: {selectedClient.FullName}\nНомер карты: {selectedClient.CardNumber}\nБонусные баллы: {selectedClient.BonusPoints}";
                 ClientsPopup.IsOpen = false;
-
-                // Проверка на наличие действующего абонемента
-                CheckForActiveMembership(selectedClient.ClientID);
             }
         }
 
@@ -265,10 +289,6 @@ namespace FitnessCenterIS.View.Windows
                 RemoveMembershipButton.Visibility = Visibility.Visible;
                 PriceSoldTextBox.IsEnabled = false;
 
-                if (_selectedClient != null)
-                {
-                    CheckForActiveMembership(_selectedClient.ClientID);
-                }
             }
             else if (ServiceRadioButton.IsChecked == true)
             {
@@ -284,6 +304,16 @@ namespace FitnessCenterIS.View.Windows
                 RemoveMembershipButton.Visibility = Visibility.Collapsed;
                 PriceSoldTextBox.IsEnabled = true;
                 SaveSaleButton.IsEnabled = true;
+
+                // Если выбрана группа, обновляем список услуг
+                if (GroupComboBox.SelectedItem is Groups selectedGroup)
+                {
+                    var groupServices = _context.Services
+                        .Where(s => s.ServiceID == selectedGroup.ServiceID)
+                        .ToList();
+
+                    ServiceComboBox.ItemsSource = groupServices;
+                }
             }
         }
 
@@ -306,17 +336,43 @@ namespace FitnessCenterIS.View.Windows
 
         private void ServiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ServiceComboBox == null || PriceSoldTextBox == null)
+            if (ServiceComboBox == null || PriceSoldTextBox == null || TrainerComboBox == null)
                 return;
 
             if (ServiceComboBox.SelectedItem is Services selectedService)
             {
                 _basePrice = selectedService.Price.GetValueOrDefault();
                 PriceSoldTextBox.Text = _basePrice.ToString();
+
+                // Автоматически выбираем тренера, связанного с услугой
+                var serviceTrainers = _context.ServiceTrainer
+                    .Where(st => st.ServiceID == selectedService.ServiceID)
+                    .Select(st => st.TrainerID)
+                    .ToList();
+
+                if (serviceTrainers.Any())
+                {
+                    // Находим тренера в списке доступных тренеров
+                    var trainer = TrainerComboBox.Items.Cast<ServiceTrainerCollection>()
+                        .FirstOrDefault(t => serviceTrainers.Contains(t.TrainerID));
+
+                    if (trainer != null)
+                    {
+                        TrainerComboBox.SelectedItem = trainer;
+                        // Делаем выбор тренера недоступным для изменения
+                        TrainerComboBox.IsEnabled = false;
+                    }
+                }
+                else
+                {
+                    // Если тренер не назначен для услуги, разрешаем ручной выбор
+                    TrainerComboBox.IsEnabled = true;
+                }
             }
             else
             {
                 PriceSoldTextBox.Text = "";
+                TrainerComboBox.IsEnabled = true;
             }
         }
 
@@ -455,9 +511,18 @@ namespace FitnessCenterIS.View.Windows
                 return;
             }
 
-            if (PaymentMethodComboBox.SelectedItem == null)
+            // Проверка на выбор группы только для групповых занятий
+            bool isGroupTraining = false;
+
+            if (TrainingTypeComboBox.SelectedItem is ComboBoxItem trainingTypeItem)
             {
-                MessageBox.Show("Пожалуйста, выберите способ оплаты.");
+                isGroupTraining = trainingTypeItem.Content.ToString() == "Групповое";
+            }
+
+            // Проверяем выбор группы только если это групповое занятие
+            if (isGroupTraining && GroupComboBox.SelectedItem == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите группу для группового занятия.");
                 return;
             }
 
@@ -474,6 +539,7 @@ namespace FitnessCenterIS.View.Windows
             }
 
             int clientId = _selectedClient.ClientID;
+            int? groupId = isGroupTraining ? (int?)GroupComboBox.SelectedValue : null;
             DateTime saleDateTime = SaleDatePicker.SelectedDate ?? DateTime.Now;
             decimal discountAmount = decimal.TryParse(DiscountTextBox.Text, out discountAmount) ? discountAmount : 0;
             decimal priceSold = decimal.TryParse(PriceSoldTextBox.Text, out priceSold) ? priceSold : 0;
@@ -483,7 +549,10 @@ namespace FitnessCenterIS.View.Windows
             int? trainerId = TrainerComboBox.SelectedValue != null ? (int?)TrainerComboBox.SelectedValue : null;
             DateTime? startDateTime = StartDateTimePicker.SelectedDate;
             DateTime? endDateTime = EndDateTimePicker.SelectedDate;
-            int paymentMethodId = (int)PaymentMethodComboBox.SelectedValue;
+
+            // Сохраняем ID созданной продажи, чтобы использовать в обработке оплаты
+            int createdSaleId = 0;
+
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
@@ -507,14 +576,15 @@ namespace FitnessCenterIS.View.Windows
 
                         _context.Sales.Add(newSale);
                         _context.SaveChanges();
+                        createdSaleId = newSale.SaleID;
 
                         // Добавляем все выбранные абонементы
-                        foreach (var selectedMembership in _selectedMemberships)
+                        foreach (var membership in _selectedMemberships)
                         {
                             // Создаем запись в промежуточной таблице SeasonticketClients
                             var seasonticketClient = new SeasonticketClients
                             {
-                                SeasonticketID = selectedMembership.SeasonticketID,
+                                SeasonticketID = membership.SeasonticketID,
                                 ClientID = clientId
                             };
                             _context.SeasonticketClients.Add(seasonticketClient);
@@ -524,40 +594,137 @@ namespace FitnessCenterIS.View.Windows
                             var seasonticketSale = new SeasonticketSales
                             {
                                 SaleID = newSale.SaleID,
-                                SeasonticketID = selectedMembership.SeasonticketID
+                                SeasonticketID = membership.SeasonticketID
                             };
                             _context.SeasonticketSales.Add(seasonticketSale);
 
                             // Обновляем информацию о продаже
-                            newSale.SeasonticketID = selectedMembership.SeasonticketID;
-                            newSale.RemainingVisits = selectedMembership.Visits;
+                            newSale.SeasonticketID = membership.SeasonticketID;
+                            newSale.RemainingVisits = membership.Visits;
                             _context.SaveChanges();
+
+                            // Если это групповое занятие, создаем связь с группой
+                            if (isGroupTraining && groupId.HasValue)
+                            {
+                                // Находим услугу, связанную с группой
+                                int? serviceId = null;
+                                var group = _context.Groups.Find(groupId.Value);
+                                if (group != null)
+                                {
+                                    serviceId = group.ServiceID;
+                                }
+
+                                // Создаем связь услуги с абонементом
+                                var seasonticketService = new SeasonticketServices
+                                {
+                                    SeasonticketID = membership.SeasonticketID,
+                                    ServiceID = serviceId,
+                                    AccessAllowed = true,
+                                    VisitLimit = membership.Visits,
+                                    DateTime = DateTime.Now,
+                                    SaleID = newSale.SaleID
+                                };
+
+                                _context.SeasonticketServices.Add(seasonticketService);
+                                _context.SaveChanges();
+
+                                // Добавляем клиента в группу
+                                var groupMember = new GroupMembers
+                                {
+                                    GroupID = groupId.Value,
+                                    SeasonticketServiceID = seasonticketService.SeasonticketServiceID,
+                                    CreateDateTime = DateTime.Now,
+                                    Notes = $"Добавлен при продаже абонемента {membership.Name}"
+                                };
+
+                                _context.GroupMembers.Add(groupMember);
+                                _context.SaveChanges();
+                            }
                         }
 
-                        // Создаем платеж
-                        var payment = new Payments
+                        // Открываем окно для выбора способа оплаты
+                        var depositWindow = new DepositAccountWindow(clientId, priceSold, "Payment");
+                        if (depositWindow.ShowDialog() == true && depositWindow.PaymentResult.Success)
                         {
-                            SaleID = newSale.SaleID,
-                            Amount = priceSold,
-                            PaymentMethodID = paymentMethodId,
-                            DateTime = DateTime.Now
-                        };
+                            // Используем данные из окна оплаты
+                            var paymentResult = depositWindow.PaymentResult;
 
-                        _context.Payments.Add(payment);
+                            // Если есть сумма к оплате картой, создаем запись платежа
+                            if (paymentResult.CardAmount > 0)
+                            {
+                                var payment = new Payments
+                                {
+                                    SaleID = createdSaleId,
+                                    Amount = paymentResult.CardAmount,
+                                    PaymentMethodID = paymentResult.PaymentMethodId,
+                                    DateTime = DateTime.Now
+                                };
 
-                        // Начисляем бонусные баллы клиенту
-                        var client = _context.Clients.Find(clientId);
-                        if (client != null)
-                        {
-                            client.BonuseBalance = (client.BonuseBalance ?? 0) + _totalBonusPoints;
+                                _context.Payments.Add(payment);
+                                _context.SaveChanges();
+                            }
+
+                            // Начисляем бонусные баллы только за часть, оплаченную не бонусами
+                            if (paymentResult.BonusAmount < priceSold)
+                            {
+                                decimal bonusPointsBase = priceSold - paymentResult.BonusAmount;
+                                decimal bonusToAdd = CalculateBonusPointsForSale(bonusPointsBase);
+
+                                // Начисляем бонусные баллы клиенту
+                                var client = _context.Clients.Find(clientId);
+                                if (client != null)
+                                {
+                                    client.BonuseBalance = (client.BonuseBalance ?? 0) + bonusToAdd;
+                                    _context.SaveChanges();
+                                }
+                            }
+
+                            transaction.Commit();
+
+                            string paymentDetails = "";
+                            if (paymentResult.CardAmount > 0)
+                                paymentDetails += $"{paymentResult.CardAmount:N2} ₽ картой";
+                            if (paymentResult.DepositAmount > 0)
+                            {
+                                if (!string.IsNullOrEmpty(paymentDetails)) paymentDetails += ", ";
+                                paymentDetails += $"{paymentResult.DepositAmount:N2} ₽ с депозита";
+                            }
+                            if (paymentResult.BonusAmount > 0)
+                            {
+                                if (!string.IsNullOrEmpty(paymentDetails)) paymentDetails += ", ";
+                                paymentDetails += $"{paymentResult.BonusAmount:N2} бонусными баллами";
+                            }
+
+                            // Рассчитываем и отображаем начисленные бонусы
+                            decimal bonusCalculated = 0;
+                            if (paymentResult.BonusAmount < priceSold)
+                            {
+                                decimal bonusPointsBase = priceSold - paymentResult.BonusAmount;
+                                bonusCalculated = CalculateBonusPointsForSale(bonusPointsBase);
+                            }
+
+                            string successMessage = $"Продажа успешно оформлена!\nОплата: {paymentDetails}";
+                            if (bonusCalculated > 0)
+                            {
+                                successMessage += $"\nНачислено {bonusCalculated:N2} бонусных баллов";
+                            }
+
+                            if (isGroupTraining)
+                                successMessage += "\nКлиент добавлен в группу.";
+
+                            MessageBox.Show(successMessage);
+
+                            ReceiptPrinter.ShowReceiptPreview(newSale, paymentResult);
+
+                            DialogResult = true;
+                            Close();
                         }
-
-                        _context.SaveChanges();
-                        transaction.Commit();
-
-                        MessageBox.Show($"Продажа успешно оформлена! Начислено {_totalBonusPoints:F2} бонусных баллов.");
-                        DialogResult = true;
-                        Close();
+                        else
+                        {
+                            // Пользователь отменил оплату, отменяем транзакцию
+                            transaction.Rollback();
+                            MessageBox.Show("Продажа отменена.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                     }
                     else if (ServiceRadioButton.IsChecked == true && ServiceComboBox.SelectedItem != null)
                     {
@@ -592,28 +759,111 @@ namespace FitnessCenterIS.View.Windows
 
                         _context.Sales.Add(newSale);
                         _context.SaveChanges();
+                        createdSaleId = newSale.SaleID;
 
                         // Обновляем связь с продажей
                         seasonticketService.SaleID = newSale.SaleID;
                         _context.SaveChanges();
 
-                        // Создаем платеж
-                        var payment = new Payments
+                        // Если это групповая услуга, добавляем клиента в группу
+                        if (isGroupTraining && groupId.HasValue)
                         {
-                            SaleID = newSale.SaleID,
-                            Amount = priceSold,
-                            PaymentMethodID = paymentMethodId,
-                            DateTime = DateTime.Now
-                        };
+                            // Добавляем клиента в группу
+                            var groupMember = new GroupMembers
+                            {
+                                GroupID = groupId.Value,
+                                SeasonticketServiceID = seasonticketService.SeasonticketServiceID,
+                                CreateDateTime = DateTime.Now,
+                                Notes = "Добавлен при продаже услуги"
+                            };
 
-                        _context.Payments.Add(payment);
-                        _context.SaveChanges();
+                            _context.GroupMembers.Add(groupMember);
+                            _context.SaveChanges();
+                        }
 
-                        transaction.Commit();
+                        // Открываем окно для выбора способа оплаты
+                        var depositWindow = new DepositAccountWindow(clientId, priceSold, "Payment");
+                        if (depositWindow.ShowDialog() == true && depositWindow.PaymentResult.Success)
+                        {
+                            // Используем данные из окна оплаты
+                            var paymentResult = depositWindow.PaymentResult;
 
-                        MessageBox.Show("Продажа услуги успешно оформлена!");
-                        DialogResult = true;
-                        Close();
+                            // Если есть сумма к оплате картой, создаем запись платежа
+                            if (paymentResult.CardAmount > 0)
+                            {
+                                var payment = new Payments
+                                {
+                                    SaleID = createdSaleId,
+                                    Amount = paymentResult.CardAmount,
+                                    PaymentMethodID = paymentResult.PaymentMethodId,
+                                    DateTime = DateTime.Now
+                                };
+
+                                _context.Payments.Add(payment);
+                                _context.SaveChanges();
+                            }
+
+                            // Начисляем бонусные баллы только за часть, оплаченную не бонусами
+                            if (paymentResult.BonusAmount < priceSold)
+                            {
+                                decimal bonusPointsBase = priceSold - paymentResult.BonusAmount;
+                                decimal bonusToAdd = CalculateBonusPointsForSale(bonusPointsBase);
+
+                                // Начисляем бонусные баллы клиенту
+                                var client = _context.Clients.Find(clientId);
+                                if (client != null)
+                                {
+                                    client.BonuseBalance = (client.BonuseBalance ?? 0) + bonusToAdd;
+                                    _context.SaveChanges();
+                                }
+                            }
+
+                            transaction.Commit();
+
+                            string paymentDetails = "";
+                            if (paymentResult.CardAmount > 0)
+                                paymentDetails += $"{paymentResult.CardAmount:N2} ₽ картой";
+                            if (paymentResult.DepositAmount > 0)
+                            {
+                                if (!string.IsNullOrEmpty(paymentDetails)) paymentDetails += ", ";
+                                paymentDetails += $"{paymentResult.DepositAmount:N2} ₽ с депозита";
+                            }
+                            if (paymentResult.BonusAmount > 0)
+                            {
+                                if (!string.IsNullOrEmpty(paymentDetails)) paymentDetails += ", ";
+                                paymentDetails += $"{paymentResult.BonusAmount:N2} бонусными баллами";
+                            }
+
+                            // Рассчитываем и отображаем начисленные бонусы
+                            decimal bonusCalculated = 0;
+                            if (paymentResult.BonusAmount < priceSold)
+                            {
+                                decimal bonusPointsBase = priceSold - paymentResult.BonusAmount;
+                                bonusCalculated = CalculateBonusPointsForSale(bonusPointsBase);
+                            }
+
+                            string successMessage = $"Продажа услуги успешно оформлена!\nОплата: {paymentDetails}";
+                            if (bonusCalculated > 0)
+                            {
+                                successMessage += $"\nНачислено {bonusCalculated:N2} бонусных баллов";
+                            }
+
+                            if (isGroupTraining)
+                                successMessage += "\nКлиент добавлен в группу.";
+
+                            MessageBox.Show(successMessage);
+
+                            ReceiptPrinter.ShowReceiptPreview(newSale, paymentResult);
+
+                            DialogResult = true;
+                            Close();
+                        }
+                        else
+                        {
+                            // Пользователь отменил оплату, отменяем транзакцию
+                            transaction.Rollback();
+                            MessageBox.Show("Продажа отменена.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -623,6 +873,121 @@ namespace FitnessCenterIS.View.Windows
                 }
             }
         }
+
+        // Новый метод для расчета бонусных баллов за покупку
+        private decimal CalculateBonusPointsForSale(decimal amountPaid)
+        {
+            // Базовые бонусные баллы - 5% от стоимости
+            decimal bonusPoints = amountPaid * 0.05m;
+
+            // Дополнительные баллы за количество занятий (если это абонемент)
+            if (MembershipRadioButton.IsChecked == true && RemainingVisitsComboBox.SelectedItem is ComboBoxItem selectedVisitsItem)
+            {
+                int visits = int.Parse(selectedVisitsItem.Content.ToString());
+                decimal visitMultiplier;
+
+                if (visits == 8)
+                    visitMultiplier = 1.2m;   // +20% для 8 занятий
+                else if (visits == 12)
+                    visitMultiplier = 1.5m;   // +50% для 12 занятий
+                else
+                    visitMultiplier = 1.0m;   // Без бонуса для других значений
+
+                bonusPoints *= visitMultiplier;
+            }
+
+            return Math.Round(bonusPoints, 2);
+        }
+
+        // Метод обработки изменения типа тренировки
+        private void TrainingTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TrainingTypeComboBox == null || GroupSelectionPanel == null)
+                return;
+
+            // Получаем выбранный тип тренировки
+            if (TrainingTypeComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string trainingType = selectedItem.Content.ToString();
+
+                // Показываем или скрываем панель выбора группы в зависимости от типа тренировки
+                if (trainingType == "Групповое")
+                {
+                    GroupSelectionPanel.Visibility = Visibility.Visible;
+                    LoadGroups(); // Загружаем список групп
+                }
+                else
+                {
+                    GroupSelectionPanel.Visibility = Visibility.Collapsed;
+                }
+
+                // Фильтруем абонементы/услуги в зависимости от типа тренировки
+                FilterMembershipsAndServices(trainingType);
+            }
+        }
+
+        // Метод для загрузки групп в ComboBox
+        private void LoadGroups()
+        {
+            try
+            {
+                // Загружаем только активные группы
+                var groups = _context.Groups
+                    .Where(g => g.StatusActivity == "Активно")
+                    .OrderBy(g => g.Name)
+                    .ToList();
+
+                GroupComboBox.ItemsSource = groups;
+
+                // Если есть группы, выбираем первую
+                if (groups.Count > 0)
+                    GroupComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке групп: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Метод для фильтрации абонементов и услуг по типу тренировки
+        // Метод для фильтрации абонементов и услуг по типу тренировки
+        private void FilterMembershipsAndServices(string trainingType)
+        {
+            try
+            {
+                if (MembershipComboBox == null || ServiceComboBox == null)
+                    return;
+
+                // Загружаем все абонементы (без фильтрации)
+                var memberships = _context.Seasontickets.ToList();
+                MembershipComboBox.ItemsSource = memberships;
+
+                // Загружаем все активные услуги
+                var services = _context.Services
+                    .Where(s => s.StatusService == "Активен")
+                    .ToList();
+
+                ServiceComboBox.ItemsSource = services;
+
+                // Если комбобоксы пустые, покажем сообщение в консоль для диагностики
+                if (memberships.Count == 0)
+                {
+                    Console.WriteLine("Внимание: список абонементов пуст");
+                }
+
+                if (services.Count == 0)
+                {
+                    Console.WriteLine("Внимание: список услуг пуст");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке абонементов и услуг: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
@@ -663,4 +1028,3 @@ namespace FitnessCenterIS.View.Windows
         public int Visits { get; set; }
     }
 }
-

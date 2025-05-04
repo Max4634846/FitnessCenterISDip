@@ -154,6 +154,10 @@
                     <Button x:Name="PrintButton" Style="{StaticResource NavButton}" Width="40" Click="PrintButton_Click">
                         <materialDesign:PackIcon Kind="Printer" Width="18" Height="18"/>
                     </Button>
+                    <Button x:Name="EmailButton" Style="{StaticResource NavButton}" Width="40" Margin="5,0" Click="EmailButton_Click">
+                        <materialDesign:PackIcon Kind="Email" Width="18" Height="18" 
+                                ToolTip="Отправить расписание по email"/>
+                    </Button>
                 </StackPanel>
 
             </Grid>

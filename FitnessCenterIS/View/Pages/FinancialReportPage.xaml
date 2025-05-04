@@ -1,0 +1,226 @@
+﻿<Page x:Class="FitnessCenterIS.View.Pages.Reports.FinancialReportPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:FitnessCenterIS.View.Pages.Reports"
+      xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      d:DesignHeight="800" d:DesignWidth="1280"
+      Title="Финансовый отчет">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок и выбор периода -->
+        <Border Grid.Row="0" Background="White" Padding="20" Margin="10" 
+                BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
+                materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="CurrencyUsd" Width="30" Height="30" 
+                                         VerticalAlignment="Center" Foreground="#090909"/>
+                    <TextBlock Text="Финансовый отчет" FontWeight="Bold" FontSize="22" 
+                           VerticalAlignment="Center" Margin="10 0 0 0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Период: " VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <DatePicker x:Name="DateFromPicker" Width="120" Margin="5 0" 
+                            SelectedDateChanged="DateRangeChanged"/>
+                    <TextBlock Text=" - " VerticalAlignment="Center"/>
+                    <DatePicker x:Name="DateToPicker" Width="120" Margin="5 0" 
+                            SelectedDateChanged="DateRangeChanged"/>
+
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
+                        Margin="15 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
+                        Click="ExportToExcel_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileExcel" Margin="0 0 5 0"/>
+                            <TextBlock Text="Экспорт"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
+                        Margin="10 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
+                        Click="PrintReport_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Printer" Margin="0 0 5 0"/>
+                            <TextBlock Text="Печать"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основные показатели -->
+        <Border Grid.Row="1" Background="White" Padding="20" Margin="10 0 10 10" 
+                BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
+                materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Общий доход -->
+                <Border Grid.Column="0" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Общий доход" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="TotalIncomeTextBlock" Text="0 ₽" FontWeight="Bold" 
+                               FontSize="24" Foreground="#4CAF50" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Прибыль -->
+                <Border Grid.Column="1" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Прибыль" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="ProfitTextBlock" Text="0 ₽" FontWeight="Bold" 
+                               FontSize="24" Foreground="#2196F3" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Маржинальность -->
+                <Border Grid.Column="2" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Маржинальность" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="MarginalityTextBlock" Text="0%" FontWeight="Bold" 
+                               FontSize="24" Foreground="#9C27B0" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Доход от абонементов -->
+                <Border Grid.Column="3" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Доход от абонементов" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="MembershipIncomeTextBlock" Text="0 ₽" FontWeight="Bold" 
+                               FontSize="24" Foreground="#FF9800" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Доход от услуг -->
+                <Border Grid.Column="4" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Доход от услуг" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="ServiceIncomeTextBlock" Text="0 ₽" FontWeight="Bold" 
+                               FontSize="24" Foreground="#FF5722" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Средний чек -->
+                <Border Grid.Column="5" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Средний чек" FontWeight="Medium" FontSize="14"/>
+                        <TextBlock x:Name="AverageCheckTextBlock" Text="0 ₽" FontWeight="Bold" 
+                               FontSize="24" Foreground="#607D8B" Margin="0 10 0 0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- График финансовых показателей -->
+        <Border Grid.Row="2" Background="White" Padding="20" Margin="10 0 10 10" 
+                BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
+                materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="PeriodTitle" Grid.Row="0" Text="Финансовые показатели" 
+                       FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+
+                <lvc:CartesianChart Grid.Row="1" x:Name="FinancialChart" Height="300" 
+                                DisableAnimations="True">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="Период" />
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="Сумма, ₽" />
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </Grid>
+        </Border>
+
+        <!-- Таблица финансовых данных -->
+        <Border Grid.Row="3" Background="White" Padding="20" Margin="10 0 10 10" 
+                BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
+                materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Детализация" 
+                       FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+
+                <DataGrid Grid.Row="1" x:Name="FinancialDataGrid" AutoGenerateColumns="False" 
+                      IsReadOnly="True" CanUserSortColumns="True"
+                      BorderThickness="1" BorderBrush="#E0E0E0" 
+                      GridLinesVisibility="Horizontal"
+                      AlternatingRowBackground="#F5F5F5"
+                      RowBackground="White">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Дата" Binding="{Binding Date, StringFormat=dd.MM.yyyy HH:mm}" 
+                                        Width="140"/>
+                        <DataGridTextColumn Header="ID" Binding="{Binding TransactionId}" Width="60"/>
+                        <DataGridTextColumn Header="Категория" Binding="{Binding Category}" Width="100"/>
+                        <DataGridTextColumn Header="Продукт/Услуга" Binding="{Binding Product}" Width="*"/>
+                        <DataGridTextColumn Header="Доход" Binding="{Binding Income, StringFormat={}{0:N2} ₽}" 
+                                        Width="120"/>
+                        <DataGridTextColumn Header="Прибыль" Binding="{Binding Profit, StringFormat={}{0:N2} ₽}" 
+                                        Width="120"/>
+                        <DataGridTextColumn Header="Менеджер" Binding="{Binding Manager}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Итоговая строка -->
+                <Grid Grid.Row="2" Margin="0 10 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="150"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" x:Name="TotalRowsTextBlock" Text="Всего записей: 0" 
+                           VerticalAlignment="Center" FontWeight="SemiBold"/>
+
+                    <TextBlock Grid.Column="2" Text="Итого:" HorizontalAlignment="Right" 
+                           VerticalAlignment="Center" FontWeight="Bold" Margin="0 0 10 0"/>
+
+                    <TextBlock Grid.Column="3" x:Name="IncomeFooterTextBlock" Text="0 ₽" 
+                           VerticalAlignment="Center" FontWeight="Bold" Margin="0 0 10 0"/>
+
+                    <TextBlock Grid.Column="4" x:Name="ExpensesFooterTextBlock" Text="0 ₽" 
+                           VerticalAlignment="Center" FontWeight="Bold" Margin="0 0 10 0"/>
+
+                    <TextBlock Grid.Column="5" x:Name="ProfitFooterTextBlock" Text="0 ₽" 
+                           VerticalAlignment="Center" FontWeight="Bold" Margin="0 0 10 0"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

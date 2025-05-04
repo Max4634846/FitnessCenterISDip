@@ -52,6 +52,12 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro.IconPacks, Version=5.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.IconPacks.5.1.0\lib\net47\MahApps.Metro.IconPacks.dll</HintPath>
     </Reference>
@@ -223,6 +229,7 @@
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.6.0.0\lib\net461\System.Diagnostics.DiagnosticSource.dll</HintPath>
@@ -318,9 +325,13 @@
     <Compile Include="LoyaltyLevels.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
+    <Compile Include="Model\BonusTransaction.cs" />
     <Compile Include="Model\Category.cs" />
     <Compile Include="Model\ClientsCollection.cs" />
+    <Compile Include="Model\DepositTransaction.cs" />
+    <Compile Include="Model\EmailRecipient.cs" />
     <Compile Include="Model\PriorityToColorConverter.cs" />
+    <Compile Include="Model\ReceiptPrinter.cs" />
     <Compile Include="Model\ScheduleItem.cs" />
     <Compile Include="Model\ScheduleRenderingHelper.cs" />
     <Compile Include="Model\ServiceTrainerCollection.cs" />
@@ -384,6 +395,12 @@
     <Compile Include="ServiceTypes.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
+    <Compile Include="sp_helpdiagramdefinition_Result.cs">
+      <DependentUpon>BDFitnessCenter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="sp_helpdiagrams_Result.cs">
+      <DependentUpon>BDFitnessCenter.tt</DependentUpon>
+    </Compile>
     <Compile Include="Staffs.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
@@ -411,6 +428,15 @@
     <Compile Include="View\Pages\ClientPage.xaml.cs">
       <DependentUpon>ClientPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Pages\DashboardReportPage.xaml.cs">
+      <DependentUpon>DashboardReportPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Pages\FinancialReportPage.xaml.cs">
+      <DependentUpon>FinancialReportPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Pages\GroupsPage.xaml.cs">
+      <DependentUpon>GroupsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Pages\LeadPage.xaml.cs">
       <DependentUpon>LeadPage.xaml</DependentUpon>
     </Compile>
@@ -425,6 +451,9 @@
     </Compile>
     <Compile Include="View\Pages\RolesPage.xaml.cs">
       <DependentUpon>RolesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Pages\SalesPage.xaml.cs">
+      <DependentUpon>SalesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Pages\SchedulePage.xaml.cs">
       <DependentUpon>SchedulePage.xaml</DependentUpon>
@@ -443,6 +472,9 @@
     </Compile>
     <Compile Include="View\Pages\WaitingListPage.xaml.cs">
       <DependentUpon>WaitingListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\AddEditGroupWindow.xaml.cs">
+      <DependentUpon>AddEditGroupWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Windows\AddEditNewClientWindow.xaml.cs">
       <DependentUpon>AddEditNewClientWindow.xaml</DependentUpon>
@@ -471,8 +503,17 @@
     <Compile Include="View\Windows\AttendanceWindow.xaml.cs">
       <DependentUpon>AttendanceWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Windows\ClientSelectionWindow.xaml.cs">
+      <DependentUpon>ClientSelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\DepositAccountWindow.xaml.cs">
+      <DependentUpon>DepositAccountWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Windows\EditScheduleItemWindow.xaml.cs">
       <DependentUpon>EditScheduleItemWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\GroupClientsWindow.xaml.cs">
+      <DependentUpon>GroupClientsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Windows\LockerSelectionWindow.xaml.cs">
       <DependentUpon>LockerSelectionWindow.xaml</DependentUpon>
@@ -495,6 +536,18 @@
     </Compile>
     <Compile Include="View\Windows\QRCodeWindow.xaml.cs">
       <DependentUpon>QRCodeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\ReceiptPreviewWindow.xaml.cs">
+      <DependentUpon>ReceiptPreviewWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\SaleDetailsWindow.xaml.cs">
+      <DependentUpon>SaleDetailsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\SendScheduleWindow.xaml.cs">
+      <DependentUpon>SendScheduleWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\StatusSelectionWindow.xaml.cs">
+      <DependentUpon>StatusSelectionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Windows\TaskWindow.xaml.cs">
       <DependentUpon>TaskWindow.xaml</DependentUpon>
@@ -531,6 +584,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Pages\DashboardReportPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\FinancialReportPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\GroupsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Pages\LeadPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -548,6 +613,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Pages\RolesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\SalesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -572,6 +641,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Pages\WaitingListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\AddEditGroupWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -611,7 +684,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Windows\ClientSelectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\DepositAccountWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Windows\EditScheduleItemWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\GroupClientsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -636,6 +721,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Windows\QRCodeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\ReceiptPreviewWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\SaleDetailsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\SendScheduleWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\StatusSelectionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
