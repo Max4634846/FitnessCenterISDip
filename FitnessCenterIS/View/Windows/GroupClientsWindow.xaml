@@ -135,13 +135,13 @@
                     <!-- Кнопки управления для клиентов -->
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
                         <Button Content="Удалить из группы" Padding="10 6" Margin="0 0 10 0"
-                              Background="#f44336" Foreground="White" BorderThickness="0"
+                              Background="#0f0f0f" Foreground="White" BorderThickness="0"
                               Click="RemoveClient_Click"/>
                         <Button Content="Заморозить участие" Padding="10 6" Margin="0 0 10 0"
-                              Background="#ff9800" Foreground="White" BorderThickness="0"
+                              Background="#0f0f0f" Foreground="White" BorderThickness="0"
                               Click="FreezeClient_Click"/>
                         <Button Content="Возобновить участие" Padding="10 6"
-                              Background="#4caf50" Foreground="White" BorderThickness="0"
+                              Background="#0f0f0f" Foreground="White" BorderThickness="0"
                               Click="UnfreezeClient_Click"/>
                     </StackPanel>
                 </Grid>

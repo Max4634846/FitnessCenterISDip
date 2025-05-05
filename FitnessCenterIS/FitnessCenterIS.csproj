@@ -425,6 +425,9 @@
     <Compile Include="View\Pages\AttendanceHistoryPage.xaml.cs">
       <DependentUpon>AttendanceHistoryPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Pages\AttendanceReportPage.xaml.cs">
+      <DependentUpon>AttendanceReportPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Pages\ClientPage.xaml.cs">
       <DependentUpon>ClientPage.xaml</DependentUpon>
     </Compile>
@@ -466,6 +469,9 @@
     </Compile>
     <Compile Include="View\Pages\StaffPage.xaml.cs">
       <DependentUpon>StaffPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Pages\TrainerPopularityReportPage.xaml.cs">
+      <DependentUpon>TrainerPopularityReportPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Pages\UserPage.xaml.cs">
       <DependentUpon>UserPage.xaml</DependentUpon>
@@ -580,6 +586,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Pages\AttendanceReportPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Pages\ClientPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -633,6 +643,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Pages\StaffPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\TrainerPopularityReportPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -95,8 +95,8 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Выбор типа абонемента/занятия -->
-                        <StackPanel Grid.Row="3" Margin="0 0 0 15">
+                        <!-- Выбор типа абонемента/занятия (убрано для услуг) -->
+                        <StackPanel Grid.Row="3" Margin="0 0 0 15" x:Name="TrainingTypePanel">
                             <TextBlock Text="Тип занятия" FontSize="16" FontWeight="SemiBold" Margin="0 0 0 8"/>
                             <ComboBox x:Name="TrainingTypeComboBox" Padding="8 6" 
                                   SelectionChanged="TrainingTypeComboBox_SelectionChanged">
@@ -167,7 +167,7 @@
                 <Grid Grid.Column="1" Margin="20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <!-- Администратор и тренер -->
+                        <!-- Администратор и дата продажи -->
                         <RowDefinition Height="Auto"/>
                         <!-- Детали продажи -->
                         <RowDefinition Height="Auto"/>
@@ -178,42 +178,26 @@
                         <!-- Дополнительная информация -->
                     </Grid.RowDefinitions>
 
-                    <!-- Администратор и тренер -->
+                    <!-- Администратор и дата продажи - смещены вверх -->
                     <Grid Grid.Row="0" Margin="0 0 0 20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0 0 10 0">
+                        <StackPanel Grid.Column="0" Margin="0 0 10 0">
                             <TextBlock Text="Администратор" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
                             <ComboBox x:Name="AdministratorComboBox" Padding="8 6" 
                                   DisplayMemberPath="Name" SelectedValuePath="StaffID"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10 0 0 0">
-                            <TextBlock x:Name="TrainerLabel" Text="Тренер" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
-                            <ComboBox x:Name="TrainerComboBox" Padding="8 6" 
-                                  DisplayMemberPath="Name" SelectedValuePath="TrainerID"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0 15 10 0">
+                        <StackPanel Grid.Column="1" Margin="10 0 0 0">
                             <TextBlock Text="Дата продажи" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
                             <DatePicker x:Name="SaleDatePicker" Padding="8 6"/>
                         </StackPanel>
-
-                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10 15 0 0">
-                            <TextBlock Text="Способ оплаты" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
-                            <ComboBox x:Name="PaymentMethodComboBox" Padding="8 6" 
-                                  DisplayMemberPath="Name" SelectedValuePath="PaymentMethodID"/>
-                        </StackPanel>
                     </Grid>
 
-                    <!-- Детали продажи -->
+                    <!-- Детали продажи - поднятые наверх -->
                     <Grid Grid.Row="1" Margin="0 0 0 20">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -225,6 +209,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
+                        <!-- Первый ряд -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0 0 10 0">
                             <TextBlock Text="Количество занятий" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"
                                    x:Name="RemainingVisitsLabel"/>
@@ -242,6 +227,7 @@
                                  TextChanged="DiscountTextBox_TextChanged"/>
                         </StackPanel>
 
+                        <!-- Второй ряд -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0 15 10 0">
                             <TextBlock Text="Статус продажи" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
                             <ComboBox x:Name="StatusSaleComboBox" Padding="8 6"/>
@@ -253,6 +239,7 @@
                                   DisplayMemberPath="Name" SelectedValuePath="VatRateID"/>
                         </StackPanel>
 
+                        <!-- Третий ряд -->
                         <StackPanel Grid.Row="2" Grid.Column="0" Margin="0 15 10 0" x:Name="StartDatePanel">
                             <TextBlock Text="Дата начала" FontSize="14" FontWeight="SemiBold" Margin="0 0 0 5"/>
                             <DatePicker x:Name="StartDateTimePicker" Padding="8 6"/>

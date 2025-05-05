@@ -254,9 +254,11 @@
                                         </WrapPanel>
                                     </Expander.Header>
                                     <Expander.Content>
-                                        <StackPanel Margin="45,0,0,0">
+                                        <StackPanel Margin="40,0,0,0">
                                             <Button Content="Общая аналитика" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="AllAnalesBtn_Click"/>
                                             <Button Content="Отчет по финансам" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="FinancialBtn_Click"/>
+                                            <Button Content="Отчет по посещаемости" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="AttendanceBtn_Click"/>
+                                            <Button Content="Отчет по тренерам" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="TrainerBtn_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>

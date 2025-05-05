@@ -103,7 +103,18 @@
                                 Click="AddServiceClassification_Click"/>
                        
                     </Grid>
-                    
+
+                    <TextBlock Text="Назначенный тренер" FontSize="12" Margin="5,0,0,5"/>
+                    <Grid Margin="0,0,0,15">
+                        <Border CornerRadius="8" Background="#f0f0f0">
+                            <ComboBox x:Name="TrainerComboBox" 
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Background="Transparent" Padding="5,8"
+                                      DisplayMemberPath="Name" 
+                                      SelectedValuePath="TrainerID"/>
+                        </Border>
+                    </Grid>
+
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

@@ -183,5 +183,15 @@ namespace FitnessCenterIS.View.Windows
         {
             MainFrame.Navigate(new FinancialReportPage());
         }
+
+        private void AttendanceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AttendanceReportPage());
+        }
+
+        private void TrainerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new TrainerPopularityReportPage());
+        }
     }
 }

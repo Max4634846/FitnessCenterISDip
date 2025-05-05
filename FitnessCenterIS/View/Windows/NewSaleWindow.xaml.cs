@@ -58,7 +58,7 @@ namespace FitnessCenterIS.View.Windows
         private void InitializeUI()
         {
             // Проверка на null для избежания ошибок
-            if (MembershipLabel == null || ServiceLabel == null || TrainerLabel == null ||
+            if (MembershipLabel == null || ServiceLabel == null ||
                 RemainingVisitsLabel == null || RemainingVisitsComboBox == null ||
                 StartDatePanel == null || StartDateTimePicker == null ||
                 EndDatePanel == null || EndDateTimePicker == null ||
@@ -70,8 +70,6 @@ namespace FitnessCenterIS.View.Windows
             // Настройка видимости элементов для абонемента
             MembershipSelectionPanel.Visibility = Visibility.Visible;
             ServiceSelectionPanel.Visibility = Visibility.Collapsed;
-            TrainerLabel.Visibility = Visibility.Visible;
-            TrainerComboBox.Visibility = Visibility.Visible;
             RemainingVisitsLabel.Visibility = Visibility.Visible;
             RemainingVisitsComboBox.Visibility = Visibility.Visible;
             StartDatePanel.Visibility = Visibility.Visible;
@@ -134,18 +132,6 @@ namespace FitnessCenterIS.View.Windows
                 Name = $"{u.Staffs.Persons.Surname} {u.Staffs.Persons.Name}"
             }).ToList();
 
-            // Загрузка тренеров
-            var trainersData = _context.Staffs
-                .Include(s => s.Persons)
-                .Where(s => s.RoleID == 2)
-                .ToList();
-
-            var trainers = trainersData.Select(s => new ServiceTrainerCollection
-            {
-                TrainerID = s.StaffID,
-                Name = $"{s.Persons.Surname} {s.Persons.Name}"
-            }).ToList();
-
             var memberships = _context.Seasontickets.ToList();
             var services = _context.Services.ToList();
             var vatRates = _context.Vatrates.ToList();
@@ -160,10 +146,6 @@ namespace FitnessCenterIS.View.Windows
             AdministratorComboBox.DisplayMemberPath = "Name";
             AdministratorComboBox.SelectedValuePath = "StaffID";
 
-            TrainerComboBox.ItemsSource = trainers;
-            TrainerComboBox.DisplayMemberPath = "Name";
-            TrainerComboBox.SelectedValuePath = "TrainerID";
-
             MembershipComboBox.ItemsSource = memberships;
             MembershipComboBox.DisplayMemberPath = "Name";
             MembershipComboBox.SelectedValuePath = "SeasonticketID";
@@ -175,10 +157,6 @@ namespace FitnessCenterIS.View.Windows
             VatRateComboBox.ItemsSource = vatRates;
             VatRateComboBox.DisplayMemberPath = "Name";
             VatRateComboBox.SelectedValuePath = "VatRateID";
-
-            PaymentMethodComboBox.ItemsSource = paymentMethods;
-            PaymentMethodComboBox.DisplayMemberPath = "Name";
-            PaymentMethodComboBox.SelectedValuePath = "PaymentMethodID";
 
             GroupComboBox.ItemsSource = groups;
             GroupComboBox.DisplayMemberPath = "Name";
@@ -268,7 +246,6 @@ namespace FitnessCenterIS.View.Windows
         {
             if (MembershipRadioButton == null || ServiceRadioButton == null ||
                 MembershipSelectionPanel == null || ServiceSelectionPanel == null ||
-                TrainerLabel == null || TrainerComboBox == null ||
                 RemainingVisitsLabel == null || RemainingVisitsComboBox == null ||
                 StartDatePanel == null || EndDatePanel == null ||
                 PriceSoldTextBox == null || SaveSaleButton == null ||
@@ -279,8 +256,6 @@ namespace FitnessCenterIS.View.Windows
             {
                 MembershipSelectionPanel.Visibility = Visibility.Visible;
                 ServiceSelectionPanel.Visibility = Visibility.Collapsed;
-                TrainerLabel.Visibility = Visibility.Visible;
-                TrainerComboBox.Visibility = Visibility.Visible;
                 RemainingVisitsLabel.Visibility = Visibility.Visible;
                 RemainingVisitsComboBox.Visibility = Visibility.Visible;
                 StartDatePanel.Visibility = Visibility.Visible;
@@ -294,8 +269,6 @@ namespace FitnessCenterIS.View.Windows
             {
                 MembershipSelectionPanel.Visibility = Visibility.Collapsed;
                 ServiceSelectionPanel.Visibility = Visibility.Visible;
-                TrainerLabel.Visibility = Visibility.Visible;
-                TrainerComboBox.Visibility = Visibility.Visible;
                 RemainingVisitsLabel.Visibility = Visibility.Collapsed;
                 RemainingVisitsComboBox.Visibility = Visibility.Collapsed;
                 StartDatePanel.Visibility = Visibility.Collapsed;
@@ -336,43 +309,17 @@ namespace FitnessCenterIS.View.Windows
 
         private void ServiceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ServiceComboBox == null || PriceSoldTextBox == null || TrainerComboBox == null)
+            if (ServiceComboBox == null || PriceSoldTextBox == null)
                 return;
 
             if (ServiceComboBox.SelectedItem is Services selectedService)
             {
                 _basePrice = selectedService.Price.GetValueOrDefault();
                 PriceSoldTextBox.Text = _basePrice.ToString();
-
-                // Автоматически выбираем тренера, связанного с услугой
-                var serviceTrainers = _context.ServiceTrainer
-                    .Where(st => st.ServiceID == selectedService.ServiceID)
-                    .Select(st => st.TrainerID)
-                    .ToList();
-
-                if (serviceTrainers.Any())
-                {
-                    // Находим тренера в списке доступных тренеров
-                    var trainer = TrainerComboBox.Items.Cast<ServiceTrainerCollection>()
-                        .FirstOrDefault(t => serviceTrainers.Contains(t.TrainerID));
-
-                    if (trainer != null)
-                    {
-                        TrainerComboBox.SelectedItem = trainer;
-                        // Делаем выбор тренера недоступным для изменения
-                        TrainerComboBox.IsEnabled = false;
-                    }
-                }
-                else
-                {
-                    // Если тренер не назначен для услуги, разрешаем ручной выбор
-                    TrainerComboBox.IsEnabled = true;
-                }
             }
             else
             {
                 PriceSoldTextBox.Text = "";
-                TrainerComboBox.IsEnabled = true;
             }
         }
 
@@ -546,7 +493,6 @@ namespace FitnessCenterIS.View.Windows
             string statusSale = StatusSaleComboBox.SelectedItem as string ?? "Активна";
             int vatRateId = VatRateComboBox.SelectedValue != null ? (int)VatRateComboBox.SelectedValue : 1;
             int administratorId = (int)AdministratorComboBox.SelectedValue;
-            int? trainerId = TrainerComboBox.SelectedValue != null ? (int?)TrainerComboBox.SelectedValue : null;
             DateTime? startDateTime = StartDateTimePicker.SelectedDate;
             DateTime? endDateTime = EndDateTimePicker.SelectedDate;
 
@@ -570,8 +516,7 @@ namespace FitnessCenterIS.View.Windows
                             VatRateID = vatRateId,
                             ClassificationID = 1, // Классификация для абонементов
                             StartDateTime = startDateTime,
-                            EndDateTime = endDateTime,
-                            TrainerID = trainerId
+                            EndDateTime = endDateTime
                         };
 
                         _context.Sales.Add(newSale);
@@ -612,6 +557,19 @@ namespace FitnessCenterIS.View.Windows
                                 if (group != null)
                                 {
                                     serviceId = group.ServiceID;
+
+                                    // Если у услуги есть назначенный тренер, используем его
+                                    if (serviceId.HasValue)
+                                    {
+                                        var serviceTrainer = _context.ServiceTrainer
+                                            .FirstOrDefault(st => st.ServiceID == serviceId.Value);
+
+                                        if (serviceTrainer != null)
+                                        {
+                                            newSale.TrainerID = serviceTrainer.TrainerID;
+                                            _context.SaveChanges();
+                                        }
+                                    }
                                 }
 
                                 // Создаем связь услуги с абонементом
@@ -730,6 +688,13 @@ namespace FitnessCenterIS.View.Windows
                     {
                         int serviceId = (int)ServiceComboBox.SelectedValue;
 
+                        // Проверяем, есть ли у услуги назначенный тренер
+                        var serviceTrainer = _context.ServiceTrainer
+                            .FirstOrDefault(st => st.ServiceID == serviceId);
+
+                        // Если есть, используем его ID
+                        int? assignedTrainerId = serviceTrainer?.TrainerID;
+
                         // Создаем связь услуги
                         var seasonticketService = new SeasonticketServices
                         {
@@ -742,11 +707,11 @@ namespace FitnessCenterIS.View.Windows
                         _context.SeasonticketServices.Add(seasonticketService);
                         _context.SaveChanges();
 
-                        // Создаем продажу
+                        // Создаем продажу с назначенным тренером (если он есть)
                         var newSale = new Sales
                         {
                             AdministratorID = administratorId,
-                            TrainerID = trainerId,
+                            TrainerID = assignedTrainerId,
                             SeasonticketServiceID = seasonticketService.SeasonticketServiceID,
                             SaleDateTime = saleDateTime,
                             DiscountAmount = discountAmount,
@@ -951,7 +916,6 @@ namespace FitnessCenterIS.View.Windows
         }
 
         // Метод для фильтрации абонементов и услуг по типу тренировки
-        // Метод для фильтрации абонементов и услуг по типу тренировки
         private void FilterMembershipsAndServices(string trainingType)
         {
             try
@@ -987,7 +951,6 @@ namespace FitnessCenterIS.View.Windows
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
