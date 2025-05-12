@@ -326,6 +326,7 @@
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
     <Compile Include="Model\BonusTransaction.cs" />
+    <Compile Include="Model\BoolToStatusConverter.cs" />
     <Compile Include="Model\Category.cs" />
     <Compile Include="Model\ClientsCollection.cs" />
     <Compile Include="Model\DepositTransaction.cs" />
@@ -338,6 +339,7 @@
     <Compile Include="Model\StaffsCollection.cs" />
     <Compile Include="Model\UsersCollection.cs" />
     <Compile Include="Model\UserSession.cs" />
+    <Compile Include="Model\WaitingListItem.cs" />
     <Compile Include="NumberTrainings.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
@@ -564,6 +566,12 @@
     <Compile Include="View\Windows\VisitClientWindow.xaml.cs">
       <DependentUpon>VisitClientWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Windows\WaitingListDetailsWindow.xaml.cs">
+      <DependentUpon>WaitingListDetailsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Windows\WaitingListWindow.xaml.cs">
+      <DependentUpon>WaitingListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WaitingListClients.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
@@ -763,6 +771,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Windows\VisitClientWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\WaitingListDetailsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Windows\WaitingListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

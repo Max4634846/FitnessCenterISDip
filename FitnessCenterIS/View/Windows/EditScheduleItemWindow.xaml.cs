@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -247,10 +248,33 @@ namespace FitnessCenterIS.View.Windows
                         return;
                     }
 
-                    // Обновляем выбранные значения
-                    _scheduleItem.SeasonticketServiceID = ServiceComboBox.SelectedValue != null ?
-                        (int?)ServiceComboBox.SelectedValue : null;
+                    // ВАЖНАЯ КОРРЕКТИРОВКА: Проверяем существование выбранной услуги в SeasonticketServices
+                    if (ServiceComboBox.SelectedValue != null)
+                    {
+                        int serviceId = (int)ServiceComboBox.SelectedValue;
+                        // Проверяем, что выбранная услуга существует в таблице SeasonticketServices
+                        var seasonTicketService = _dbContext.SeasonticketServices
+                            .FirstOrDefault(s => s.ServiceID == serviceId);
 
+                        if (seasonTicketService != null)
+                        {
+                            // Если услуга существует в SeasonticketServices, используем ее ID
+                            _scheduleItem.SeasonticketServiceID = seasonTicketService.SeasonticketServiceID;
+                        }
+                        else
+                        {
+                            // Если услуги нет в SeasonticketServices, нужно решить как поступить
+                            MessageBox.Show("Выбранная услуга не связана с абонементами. Пожалуйста, выберите другую услугу.",
+                                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        _scheduleItem.SeasonticketServiceID = null;
+                    }
+
+                    // Обновляем остальные выбранные значения
                     _scheduleItem.TrainerID = TrainerComboBox.SelectedValue != null ?
                         (int?)TrainerComboBox.SelectedValue : null;
 
@@ -264,15 +288,27 @@ namespace FitnessCenterIS.View.Windows
                     _scheduleItem.GroupID = GroupComboBox.SelectedValue != null ?
                         (int?)GroupComboBox.SelectedValue : null;
 
-                    if (CheckScheduleConflict())
+                    // Проверка на конфликты
+                    List<Schedules> conflictingSchedules;
+                    if (CheckScheduleConflict(out conflictingSchedules))
                     {
-                        // Если есть конфликт, добавляем клиента в список ожидания
-                        AddToWaitingList();
-                        MessageBox.Show("Выбранное время уже занято. Клиент добавлен в список ожидания.",
-                            "Конфликт расписания", MessageBoxButton.OK, MessageBoxImage.Information);
-                        DialogResult = true;
-                        Close();
-                        return;
+                        // Спрашиваем пользователя, что делать с конфликтом
+                        var result = MessageBox.Show(
+                            "Выбранное время и помещение уже заняты. Добавить клиента в список ожидания?",
+                            "Конфликт расписания",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            // Добавляем в список ожидания на конфликтующее занятие
+                            // ВАЖНО: Передаем conflictingSchedule, а не _scheduleItem
+                            AddToWaitingList(conflictingSchedules.First());
+                            DialogResult = true;
+                            Close();
+                            return;
+                        }
+                        return; // Выходим из метода, не сохраняя текущее расписание
                     }
 
                     // Обновляем статус
@@ -281,43 +317,95 @@ namespace FitnessCenterIS.View.Windows
                         _scheduleItem.ScheduleStatus = selectedStatus.Content.ToString();
                     }
 
-                    // Обновляем объект-обертку ScheduleItem
-                    _scheduleItemWrapper.UpdateSchedule(_scheduleItem);
-
-                    if (_isEditMode)
+                    // Обновляем объект-обертку ScheduleItem, если она существует
+                    if (_scheduleItemWrapper != null)
                     {
-                        // Обновляем существующую запись
-                        _dbContext.Entry(_scheduleItem).State = System.Data.Entity.EntityState.Modified;
-                    }
-                    else
-                    {
-                        // Добавляем новую запись
-                        _dbContext.Schedules.Add(_scheduleItem);
+                        _scheduleItemWrapper.UpdateSchedule(_scheduleItem);
                     }
 
-                    _dbContext.SaveChanges();
+                    try
+                    {
+                        if (_isEditMode)
+                        {
+                            // Обновляем существующую запись
+                            _dbContext.Entry(_scheduleItem).State = System.Data.Entity.EntityState.Modified;
+                        }
+                        else
+                        {
+                            // Добавляем новую запись
+                            _dbContext.Schedules.Add(_scheduleItem);
+                        }
 
-                    DialogResult = true;
-                    Close();
+                        _dbContext.SaveChanges();
+                        DialogResult = true;
+                        Close();
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+                    {
+                        // Ошибка валидации данных Entity Framework
+                        StringBuilder errorBuilder = new StringBuilder("Ошибка валидации:\n");
+                        foreach (var validationErrors in dbEx.EntityValidationErrors)
+                        {
+                            foreach (var validationError in validationErrors.ValidationErrors)
+                            {
+                                errorBuilder.AppendLine($"Свойство: {validationError.PropertyName}, Ошибка: {validationError.ErrorMessage}");
+                            }
+                        }
+                        MessageBox.Show(errorBuilder.ToString(), "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    catch (System.Data.Entity.Infrastructure.DbUpdateException updateEx)
+                    {
+                        // Ошибка обновления базы данных
+                        StringBuilder errorBuilder = new StringBuilder("Ошибка при обновлении базы данных:\n");
+                        if (updateEx.InnerException != null)
+                        {
+                            errorBuilder.AppendLine(updateEx.InnerException.Message);
+                            if (updateEx.InnerException.InnerException != null)
+                            {
+                                errorBuilder.AppendLine("\nДетальная информация:");
+                                errorBuilder.AppendLine(updateEx.InnerException.InnerException.Message);
+                            }
+                        }
+                        else
+                        {
+                            errorBuilder.AppendLine(updateEx.Message);
+                        }
+                        MessageBox.Show(errorBuilder.ToString(), "Ошибка обновления", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Другие ошибки
+                        StringBuilder errorBuilder = new StringBuilder("Произошла ошибка при сохранении:\n");
+                        errorBuilder.AppendLine(ex.Message);
+                        if (ex.InnerException != null)
+                        {
+                            errorBuilder.AppendLine("\nДетальная информация:");
+                            errorBuilder.AppendLine(ex.InnerException.Message);
+                        }
+                        MessageBox.Show(errorBuilder.ToString(), "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Общая ошибка: {ex.Message}\n\nСтек вызовов:\n{ex.StackTrace}",
+                                   "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
         // Метод для проверки конфликтов в расписании
-        private bool CheckScheduleConflict()
+        private bool CheckScheduleConflict(out List<Schedules> conflictingSchedules)
         {
-            if (_scheduleItem.SeasonticketServiceID.HasValue && _scheduleItem.StartDateTime.HasValue && _scheduleItem.EndDateTime.HasValue)
+            conflictingSchedules = new List<Schedules>();
+
+            if (_scheduleItem.RoomID.HasValue && _scheduleItem.StartDateTime.HasValue && _scheduleItem.EndDateTime.HasValue)
             {
-                // Проверяем, есть ли другие активные занятия с той же услугой в то же время
-                var conflictingSchedules = _dbContext.Schedules
+                // Проверяем, есть ли другие активные занятия в той же комнате в то же время
+                conflictingSchedules = _dbContext.Schedules
                     .Where(s => s.ScheduleID != _scheduleItem.ScheduleID && // Не текущее занятие
-                           s.SeasonticketServiceID == _scheduleItem.SeasonticketServiceID && // Та же услуга
-                           s.ScheduleStatus == "Активно" && // Активный статус
+                           s.RoomID == _scheduleItem.RoomID && // Та же комната
+                           (s.ScheduleStatus == "Активно" || s.ScheduleStatus == null) && // Активный статус
+                           s.StartDateTime.HasValue && s.EndDateTime.HasValue && // Убедимся, что даты заданы
                            ((s.StartDateTime <= _scheduleItem.StartDateTime && s.EndDateTime > _scheduleItem.StartDateTime) || // Начало внутри другого занятия
                             (s.StartDateTime < _scheduleItem.EndDateTime && s.EndDateTime >= _scheduleItem.EndDateTime) || // Конец внутри другого занятия
                             (s.StartDateTime >= _scheduleItem.StartDateTime && s.EndDateTime <= _scheduleItem.EndDateTime))) // Полностью внутри
@@ -329,39 +417,77 @@ namespace FitnessCenterIS.View.Windows
         }
 
         // Метод для добавления клиента в список ожидания
-        private void AddToWaitingList()
+        private void AddToWaitingList(Schedules conflictingSchedule)
         {
-            if (_scheduleItem.ClientID.HasValue && _scheduleItem.SeasonticketServiceID.HasValue)
+            if (_scheduleItem.ClientID.HasValue && conflictingSchedule != null)
             {
-                // Создаем запись в таблице WaitingLists
-                var waitingList = new WaitingLists
+                try
                 {
-                    SheduleID = _scheduleItem.ScheduleID,
-                    SeasonticketServiceID = _scheduleItem.SeasonticketServiceID,
-                    DateTime = DateTime.Now,
-                    IsActivite = true
-                };
+                    // Используем ID конфликтующего расписания
+                    int scheduleId = conflictingSchedule.ScheduleID;
+                    int? serviceId = conflictingSchedule.SeasonticketServiceID;
 
-                _dbContext.WaitingLists.Add(waitingList);
-                _dbContext.SaveChanges();
+                    // Проверяем, не находится ли уже этот клиент в списке ожидания
+                    var existingWaiting = _dbContext.WaitingListClients
+                        .FirstOrDefault(w => w.WaitingLists != null &&
+                                       w.WaitingLists.SheduleID == scheduleId &&
+                                       w.ClientID == _scheduleItem.ClientID.Value &&
+                                       (!w.IsProcessed.HasValue || w.IsProcessed.Value == false));
 
-                // Создаем запись в таблице WaitingListClients
-                var waitingListClient = new WaitingListClients
+                    if (existingWaiting != null)
+                    {
+                        MessageBox.Show("Клиент уже находится в списке ожидания на это занятие.",
+                                       "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    // Находим или создаем запись в таблице WaitingLists
+                    var waitingList = _dbContext.WaitingLists
+                        .FirstOrDefault(w => w.SheduleID == scheduleId);
+
+                    if (waitingList == null)
+                    {
+                        // Создаем новый список ожидания для этого расписания
+                        waitingList = new WaitingLists
+                        {
+                            SheduleID = scheduleId,
+                            SeasonticketServiceID = serviceId,
+                            DateTime = DateTime.Now,
+                            IsActivite = true
+                        };
+
+                        _dbContext.WaitingLists.Add(waitingList);
+                        _dbContext.SaveChanges(); // Сохраняем, чтобы получить ID
+                    }
+
+                    // Создаем запись в таблице WaitingListClients
+                    var waitingListClient = new WaitingListClients
+                    {
+                        WaitingListID = waitingList.WaitingListID,
+                        ClientID = _scheduleItem.ClientID.Value,
+                        EnrollmentDateTime = DateTime.Now,
+                        IsProcessed = false,
+                        Notes = $"Добавлен в список ожидания из-за конфликта расписания {DateTime.Now:dd.MM.yyyy HH:mm}"
+                    };
+
+                    _dbContext.WaitingListClients.Add(waitingListClient);
+                    _dbContext.SaveChanges();
+
+                    MessageBox.Show($"Клиент успешно добавлен в список ожидания на занятие.",
+                                   "Список ожидания", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
                 {
-                    WaitingListID = waitingList.WaitingListID,
-                    ClientID = _scheduleItem.ClientID.Value,
-                    EnrollmentDateTime = DateTime.Now,
-                    IsProcessed = false,
-                    Notes = $"Автоматически добавлен из-за конфликта расписания {_scheduleItem.StartDateTime:dd.MM.yyyy HH:mm}"
-                };
-
-                _dbContext.WaitingListClients.Add(waitingListClient);
-                _dbContext.SaveChanges();
+                    MessageBox.Show($"Ошибка при добавлении в список ожидания: {ex.Message}",
+                                   "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Необходимо выбрать клиента и указать конфликтующее расписание для добавления в список ожидания.",
+                               "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
-
-
-
 
         private bool ValidateScheduleItem()
         {
@@ -413,6 +539,61 @@ namespace FitnessCenterIS.View.Windows
                 {
                     try
                     {
+                        // Проверяем, есть ли клиенты в списке ожидания на это занятие
+                        var waitingList = _dbContext.WaitingLists
+                            .FirstOrDefault(w => w.SheduleID == _scheduleItem.ScheduleID);
+
+                        if (waitingList != null)
+                        {
+                            // Получаем первого ожидающего клиента (самый старый в списке)
+                            var waitingClient = _dbContext.WaitingListClients
+                                .Where(w => w.WaitingListID == waitingList.WaitingListID &&
+                                          (w.IsProcessed.HasValue == false || w.IsProcessed.Value == false))
+                                .OrderBy(w => w.EnrollmentDateTime)
+                                .FirstOrDefault();
+
+                            if (waitingClient != null)
+                            {
+                                // Спрашиваем пользователя о замене занятия
+                                var replaceResult = MessageBox.Show(
+                                    $"Есть клиенты в списке ожидания. Заменить текущее занятие на клиента из списка ожидания?",
+                                    "Список ожидания",
+                                    MessageBoxButton.YesNoCancel,
+                                    MessageBoxImage.Question);
+
+                                if (replaceResult == MessageBoxResult.Yes)
+                                {
+                                    // Заменяем клиента в текущем занятии
+                                    _scheduleItem.ClientID = waitingClient.ClientID;
+
+                                    // Обновляем занятие
+                                    _dbContext.Entry(_scheduleItem).State = System.Data.Entity.EntityState.Modified;
+
+                                    // Отмечаем запись в списке ожидания как обработанную
+                                    waitingClient.IsProcessed = true;
+                                    waitingClient.Notes += $"\nПеремещен в расписание {DateTime.Now:dd.MM.yyyy HH:mm}";
+                                    _dbContext.Entry(waitingClient).State = System.Data.Entity.EntityState.Modified;
+
+                                    _dbContext.SaveChanges();
+
+                                    MessageBox.Show(
+                                        "Занятие успешно передано клиенту из списка ожидания!",
+                                        "Список ожидания",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Information);
+
+                                    DialogResult = true;
+                                    Close();
+                                    return;
+                                }
+                                else if (replaceResult == MessageBoxResult.Cancel)
+                                {
+                                    // Отмена операции
+                                    return;
+                                }
+                                // Если No - просто удаляем занятие
+                            }
+                        }
 
                         // Удаляем запись из базы данных
                         _dbContext.Schedules.Remove(_scheduleItem);

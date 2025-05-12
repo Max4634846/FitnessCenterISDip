@@ -158,6 +158,10 @@
                         <materialDesign:PackIcon Kind="Email" Width="18" Height="18" 
                                 ToolTip="Отправить расписание по email"/>
                     </Button>
+                    <Button x:Name="WaitingListButton" Style="{StaticResource NavButton}" Width="40" Margin="5,0" Click="WaitingListButton_Click">
+                        <materialDesign:PackIcon Kind="AccountGroup" Width="18" Height="18" 
+                                                 ToolTip="Список ожидания"/>
+                    </Button>
                 </StackPanel>
 
             </Grid>

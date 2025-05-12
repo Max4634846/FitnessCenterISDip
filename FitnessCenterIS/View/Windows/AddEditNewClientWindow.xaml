@@ -245,7 +245,7 @@
                 </TabItem>
 
                 <!-- Вкладка для карты и QR-кода -->
-                <TabItem Header="Карточка клиента">
+                <TabItem x:Name="CardClient" Header="Карточка клиента">
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="25" HorizontalAlignment="Center">

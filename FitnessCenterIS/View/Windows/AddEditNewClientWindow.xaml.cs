@@ -36,6 +36,11 @@ namespace FitnessCenterIS.View.Windows
             IdClient.Visibility = Visibility.Collapsed;
             IdClientLabel.Visibility = Visibility.Collapsed;
             GuardianTabItem.Visibility = Visibility.Collapsed;
+
+            if(isLead)
+            {
+                CardClient.Visibility = Visibility.Collapsed;
+            }
         }
 
         // Конструктор для режима редактирования

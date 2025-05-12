@@ -80,36 +80,41 @@ namespace FitnessCenterIS.View.Pages
 
         private void LoadScheduleItems()
         {
-            // Загружаем все занятия из базы данных с нужными связями
-            var allScheduleItems = _dbContext.Schedules
-                .Include("Rooms")
-                .Include("Staffs.Persons")
-                .Include("Clients.Persons")
-                .Include("Groups")
-                .ToList();
-
-            // Фильтруем только активные занятия для отображения
-            _scheduleItems = allScheduleItems
-                .Where(item => item.ScheduleStatus == null || item.ScheduleStatus == "Активно")
-                .ToList();
-
-            _scheduleItemsWrapper.Clear();
-
-            // Создаем случайный генератор для определения цветов
-            Random random = new Random();
-
-            foreach (var item in _scheduleItems)
+            try
             {
-                // Определяем цвет для расписания: используем существующий или генерируем новый
-                string color = _scheduleColors.ContainsKey(item.ScheduleID)
-                    ? _scheduleColors[item.ScheduleID]
-                    : GetColorForSchedule(item);
+                // Загружаем все занятия из базы данных с нужными связями
+                var allScheduleItems = _dbContext.Schedules
+                    .Include("Rooms")
+                    .Include("Staffs.Persons")
+                    .Include("Clients.Persons")
+                    .Include("Groups")
+                    .ToList();
 
-                // Создаем обертку ScheduleItem
-                _scheduleItemsWrapper.Add(new ScheduleItem(item, color));
+                // Убираем фильтр по статусу, чтобы видеть все записи, или явно укажите нужные статусы
+                _scheduleItems = allScheduleItems
+                    //.Where(item => item.ScheduleStatus == null || item.ScheduleStatus == "Активно")
+                    .ToList();
 
-                // Сохраняем цвет для будущего использования
-                _scheduleColors[item.ScheduleID] = color;
+                _scheduleItemsWrapper.Clear();
+
+                foreach (var item in _scheduleItems)
+                {
+                    // Определяем цвет для расписания
+                    string color = _scheduleColors.ContainsKey(item.ScheduleID)
+                        ? _scheduleColors[item.ScheduleID]
+                        : GetColorForSchedule(item);
+
+                    // Создаем обертку ScheduleItem
+                    _scheduleItemsWrapper.Add(new ScheduleItem(item, color));
+
+                    // Сохраняем цвет для будущего использования
+                    _scheduleColors[item.ScheduleID] = color;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке расписания: {ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -814,21 +819,63 @@ namespace FitnessCenterIS.View.Pages
 
         private void EditScheduleItem(Schedules item)
         {
+            // Проверяем, было ли занятие удалено или освобождено 
+            bool wasOccupied = item.ClientID != null;
+            int originalClientId = item.ClientID ?? 0;
+            int scheduleId = item.ScheduleID; // Сохраняем ID для дальнейшего использования
+
             // Открываем окно редактирования занятия с передачей словаря цветов
             var editWindow = new EditScheduleWindow(_dbContext, item, _scheduleColors);
             if (editWindow.ShowDialog() == true)
             {
-                // После успешного редактирования обновляем расписание
-                LoadScheduleItems();
-                GenerateScheduleView();
+                try
+                {
+                    // Проверяем, существует ли по-прежнему элемент расписания
+                    var updatedItem = _dbContext.Schedules.Find(scheduleId);
+
+                    if (updatedItem != null)
+                    {
+                        // Если занятие было освобождено (клиент был удален), проверяем список ожидания
+                        if (wasOccupied && (updatedItem.ClientID == null || updatedItem.ClientID != originalClientId))
+                        {
+                            // Проверяем, есть ли клиенты в списке ожидания
+                            if (CheckAndProcessWaitingList(scheduleId))
+                            {
+                                // Спрашиваем пользователя, переместить ли клиента из списка ожидания
+                                var result = MessageBox.Show(
+                                    "Есть клиенты в списке ожидания на это занятие. Переместить первого клиента из списка ожидания?",
+                                    "Список ожидания",
+                                    MessageBoxButton.YesNo,
+                                    MessageBoxImage.Question);
+                                if (result == MessageBoxResult.Yes)
+                                {
+                                    // Перемещаем первого клиента из списка ожидания
+                                    if (MoveFirstClientFromWaitingList(updatedItem))
+                                    {
+                                        MessageBox.Show(
+                                            "Клиент из списка ожидания успешно перемещен в расписание!",
+                                            "Список ожидания",
+                                            MessageBoxButton.OK,
+                                            MessageBoxImage.Information);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // В любом случае перезагружаем расписание
+                    LoadScheduleItems();
+                    GenerateScheduleView();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при обновлении расписания: {ex.Message}",
+                                   "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // При ошибке также перезагружаем расписание
+                    LoadScheduleItems();
+                    GenerateScheduleView();
+                }
             }
         }
-
-
-
-
-
-
 
         private void PreviousButton_Click(object sender, RoutedEventArgs e)
         {
@@ -1694,11 +1741,6 @@ namespace FitnessCenterIS.View.Pages
             return container;
         }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void EmailButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1840,5 +1882,96 @@ namespace FitnessCenterIS.View.Pages
             return clonedGrid;
         }
 
+        private void WaitingListButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Открываем окно списка ожидания
+            var waitingListWindow = new WaitingListWindow(_dbContext);
+            waitingListWindow.ShowDialog();
+
+            // После закрытия окна обновляем расписание (может быть изменения)
+            LoadScheduleItems();
+            GenerateScheduleView();
+        }
+
+
+        /// <summary>
+        /// Автоматически проверяет список ожидания для указанного занятия
+        /// </summary>
+        /// <param name="scheduleID">ID занятия</param>
+        /// <returns>true, если есть ожидающие клиенты</returns>
+        private bool CheckAndProcessWaitingList(int scheduleID)
+        {
+            try
+            {
+                // Получаем список ожидания для данного занятия
+                var waitingList = _dbContext.WaitingLists
+                    .FirstOrDefault(w => w.SheduleID == scheduleID);
+
+                if (waitingList != null)
+                {
+                    // Получаем первого клиента из списка ожидания
+                    var waitingClient = _dbContext.WaitingListClients
+                        .Where(w => w.WaitingListID == waitingList.WaitingListID &&
+                                    (w.IsProcessed.HasValue == false || w.IsProcessed.Value == false))
+                        .OrderBy(w => w.EnrollmentDateTime)
+                        .FirstOrDefault();
+
+                    if (waitingClient != null)
+                    {
+                        return true; // Есть клиенты в списке ожидания
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при проверке списка ожидания: {ex.Message}");
+            }
+
+            return false; // Нет клиентов в списке ожидания
+        }
+
+        /// <summary>
+        /// Перемещает первого клиента из списка ожидания в расписание
+        /// </summary>
+        /// <param name="schedule">Объект расписания</param>
+        /// <returns>true, если клиент был успешно перемещен</returns>
+        private bool MoveFirstClientFromWaitingList(Schedules schedule)
+        {
+            try
+            {
+                // Находим список ожидания для данного занятия
+                var waitingList = _dbContext.WaitingLists
+                    .FirstOrDefault(w => w.SheduleID == schedule.ScheduleID);
+
+                if (waitingList != null)
+                {
+                    // Находим первого ожидающего клиента (самый старый запрос)
+                    var waitingClient = _dbContext.WaitingListClients
+                        .Where(w => w.WaitingListID == waitingList.WaitingListID &&
+                                  (w.IsProcessed.HasValue == false || w.IsProcessed.Value == false))
+                        .OrderBy(w => w.EnrollmentDateTime)
+                        .FirstOrDefault();
+
+                    if (waitingClient != null)
+                    {
+                        // Обновляем занятие с клиентом из списка ожидания
+                        schedule.ClientID = waitingClient.ClientID;
+
+                        // Отмечаем запись в списке ожидания как обработанную
+                        waitingClient.IsProcessed = true;
+                        waitingClient.Notes += $"\nАвтоматически перемещен в расписание {DateTime.Now:dd.MM.yyyy HH:mm}";
+
+                        _dbContext.SaveChanges();
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при перемещении из списка ожидания: {ex.Message}");
+            }
+
+            return false;
+        }
     }
 }
