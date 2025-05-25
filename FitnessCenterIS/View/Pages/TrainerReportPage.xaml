@@ -1,4 +1,4 @@
-﻿<Page x:Class="FitnessCenterIS.View.Pages.TrainerPopularityReportPage"
+﻿<Page x:Class="FitnessCenterIS.View.Pages.TrainerReportPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,7 +8,7 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="1280"
-      Title="Популярность тренеров">
+      Title="Отчет по тренерам">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -29,9 +29,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="AccountGroup" Width="30" Height="30" 
+                    <materialDesign:PackIcon Kind="AccountMultiple" Width="30" Height="30" 
                                          VerticalAlignment="Center" Foreground="#090909"/>
-                    <TextBlock Text="Популярность тренеров" FontWeight="Bold" FontSize="22" 
+                    <TextBlock Text="Отчет по тренерам" FontWeight="Bold" FontSize="22" 
                            VerticalAlignment="Center" Margin="10 0 0 0"/>
                 </StackPanel>
 
@@ -45,19 +45,10 @@
 
                     <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
                         Margin="15 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
-                        Click="ExportReport_Click">
+                        Click="ExportToWord_Click">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="FileExport" Margin="0 0 5 0"/>
-                            <TextBlock Text="Экспорт"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
-                        Margin="10 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
-                        Click="PrintReport_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Printer" Margin="0 0 5 0"/>
-                            <TextBlock Text="Печать"/>
+                            <materialDesign:PackIcon Kind="FileWord" Margin="0 0 5 0"/>
+                            <TextBlock Text="Экспорт в Word"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -90,46 +81,46 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Количество продаж тренеров -->
+                    <!-- Количество тренировок -->
                     <Border Grid.Column="1" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
                         <StackPanel>
-                            <TextBlock Text="Продажи тренеров" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="TrainerSalesCountTextBlock" Text="0" FontWeight="Bold" 
+                            <TextBlock Text="Тренировки" FontWeight="Medium" FontSize="14"/>
+                            <TextBlock x:Name="TotalTrainingsTextBlock" Text="0" FontWeight="Bold" 
                                    FontSize="24" Foreground="#0F9D58" Margin="0 10 0 0"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Выручка через тренеров -->
+                    <!-- Клиенты тренеров -->
                     <Border Grid.Column="2" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
                         <StackPanel>
-                            <TextBlock Text="Выручка тренеров" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="TrainerRevenueTextBlock" Text="0 ₽" FontWeight="Bold" 
+                            <TextBlock Text="Клиенты" FontWeight="Medium" FontSize="14"/>
+                            <TextBlock x:Name="TrainerClientsTextBlock" Text="0" FontWeight="Bold" 
                                    FontSize="24" Foreground="#DB4437" Margin="0 10 0 0"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Тренировки по записи -->
+                    <!-- Выручка тренеров -->
                     <Border Grid.Column="3" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
                         <StackPanel>
-                            <TextBlock Text="Тренировки по записи" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="ScheduledTrainingsTextBlock" Text="0" FontWeight="Bold" 
+                            <TextBlock Text="Выручка" FontWeight="Medium" FontSize="14"/>
+                            <TextBlock x:Name="TrainerRevenueTextBlock" Text="0 ₽" FontWeight="Bold" 
                                    FontSize="24" Foreground="#F4B400" Margin="0 10 0 0"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Средняя стоимость услуг тренера -->
+                    <!-- Средняя стоимость тренировки -->
                     <Border Grid.Column="4" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
                         <StackPanel>
                             <TextBlock Text="Средняя стоимость" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="AverageTrainerServicePriceTextBlock" Text="0 ₽" FontWeight="Bold" 
+                            <TextBlock x:Name="AverageTrainingPriceTextBlock" Text="0 ₽" FontWeight="Bold" 
                                    FontSize="24" Foreground="#7B1FA2" Margin="0 10 0 0"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- Самый популярный тренер -->
+                    <!-- Лучший тренер -->
                     <Border Grid.Column="5" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
                         <StackPanel>
-                            <TextBlock Text="Топ тренер" FontWeight="Medium" FontSize="14"/>
+                            <TextBlock Text="Лучший тренер" FontWeight="Medium" FontSize="14"/>
                             <TextBlock x:Name="TopTrainerTextBlock" Text="Н/Д" FontWeight="Bold" 
                                    FontSize="20" Foreground="#0288D1" Margin="0 10 0 0"
                                    TextWrapping="Wrap"/>
@@ -146,23 +137,23 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- График продаж тренеров -->
+            <!-- График выручки тренеров -->
             <Border Grid.Column="0" Background="White" Padding="20" Margin="0 0 5 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Динамика продаж тренеров" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="TrainerSalesChartContainer" Height="250"/>
+                    <TextBlock Text="Выручка по тренерам" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="TrainerRevenueChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
 
-            <!-- График распределения услуг по тренерам -->
+            <!-- График загруженности тренеров -->
             <Border Grid.Column="1" Background="White" Padding="20" Margin="5 0 0 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Распределение услуг по тренерам" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="TrainerServiceDistributionContainer" Height="250"/>
+                    <TextBlock Text="Загруженность тренеров" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="TrainerWorkloadChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -174,23 +165,23 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Рейтинг тренеров -->
+            <!-- График популярности тренеров -->
             <Border Grid.Column="0" Background="White" Padding="20" Margin="0 0 5 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Рейтинг тренеров" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="TrainerRatingChartContainer" Height="250"/>
+                    <TextBlock Text="Популярность тренеров" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="TrainerPopularityChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
 
-            <!-- График посещаемости тренеров -->
+            <!-- График услуг по тренерам -->
             <Border Grid.Column="1" Background="White" Padding="20" Margin="5 0 0 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Посещаемость тренеров" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="TrainerAttendanceChartContainer" Height="250"/>
+                    <TextBlock Text="Распределение услуг" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="TrainerServicesChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
         </Grid>

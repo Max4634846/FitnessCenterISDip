@@ -404,7 +404,7 @@ namespace FitnessCenterIS.View.Windows
                 conflictingSchedules = _dbContext.Schedules
                     .Where(s => s.ScheduleID != _scheduleItem.ScheduleID && // Не текущее занятие
                            s.RoomID == _scheduleItem.RoomID && // Та же комната
-                           (s.ScheduleStatus == "Активно" || s.ScheduleStatus == null) && // Активный статус
+                           (s.ScheduleStatus == null || s.ScheduleStatus == "Активно") && // Активный статус
                            s.StartDateTime.HasValue && s.EndDateTime.HasValue && // Убедимся, что даты заданы
                            ((s.StartDateTime <= _scheduleItem.StartDateTime && s.EndDateTime > _scheduleItem.StartDateTime) || // Начало внутри другого занятия
                             (s.StartDateTime < _scheduleItem.EndDateTime && s.EndDateTime >= _scheduleItem.EndDateTime) || // Конец внутри другого занятия
@@ -545,18 +545,18 @@ namespace FitnessCenterIS.View.Windows
 
                         if (waitingList != null)
                         {
-                            // Получаем первого ожидающего клиента (самый старый в списке)
-                            var waitingClient = _dbContext.WaitingListClients
+                            var waitingClients = _dbContext.WaitingListClients
                                 .Where(w => w.WaitingListID == waitingList.WaitingListID &&
-                                          (w.IsProcessed.HasValue == false || w.IsProcessed.Value == false))
+                                          (!w.IsProcessed.HasValue || !w.IsProcessed.Value))
                                 .OrderBy(w => w.EnrollmentDateTime)
-                                .FirstOrDefault();
+                                .ToList();
 
-                            if (waitingClient != null)
+                            if (waitingClients.Any())
                             {
+                                var waitingClient = waitingClients.First();
                                 // Спрашиваем пользователя о замене занятия
                                 var replaceResult = MessageBox.Show(
-                                    $"Есть клиенты в списке ожидания. Заменить текущее занятие на клиента из списка ожидания?",
+                                    $"Есть клиенты в списке ожидания. Заменить текущее занятие на клиента {waitingClient.Clients?.Persons?.Surname} {waitingClient.Clients?.Persons?.Name} из списка ожидания?",
                                     "Список ожидания",
                                     MessageBoxButton.YesNoCancel,
                                     MessageBoxImage.Question);
@@ -604,12 +604,13 @@ namespace FitnessCenterIS.View.Windows
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show($"Ошибка при удалении: {ex.Message}\n\nStack Trace: {ex.StackTrace}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
         }
+
 
     }
 }

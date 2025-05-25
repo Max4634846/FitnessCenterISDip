@@ -46,6 +46,12 @@
     <Reference Include="AForge.Video.DirectShow, Version=2.2.5.0, Culture=neutral, PublicKeyToken=61ea4348d43881b7, processorArchitecture=MSIL">
       <HintPath>..\packages\AForge.Video.DirectShow.2.2.5\lib\AForge.Video.DirectShow.dll</HintPath>
     </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=3.3.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.3.3.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.3.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.Framework.3.3.0\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -472,8 +478,8 @@
     <Compile Include="View\Pages\StaffPage.xaml.cs">
       <DependentUpon>StaffPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Pages\TrainerPopularityReportPage.xaml.cs">
-      <DependentUpon>TrainerPopularityReportPage.xaml</DependentUpon>
+    <Compile Include="View\Pages\TrainerReportPage.xaml.cs">
+      <DependentUpon>TrainerReportPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Pages\UserPage.xaml.cs">
       <DependentUpon>UserPage.xaml</DependentUpon>
@@ -539,6 +545,9 @@
     <Compile Include="View\Windows\NewSaleWindow.xaml.cs">
       <DependentUpon>NewSaleWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Windows\PrintPreviewWindow.xaml.cs">
+      <DependentUpon>PrintPreviewWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Windows\ProcessWaitingListWindow.xaml.cs">
       <DependentUpon>ProcessWaitingListWindow.xaml</DependentUpon>
     </Compile>
@@ -565,9 +574,6 @@
     </Compile>
     <Compile Include="View\Windows\VisitClientWindow.xaml.cs">
       <DependentUpon>VisitClientWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Windows\WaitingListDetailsWindow.xaml.cs">
-      <DependentUpon>WaitingListDetailsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Windows\WaitingListWindow.xaml.cs">
       <DependentUpon>WaitingListWindow.xaml</DependentUpon>
@@ -654,7 +660,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Pages\TrainerPopularityReportPage.xaml">
+    <Page Include="View\Pages\TrainerReportPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -738,6 +744,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Windows\PrintPreviewWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Windows\ProcessWaitingListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -771,10 +781,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Windows\VisitClientWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Windows\WaitingListDetailsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

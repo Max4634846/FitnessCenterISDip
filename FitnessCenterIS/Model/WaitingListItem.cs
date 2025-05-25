@@ -10,31 +10,113 @@ namespace FitnessCenterIS.Model
     {
         public WaitingListClients WaitingListClient { get; set; }
 
+        // Базовые свойства с безопасной навигацией
         public int WaitingID => WaitingListClient?.WaitingID ?? 0;
         public int WaitingListID => WaitingListClient?.WaitingListID ?? 0;
         public int ClientID => WaitingListClient?.ClientID ?? 0;
         public DateTime? EnrollmentDateTime => WaitingListClient?.EnrollmentDateTime;
-        // Безопасный доступ к IsProcessed
-        public bool IsProcessed => WaitingListClient?.IsProcessed.HasValue == true &&
-                                 WaitingListClient.IsProcessed.Value;
+        public bool IsProcessed => WaitingListClient?.IsProcessed ?? false;
         public string Notes => WaitingListClient?.Notes ?? "";
 
-        // Данные о клиенте и расписании через навигационные свойства
-        public string ClientName => WaitingListClient?.Clients?.Persons != null
-            ? $"{WaitingListClient.Clients.Persons.Surname} {WaitingListClient.Clients.Persons.Name}"
-            : "";
+        // Навигационные свойства со сложными проверками на null
+        public string ClientName
+        {
+            get
+            {
+                try
+                {
+                    var client = WaitingListClient?.Clients;
+                    if (client == null) return "Нет данных";
 
-        public string ServiceName => WaitingListClient?.WaitingLists?.SeasonticketServices?.Services?.Name ?? "";
+                    var person = client.Persons;
+                    if (person == null) return "Нет данных о человеке";
 
-        // Время занятия, на которое записан клиент в ожидании
-        public DateTime? RequestedStartDateTime => WaitingListClient?.WaitingLists?.Schedules?.StartDateTime;
-        public DateTime? RequestedEndDateTime => WaitingListClient?.WaitingLists?.Schedules?.EndDateTime;
-        public string ScheduleTitle => WaitingListClient?.WaitingLists?.Schedules?.Title ?? "Нет информации";
+                    return $"{person.Surname ?? ""} {person.Name ?? ""}".Trim();
+                }
+                catch
+                {
+                    return "Ошибка данных";
+                }
+            }
+        }
 
-        // Конструктор
+        public string ServiceName
+        {
+            get
+            {
+                try
+                {
+                    if (WaitingListClient?.WaitingLists == null) return "Нет данных";
+                    if (WaitingListClient.WaitingLists.SeasonticketServices == null) return "Нет абонемента";
+                    if (WaitingListClient.WaitingLists.SeasonticketServices.Services == null) return "Нет услуги";
+
+                    return WaitingListClient.WaitingLists.SeasonticketServices.Services.Name ?? "Без названия";
+                }
+                catch
+                {
+                    return "Ошибка данных";
+                }
+            }
+        }
+
+        public DateTime? RequestedStartDateTime
+        {
+            get
+            {
+                try
+                {
+                    if (WaitingListClient?.WaitingLists == null) return null;
+                    if (WaitingListClient.WaitingLists.Schedules == null) return null;
+
+                    return WaitingListClient.WaitingLists.Schedules.StartDateTime;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        public DateTime? RequestedEndDateTime
+        {
+            get
+            {
+                try
+                {
+                    if (WaitingListClient?.WaitingLists == null) return null;
+                    if (WaitingListClient.WaitingLists.Schedules == null) return null;
+
+                    return WaitingListClient.WaitingLists.Schedules.EndDateTime;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        public string ScheduleTitle
+        {
+            get
+            {
+                try
+                {
+                    if (WaitingListClient?.WaitingLists == null) return "Нет данных";
+                    if (WaitingListClient.WaitingLists.Schedules == null) return "Нет расписания";
+
+                    return WaitingListClient.WaitingLists.Schedules.Title ?? "Без названия";
+                }
+                catch
+                {
+                    return "Ошибка данных";
+                }
+            }
+        }
+
+        // Конструктор с проверкой на null
         public WaitingListItem(WaitingListClients waitingListClient)
         {
-            WaitingListClient = waitingListClient;
+            WaitingListClient = waitingListClient ?? throw new ArgumentNullException(nameof(waitingListClient));
         }
     }
 }

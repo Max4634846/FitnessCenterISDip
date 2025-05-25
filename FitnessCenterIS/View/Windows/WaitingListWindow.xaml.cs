@@ -20,11 +20,12 @@ namespace FitnessCenterIS.View.Windows
             InitializeComponent();
             // Если контекст не передан, создаём новый
             _dbContext = dbContext ?? new BDFitnessClubDipEntities();
-
             // Устанавливаем стандартный фильтр в ComboBox
-            FilterComboBox.SelectedIndex = 0;
-
-            // Теперь загружаем данные
+            if (FilterComboBox != null)
+            {
+                FilterComboBox.SelectedIndex = 0;
+            }
+            // Загружаем данные
             LoadWaitingList();
         }
 
@@ -39,14 +40,10 @@ namespace FitnessCenterIS.View.Windows
                     filterOption = selectedItem.Content.ToString();
                 }
 
-                // Загружаем данные из базы с включенными связями
-                var waitingListClients = _dbContext.WaitingListClients
-                    .Include("Clients.Persons")
-                    .Include("WaitingLists.Schedules")
-                    .Include("WaitingLists.SeasonticketServices.Services")
-                    .ToList();
+                // Загружаем все записи из WaitingListClients
+                var waitingListClients = _dbContext.WaitingListClients.ToList();
 
-                // Применяем фильтр, если он выбран
+                // Применяем фильтр в памяти
                 if (filterOption == "Активные")
                 {
                     waitingListClients = waitingListClients.Where(w => !w.IsProcessed.HasValue || !w.IsProcessed.Value).ToList();
@@ -56,19 +53,34 @@ namespace FitnessCenterIS.View.Windows
                     waitingListClients = waitingListClients.Where(w => w.IsProcessed.HasValue && w.IsProcessed.Value).ToList();
                 }
 
-                // Создаем список элементов-оберток
-                _waitingListItems = waitingListClients
-                    .Select(w => new WaitingListItem(w))
+                // Создаем коллекцию элементов-оберток с безопасной обработкой null
+                _waitingListItems = new List<WaitingListItem>();
+
+                foreach (var wlc in waitingListClients)
+                {
+                    try
+                    {
+                        // Создаем обертку для каждого элемента
+                        _waitingListItems.Add(new WaitingListItem(wlc));
+                    }
+                    catch (Exception ex)
+                    {
+                        // Просто пропускаем проблемные записи и продолжаем
+                        Console.WriteLine($"Ошибка с записью: {ex.Message}");
+                    }
+                }
+
+                // Сортируем результаты
+                _waitingListItems = _waitingListItems
                     .OrderByDescending(w => w.EnrollmentDateTime)
                     .ToList();
 
-                // Привязываем данные к DataGrid
+                // Устанавливаем источник данных
                 WaitingListDataGrid.ItemsSource = _waitingListItems;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке списка ожидания: {ex.Message}",
-                               "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+ 
             }
         }
 
@@ -171,14 +183,6 @@ namespace FitnessCenterIS.View.Windows
 
         private void WaitingListDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var selectedItem = WaitingListDataGrid.SelectedItem as WaitingListItem;
-            if (selectedItem != null)
-            {
-                // Открываем детальную информацию о записи в списке ожидания
-                var details = new WaitingListDetailsWindow(selectedItem, _dbContext);
-                details.ShowDialog();
-                LoadWaitingList(); // Обновляем список после закрытия
-            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

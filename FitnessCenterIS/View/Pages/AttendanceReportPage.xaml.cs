@@ -1,27 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Wpf;
-using System.Windows.Data;
-using Microsoft.Win32;
-using System.IO;
-using System.Printing;
-using System.Windows.Documents;
-using System.Windows.Xps;
-using System.Windows.Xps.Packaging;
-using FitnessCenterIS.Model;
-using System.Data.SqlClient;
-using System.Data;
-using System.Globalization;
 using System.Configuration;
-using System.Data.Entity;
 using System.Data.Entity.Core.EntityClient;
-using System.ComponentModel;
-using System.Windows.Markup;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
+using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
+using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
+using Separator = LiveCharts.Wpf.Separator;
 
 namespace FitnessCenterIS.View.Pages
 {
@@ -30,38 +23,6 @@ namespace FitnessCenterIS.View.Pages
         private DateTime startDate;
         private DateTime endDate;
         private string connectionString;
-        private List<AttendanceRecord> attendanceData;
-
-        // Класс для представления записи посещения
-        public class AttendanceRecord : INotifyPropertyChanged
-        {
-            public int AttendanceID { get; set; }
-            public DateTime EntryDateTime { get; set; }
-            public DateTime? ExitDateTime { get; set; }
-
-            // Исправлено для совместимости с C# 7.3
-            public TimeSpan? Duration
-            {
-                get
-                {
-                    if (ExitDateTime.HasValue)
-                        return ExitDateTime.Value - EntryDateTime;
-                    return null;
-                }
-            }
-
-            public string ClientName { get; set; }
-            public string MembershipType { get; set; }
-            public string ServiceName { get; set; }
-            public string LockerNumber { get; set; }
-            public string Note { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-            protected void OnPropertyChanged(string name)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
 
         public AttendanceReportPage()
         {
@@ -69,31 +30,21 @@ namespace FitnessCenterIS.View.Pages
 
             try
             {
-                // Извлекаем строку подключения SQL из строки подключения Entity Framework
+                // Получаем строку подключения
                 var entityConnectionString = ConfigurationManager.ConnectionStrings["BDFitnessClubDipEntities"].ConnectionString;
                 var entityBuilder = new EntityConnectionStringBuilder(entityConnectionString);
                 connectionString = entityBuilder.ProviderConnectionString;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при получении строки подключения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            // Загрузка данных после полной инициализации UI
+            // Инициализация с датами по умолчанию
             this.Loaded += (s, e) => {
-                try
-                {
-                    // Set default date range (last 30 days)
-                    DateToPicker.SelectedDate = DateTime.Today;
-                    DateFromPicker.SelectedDate = DateTime.Today.AddDays(-30);
-
-                    // Initial data load
-                    LoadAttendanceData();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при инициализации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                DateToPicker.SelectedDate = DateTime.Today;
+                DateFromPicker.SelectedDate = DateTime.Today.AddDays(-30);
+                LoadAttendanceData();
             };
         }
 
@@ -111,201 +62,144 @@ namespace FitnessCenterIS.View.Pages
                 return;
 
             startDate = DateFromPicker.SelectedDate.Value;
-            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1); // End of the selected day
+            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1);
 
             try
             {
-                // Load attendance key metrics
-                LoadAttendanceMetrics();
-
-                // Load attendance charts - использование ContentControl вместо специфичных контейнеров
-                CreateDailyAttendanceChart();
-                CreateWeekdayAttendanceChart();
-                CreateHourlyAttendanceChart();
-                CreateDurationDistributionChart();
-
-                // Load detailed attendance data
-                LoadAttendanceDetails();
+                LoadKeyMetrics();
+                LoadDailyVisitsChart();
+                LoadPopularRoomsChart();
+                LoadHourlyVisitsChart();
+                LoadWeeklyVisitsChart();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void LoadAttendanceMetrics()
+        private void LoadKeyMetrics()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // Total visits
+                // Общее количество посещений
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(*) 
-                    FROM Attendances 
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(*)
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int totalVisits = 0;
-                    var result = cmd.ExecuteScalar();
+                    TotalVisitsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
+                }
+
+                // Уникальные посетители
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT COUNT(DISTINCT a.ClientID)
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    UniqueVisitorsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
+                }
+
+                // Среднее время посещения (в минутах)
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT AVG(DATEDIFF(MINUTE, a.EntryDateTime, a.ExitDateTime))
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    AND a.ExitDateTime IS NOT NULL
+                    AND a.ExitDateTime > a.EntryDateTime", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    object result = cmd.ExecuteScalar();
                     if (result != null && result != DBNull.Value)
                     {
-                        totalVisits = Convert.ToInt32(result);
+                        AverageVisitTimeTextBlock.Text = $"{Convert.ToInt32(result)} мин";
                     }
-                    TotalVisitsTextBlock.Text = totalVisits.ToString();
+                    else
+                    {
+                        AverageVisitTimeTextBlock.Text = "Н/Д";
+                    }
                 }
 
-                // Unique visitors
+                // Пиковое время (час с наибольшим количеством посещений)
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(DISTINCT ClientID) 
-                    FROM Attendances 
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    AND ClientID IS NOT NULL", connection))
+                    SELECT TOP 1 DATEPART(HOUR, a.EntryDateTime) as PeakHour
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY DATEPART(HOUR, a.EntryDateTime)
+                    ORDER BY COUNT(*) DESC", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int uniqueVisitors = 0;
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
+                    object result = cmd.ExecuteScalar();
+                    if (result != null)
                     {
-                        uniqueVisitors = Convert.ToInt32(result);
+                        PeakTimeTextBlock.Text = $"{result}:00";
                     }
-                    UniqueVisitorsTextBlock.Text = uniqueVisitors.ToString();
+                    else
+                    {
+                        PeakTimeTextBlock.Text = "Н/Д";
+                    }
                 }
 
-                // Average visits per day
-                double daysInRange = (endDate - startDate).TotalDays + 1;
-                double avgVisitsPerDay = int.Parse(TotalVisitsTextBlock.Text) / daysInRange;
-                AvgVisitsPerDayTextBlock.Text = Math.Round(avgVisitsPerDay, 1).ToString();
-
-                // Average duration
+                // Самый активный день
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT AVG(DATEDIFF(MINUTE, EntryDateTime, ISNULL(ExitDateTime, GETDATE()))) 
-                    FROM Attendances 
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    AND ExitDateTime IS NOT NULL", connection))
+                    SELECT TOP 1 CONVERT(date, a.EntryDateTime) as ActiveDay
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, a.EntryDateTime)
+                    ORDER BY COUNT(*) DESC", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    var result = cmd.ExecuteScalar();
-                    int avgMinutes = 0;
-                    if (result != null && result != DBNull.Value)
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && DateTime.TryParse(result.ToString(), out DateTime activeDay))
                     {
-                        avgMinutes = Convert.ToInt32(result);
+                        MostActiveDayTextBlock.Text = activeDay.ToString("dd.MM.yyyy");
                     }
-                    TimeSpan avgDuration = TimeSpan.FromMinutes(avgMinutes);
-                    AvgDurationTextBlock.Text = $"{avgDuration.Hours:D2}:{avgDuration.Minutes:D2}";
+                    else
+                    {
+                        MostActiveDayTextBlock.Text = "Н/Д";
+                    }
                 }
 
-                // Most active weekday
-                using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT TOP 1 DATEPART(weekday, EntryDateTime) as WeekDay, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY DATEPART(weekday, EntryDateTime)
-                    ORDER BY VisitCount DESC", connection))
+                // Средняя посещаемость в день
+                int totalDays = (endDate.Date - startDate.Date).Days + 1;
+                if (int.TryParse(TotalVisitsTextBlock.Text, out int totalVisits) && totalDays > 0)
                 {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    int weekDayNumber = 1; // Default to Sunday
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            weekDayNumber = reader.GetInt32(0);
-                        }
-                    }
-
-                    // Convert SQL Server day (1=Sunday) to .NET day (0=Sunday)
-                    DayOfWeek mostActiveDay = (DayOfWeek)(weekDayNumber % 7);
-
-                    // Get weekday name in Russian
-                    string[] weekDays = { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
-                    MostActiveWeekdayTextBlock.Text = weekDays[(int)mostActiveDay];
+                    double avgDailyVisits = (double)totalVisits / totalDays;
+                    AverageDailyVisitsTextBlock.Text = $"{avgDailyVisits:F1}";
                 }
-
-                // Most active hour
-                using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT TOP 1 DATEPART(hour, EntryDateTime) as Hour, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY DATEPART(hour, EntryDateTime)
-                    ORDER BY VisitCount DESC", connection))
+                else
                 {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    int peakHour = 0;
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            peakHour = reader.GetInt32(0);
-                        }
-                    }
-
-                    MostActiveTimeTextBlock.Text = $"{peakHour:D2}:00 - {peakHour:D2}:59";
-                }
-
-                // Peak load
-                using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT TOP 1 CONVERT(VARCHAR, CAST(EntryDateTime AS DATE), 104) as VisitDate, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY CAST(EntryDateTime AS DATE)
-                    ORDER BY VisitCount DESC", connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    string peakDate = "";
-                    int peakVisitors = 0;
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            peakDate = reader["VisitDate"].ToString();
-                            peakVisitors = Convert.ToInt32(reader["VisitCount"]);
-                        }
-                    }
-
-                    PeakVisitorsTextBlock.Text = peakVisitors > 0 ? $"{peakVisitors} ({peakDate})" : "0";
+                    AverageDailyVisitsTextBlock.Text = "0";
                 }
             }
         }
 
-        private void CreateDailyAttendanceChart()
+        private void LoadDailyVisitsChart()
         {
-            var dailyData = new ChartValues<int>();
-            var labels = new List<string>();
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                string groupFormat = (endDate - startDate).TotalDays <= 31 ? "dd.MM" : "MM.yyyy";
-                string sqlQuery = (endDate - startDate).TotalDays <= 31
-                    ? @"SELECT 
-                         CONVERT(varchar, EntryDateTime, 104) as DateGroup, 
-                         COUNT(*) as VisitCount
-                       FROM Attendances 
-                       WHERE EntryDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar, EntryDateTime, 104)
-                       ORDER BY MIN(EntryDateTime)"
-                    : @"SELECT 
-                         CONVERT(varchar(7), EntryDateTime, 104) as DateGroup, 
-                         COUNT(*) as VisitCount
-                       FROM Attendances 
-                       WHERE EntryDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar(7), EntryDateTime, 104)
-                       ORDER BY MIN(EntryDateTime)";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT CONVERT(date, a.EntryDateTime) as VisitDate, 
+                           COUNT(*) as DailyVisits
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, a.EntryDateTime)
+                    ORDER BY VisitDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
@@ -314,345 +208,189 @@ namespace FitnessCenterIS.View.Pages
                     {
                         while (reader.Read())
                         {
-                            labels.Add(reader["DateGroup"].ToString());
+                            DateTime date = Convert.ToDateTime(reader["VisitDate"]);
+                            labels.Add(date.ToString("dd.MM"));
+                            values.Add(Convert.ToDouble(reader["DailyVisits"]));
+                        }
+                    }
+                }
+            }
 
-                            int visitCount = 0;
-                            if (!reader.IsDBNull(reader.GetOrdinal("VisitCount")))
+            seriesCollection.Add(new LineSeries
+            {
+                Title = "Посещения",
+                Values = values,
+                Stroke = System.Windows.Media.Brushes.DodgerBlue,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 8
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
+            };
+
+            chart.AxisX.Add(new Axis
+            {
+                Title = "Дата",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Количество посещений",
+                MinValue = 0
+            });
+
+            DailyVisitsChartContainer.Content = chart;
+        }
+
+        private void LoadPopularRoomsChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                // Исправленный запрос через расписание
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 5 r.Name as RoomName, COUNT(*) as VisitCount
+                    FROM Schedules s
+                    INNER JOIN Rooms r ON s.RoomID = r.RoomID
+                    WHERE s.StartDateTime BETWEEN @StartDate AND @EndDate
+                    AND s.RoomID IS NOT NULL
+                    GROUP BY r.RoomID, r.Name
+                    ORDER BY VisitCount DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        bool hasData = false;
+                        while (reader.Read())
+                        {
+                            hasData = true;
+                            seriesCollection.Add(new PieSeries
                             {
-                                visitCount = reader.GetInt32(reader.GetOrdinal("VisitCount"));
-                            }
-
-                            dailyData.Add(visitCount);
+                                Title = reader["RoomName"].ToString(),
+                                Values = new ChartValues<double> { Convert.ToDouble(reader["VisitCount"]) },
+                                DataLabels = true
+                            });
                         }
-                    }
-                }
-            }
 
-            var chart = new CartesianChart
-            {
-                Series = new SeriesCollection
-                {
-                    new ColumnSeries
-                    {
-                        Title = "Посещения по дням",
-                        Values = dailyData,
-                        Fill = new SolidColorBrush(Color.FromRgb(66, 133, 244))
-                    }
-                },
-                AxisX = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Дата",
-                        Labels = labels,
-                        Separator = new LiveCharts.Wpf.Separator { Step = Math.Max(1, labels.Count / 10) }
-                    }
-                },
-                AxisY = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Количество посещений",
-                        LabelFormatter = value => value.ToString("N0")
-                    }
-                },
-                LegendLocation = LegendLocation.Top
-            };
-
-            // Находим контейнер в XAML-интерфейсе по имени (универсальный способ)
-            ContentControl dailyChartContainer = this.FindName("DailyChartContainer") as ContentControl;
-            if (dailyChartContainer != null)
-            {
-                dailyChartContainer.Content = chart;
-            }
-        }
-
-        private void CreateWeekdayAttendanceChart()
-        {
-            var weekdayData = new ChartValues<int>();
-            var dayLabels = new[] { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlQuery = @"
-                    SELECT DATEPART(weekday, EntryDateTime) as WeekDay, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY DATEPART(weekday, EntryDateTime)
-                    ORDER BY WeekDay";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    int[] visitsByDay = new int[7];
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
+                        // Если нет данных, добавляем заглушку
+                        if (!hasData)
                         {
-                            // SQL Server DATEPART(weekday) returns 1-7 where 1 is Sunday
-                            // Convert to 0-6 where 0 is Monday
-                            int weekDay = Convert.ToInt32(reader["WeekDay"]);
-                            int dayIndex = (weekDay + 5) % 7; // Convert SQL Server day to our array index
-
-                            visitsByDay[dayIndex] = Convert.ToInt32(reader["VisitCount"]);
+                            seriesCollection.Add(new PieSeries
+                            {
+                                Title = "Нет данных",
+                                Values = new ChartValues<double> { 1 },
+                                DataLabels = true,
+                                Fill = System.Windows.Media.Brushes.LightGray
+                            });
                         }
                     }
-
-                    weekdayData = new ChartValues<int>(visitsByDay);
                 }
             }
 
-            var chart = new CartesianChart
+            var chart = new PieChart
             {
-                Series = new SeriesCollection
-                {
-                    new ColumnSeries
-                    {
-                        Title = "Посещения по дням недели",
-                        Values = weekdayData,
-                        Fill = new SolidColorBrush(Color.FromRgb(15, 157, 88))
-                    }
-                },
-                AxisX = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "День недели",
-                        Labels = dayLabels
-                    }
-                },
-                AxisY = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Количество посещений",
-                        LabelFormatter = value => value.ToString("N0")
-                    }
-                },
-                LegendLocation = LegendLocation.Top
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Right,
+                DisableAnimations = true
             };
 
-            // Находим контейнер в XAML-интерфейсе по имени
-            ContentControl weekdayChartContainer = this.FindName("WeekdayChartContainer") as ContentControl;
-            if (weekdayChartContainer != null)
-            {
-                weekdayChartContainer.Content = chart;
-            }
+            PopularRoomsChartContainer.Content = chart;
         }
 
-        private void CreateHourlyAttendanceChart()
+        private void LoadHourlyVisitsChart()
         {
-            var hourlyData = new ChartValues<int>();
-            var hourLabels = new List<string>();
-
-            for (int i = 0; i < 24; i++)
-            {
-                hourLabels.Add($"{i:D2}:00");
-            }
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                string sqlQuery = @"
-                    SELECT DATEPART(hour, EntryDateTime) as Hour, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY DATEPART(hour, EntryDateTime)
-                    ORDER BY Hour";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT DATEPART(HOUR, a.EntryDateTime) as Hour, 
+                           COUNT(*) as HourlyVisits
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY DATEPART(HOUR, a.EntryDateTime)
+                    ORDER BY Hour", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    int[] visitsByHour = new int[24];
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             int hour = Convert.ToInt32(reader["Hour"]);
-                            visitsByHour[hour] = Convert.ToInt32(reader["VisitCount"]);
+                            labels.Add($"{hour:D2}:00");
+                            values.Add(Convert.ToDouble(reader["HourlyVisits"]));
                         }
                     }
-
-                    hourlyData = new ChartValues<int>(visitsByHour);
                 }
             }
 
+            seriesCollection.Add(new ColumnSeries
+            {
+                Title = "Посещения",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.MediumSeaGreen
+            });
+
             var chart = new CartesianChart
             {
-                Series = new SeriesCollection
-                {
-                    new LineSeries
-                    {
-                        Title = "Посещения по часам",
-                        Values = hourlyData,
-                        PointGeometry = DefaultGeometries.Circle,
-                        PointGeometrySize = 8,
-                        Stroke = new SolidColorBrush(Color.FromRgb(244, 180, 0)),
-                        Fill = new SolidColorBrush(Color.FromArgb(50, 244, 180, 0))
-                    }
-                },
-                AxisX = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Час дня",
-                        Labels = hourLabels,
-                        Separator = new LiveCharts.Wpf.Separator { Step = 2 }
-                    }
-                },
-                AxisY = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Количество посещений",
-                        LabelFormatter = value => value.ToString("N0")
-                    }
-                },
-                LegendLocation = LegendLocation.Top
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
             };
 
-            // Находим контейнер в XAML-интерфейсе по имени
-            ContentControl hourlyChartContainer = this.FindName("HourlyChartContainer") as ContentControl;
-            if (hourlyChartContainer != null)
+            chart.AxisX.Add(new Axis
             {
-                hourlyChartContainer.Content = chart;
-            }
+                Title = "Час дня",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Количество посещений",
+                MinValue = 0
+            });
+
+            HourlyVisitsChartContainer.Content = chart;
         }
 
-        private void CreateDurationDistributionChart()
+        private void LoadWeeklyVisitsChart()
         {
-            var durationData = new ChartValues<int>();
-            var durationLabels = new List<string>
-            {
-                "<30 мин", "30-60 мин", "1-1.5 часа", "1.5-2 часа", "2-3 часа", ">3 часа"
-            };
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string> { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
+            ChartValues<double> values = new ChartValues<double>();
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                string sqlQuery = @"
-                    SELECT 
-                        CASE 
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 30 THEN 0
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 60 THEN 1
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 90 THEN 2
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 120 THEN 3
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 180 THEN 4
-                            ELSE 5
-                        END as DurationCategory,
-                        COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    AND ExitDateTime IS NOT NULL
-                    GROUP BY 
-                        CASE 
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 30 THEN 0
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 60 THEN 1
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 90 THEN 2
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 120 THEN 3
-                            WHEN DATEDIFF(MINUTE, EntryDateTime, ExitDateTime) < 180 THEN 4
-                            ELSE 5
-                        END
-                    ORDER BY DurationCategory";
+                // Инициализируем массив для дней недели (1=Понедельник, 7=Воскресенье)
+                double[] weeklyData = new double[7];
 
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    int[] durationCounts = new int[6];
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int category = Convert.ToInt32(reader["DurationCategory"]);
-                            durationCounts[category] = Convert.ToInt32(reader["VisitCount"]);
-                        }
-                    }
-
-                    durationData = new ChartValues<int>(durationCounts);
-                }
-            }
-
-            var chart = new CartesianChart
-            {
-                Series = new SeriesCollection
-                {
-                    new ColumnSeries
-                    {
-                        Title = "Распределение по длительности",
-                        Values = durationData,
-                        Fill = new SolidColorBrush(Color.FromRgb(219, 68, 55))
-                    }
-                },
-                AxisX = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Длительность посещения",
-                        Labels = durationLabels
-                    }
-                },
-                AxisY = new AxesCollection
-                {
-                    new Axis
-                    {
-                        Title = "Количество посещений",
-                        LabelFormatter = value => value.ToString("N0")
-                    }
-                },
-                LegendLocation = LegendLocation.Top
-            };
-
-            // Находим контейнер в XAML-интерфейсе по имени
-            ContentControl durationChartContainer = this.FindName("DurationChartContainer") as ContentControl;
-            if (durationChartContainer != null)
-            {
-                durationChartContainer.Content = chart;
-            }
-        }
-
-        private void LoadAttendanceDetails()
-        {
-            attendanceData = new List<AttendanceRecord>();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlQuery = @"
-                    SELECT 
-                        a.AttendanceID,
-                        a.EntryDateTime,
-                        a.ExitDateTime,
-                        CONCAT(p.Surname, ' ', p.Name) as ClientName,
-                        st.Name as MembershipType,
-                        s.Name as ServiceName,
-                        CONCAT('№', l.KeyNumber) as LockerNumber,
-                        a.Note
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT DATEPART(WEEKDAY, a.EntryDateTime) as WeekDay, 
+                           COUNT(*) as WeeklyVisits
                     FROM Attendances a
-                    LEFT JOIN Clients c ON a.ClientID = c.ClientID
-                    LEFT JOIN Persons p ON c.PersonID = p.PersonID
-                    LEFT JOIN Sales sa ON a.SaleID = sa.SaleID
-                    LEFT JOIN Seasontickets st ON sa.SeasonticketID = st.SeasonticketID
-                    LEFT JOIN SeasonticketServices ss ON sa.SeasonticketServiceID = ss.SeasonticketServiceID
-                    LEFT JOIN Services s ON ss.ServiceID = s.ServiceID
-                    LEFT JOIN Lockers l ON a.LockerID = l.LockerID
                     WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
-                    ORDER BY a.EntryDateTime DESC";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                    GROUP BY DATEPART(WEEKDAY, a.EntryDateTime)", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
@@ -661,122 +399,279 @@ namespace FitnessCenterIS.View.Pages
                     {
                         while (reader.Read())
                         {
-                            try
-                            {
-                                var record = new AttendanceRecord
-                                {
-                                    AttendanceID = reader.IsDBNull(reader.GetOrdinal("AttendanceID")) ? 0 : reader.GetInt32(reader.GetOrdinal("AttendanceID")),
-                                    EntryDateTime = reader.GetDateTime(reader.GetOrdinal("EntryDateTime")),
-                                    ExitDateTime = reader.IsDBNull(reader.GetOrdinal("ExitDateTime")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("ExitDateTime")),
-                                    ClientName = reader.IsDBNull(reader.GetOrdinal("ClientName")) ? "Не указан" : reader.GetString(reader.GetOrdinal("ClientName")),
-                                    MembershipType = reader.IsDBNull(reader.GetOrdinal("MembershipType")) ? "-" : reader.GetString(reader.GetOrdinal("MembershipType")),
-                                    ServiceName = reader.IsDBNull(reader.GetOrdinal("ServiceName")) ? "-" : reader.GetString(reader.GetOrdinal("ServiceName")),
-                                    LockerNumber = reader.IsDBNull(reader.GetOrdinal("LockerNumber")) ? "-" : reader.GetString(reader.GetOrdinal("LockerNumber")),
-                                    Note = reader.IsDBNull(reader.GetOrdinal("Note")) ? "" : reader.GetString(reader.GetOrdinal("Note"))
-                                };
+                            int weekDay = Convert.ToInt32(reader["WeekDay"]);
+                            double visits = Convert.ToDouble(reader["WeeklyVisits"]);
 
-                                attendanceData.Add(record);
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Ошибка при обработке записи: {ex.Message}");
-                            }
+                            // SQL DATEPART возвращает: 1=Воскресенье, 2=Понедельник, ..., 7=Суббота
+                            // Преобразуем в: 0=Понедельник, 1=Вторник, ..., 6=Воскресенье
+                            int dayIndex = weekDay == 1 ? 6 : weekDay - 2;
+                            weeklyData[dayIndex] = visits;
                         }
                     }
                 }
+
+                // Добавляем данные в ChartValues
+                for (int i = 0; i < 7; i++)
+                {
+                    values.Add(weeklyData[i]);
+                }
             }
 
-            AttendanceDataGrid.ItemsSource = attendanceData;
-            TotalRowsTextBlock.Text = $"Всего записей: {attendanceData.Count}";
-        }
-
-        private void ExportToExcel_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            seriesCollection.Add(new ColumnSeries
             {
-                Filter = "Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv|All files (*.*)|*.*",
-                DefaultExt = "xlsx",
-                Title = "Экспорт отчета посещаемости"
+                Title = "Посещения",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.Coral
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
             };
 
-            if (saveFileDialog.ShowDialog() == true)
+            chart.AxisX.Add(new Axis
             {
-                try
-                {
-                    // Здесь можно реализовать экспорт в Excel с помощью библиотек
-                    // EPPlus, ClosedXML или NPOI
-                    MessageBox.Show("Отчет успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+                Title = "День недели",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Количество посещений",
+                MinValue = 0
+            });
+
+            WeeklyVisitsChartContainer.Content = chart;
         }
 
-        private void PrintReport_Click(object sender, RoutedEventArgs e)
+        private void ExportToWord_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    FixedDocument document = CreatePrintDocument();
-                    printDialog.PrintDocument(document.DocumentPaginator, "Отчет посещаемости");
+                    Filter = "Word Documents (*.docx)|*.docx",
+                    DefaultExt = "docx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string filePath = saveFileDialog.FileName;
+                    ExportToWordDocument(filePath);
+                    MessageBox.Show("Отчет по посещаемости успешно экспортирован в Word", "Экспорт", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при печати: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private FixedDocument CreatePrintDocument()
+        private void ExportToWordDocument(string filePath)
         {
-            FixedDocument document = new FixedDocument();
-
-            Grid printGrid = new Grid();
-            printGrid.Width = 794; // A4 width in pixels at 96 DPI
-            printGrid.Height = 1123; // A4 height in pixels at 96 DPI
-
-            TextBlock titleBlock = new TextBlock
+            using (WordprocessingDocument wordDocument =
+                WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
             {
-                Text = $"Отчет посещаемости за период {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}",
-                FontSize = 18,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 20, 0, 20)
-            };
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
 
-            StackPanel summaryPanel = new StackPanel { Margin = new Thickness(20) };
-            summaryPanel.Children.Add(new TextBlock { Text = "Основные показатели:", FontSize = 14, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 10, 0, 10) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Всего посещений: {TotalVisitsTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Уникальные посетители: {UniqueVisitorsTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Средняя посещаемость в день: {AvgVisitsPerDayTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Средняя продолжительность: {AvgDurationTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Самый активный день: {MostActiveWeekdayTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Самое активное время: {MostActiveTimeTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Пиковая загрузка: {PeakVisitorsTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
+                Body body = mainPart.Document.AppendChild(new Body());
 
-            printGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            printGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                SectionProperties sectionProperties = new SectionProperties();
+                sectionProperties.AppendChild(new PageSize() { Width = 11900, Height = 16840 });
+                sectionProperties.AppendChild(new PageMargin() { Top = 720, Right = 720, Bottom = 720, Left = 720 });
+                body.AppendChild(sectionProperties);
 
-            Grid.SetRow(titleBlock, 0);
-            Grid.SetRow(summaryPanel, 1);
+                // Заголовок
+                Paragraph titleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "0", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "36" }
+                        ),
+                        new Text("ОТЧЕТ ПО ПОСЕЩАЕМОСТИ")
+                    )
+                );
+                body.AppendChild(titleParagraph);
 
-            printGrid.Children.Add(titleBlock);
-            printGrid.Children.Add(summaryPanel);
+                // Подзаголовок
+                Paragraph subTitleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "400", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new FontSize() { Val = "28" }
+                        ),
+                        new Text($"за период {DateFromPicker.SelectedDate?.ToString("dd.MM.yyyy")} - {DateToPicker.SelectedDate?.ToString("dd.MM.yyyy")}")
+                    )
+                );
+                body.AppendChild(subTitleParagraph);
 
-            FixedPage page = new FixedPage();
-            page.Width = 794;
-            page.Height = 1123;
-            page.Children.Add(printGrid);
+                // Дата формирования
+                Paragraph dateInfo = new Paragraph(
+                    new Run(
+                        new RunProperties(new Bold()),
+                        new Text($"Дата формирования: {DateTime.Now:dd.MM.yyyy}")
+                    )
+                );
+                body.AppendChild(dateInfo);
 
-            PageContent pageContent = new PageContent();
-            ((IAddChild)pageContent).AddChild(page);
-            document.Pages.Add(pageContent);
+                // Разделитель
+                Paragraph divider = new Paragraph(
+                    new ParagraphProperties(
+                        new ParagraphBorders(
+                            new BottomBorder() { Val = BorderValues.Single, Size = 6, Space = 1, Color = "AAAAAA" }
+                        ),
+                        new SpacingBetweenLines() { After = "400", Before = "200" }
+                    )
+                );
+                body.AppendChild(divider);
 
-            return document;
+                // Ключевые показатели
+                Paragraph metricsHeader = new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "28" },
+                            new Color() { Val = "2F5496" }
+                        ),
+                        new Text("1. Ключевые показатели посещаемости")
+                    )
+                );
+                body.AppendChild(metricsHeader);
+
+                Table metricsTable = CreateAttendanceMetricsTable();
+                body.AppendChild(metricsTable);
+            }
+        }
+
+        private Table CreateAttendanceMetricsTable()
+        {
+            Table table = new Table();
+
+            TableProperties tblProp = new TableProperties(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableJustification() { Val = TableRowAlignmentValues.Center },
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" }
+                )
+            );
+            table.AppendChild(tblProp);
+
+            TableGrid tableGrid = new TableGrid(
+                new GridColumn() { Width = "7000" },
+                new GridColumn() { Width = "3000" }
+            );
+            table.AppendChild(tableGrid);
+
+            // Заголовок
+            TableRow headerRow = new TableRow();
+            headerRow.AppendChild(CreateHeaderCell("Показатель"));
+            headerRow.AppendChild(CreateHeaderCell("Значение"));
+            table.AppendChild(headerRow);
+
+            // Данные
+            table.AppendChild(CreateDataRow("Общее количество посещений", TotalVisitsTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Уникальные посетители", UniqueVisitorsTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Среднее время посещения", AverageVisitTimeTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Пиковое время", PeakTimeTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Самый активный день", MostActiveDayTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Средняя посещаемость в день", AverageDailyVisitsTextBlock.Text, true));
+
+            return table;
+        }
+
+        // Вспомогательные методы для создания ячеек таблицы
+        private TableCell CreateHeaderCell(string text)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "DEDEDE"
+                },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center }
+                ),
+                new Run(
+                    new RunProperties(
+                        new Bold(),
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableCell CreateDataCell(string text, bool alignRight = false, bool isAlternateRow = false)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+
+            if (isAlternateRow)
+            {
+                cellProperties.AppendChild(new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "F9F9F9"
+                });
+            }
+
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = alignRight ? JustificationValues.Right : JustificationValues.Left }
+                ),
+                new Run(
+                    new RunProperties(
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableRow CreateDataRow(string label, string value, bool isAlternateRow = false)
+        {
+            TableRow row = new TableRow();
+            row.AppendChild(CreateDataCell(label, false, isAlternateRow));
+            row.AppendChild(CreateDataCell(value, true, isAlternateRow));
+            return row;
         }
     }
 }

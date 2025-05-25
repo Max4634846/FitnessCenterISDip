@@ -1,27 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Wpf;
-using System.Windows.Data;
-using Microsoft.Win32;
-using System.IO;
-using System.Printing;
-using System.Windows.Documents;
-using System.Windows.Xps;
-using System.Windows.Xps.Packaging;
-using FitnessCenterIS.Model;
-using System.Data.SqlClient;
-using System.Data;
-using System.Globalization;
 using System.Configuration;
-using System.Data.Entity;
 using System.Data.Entity.Core.EntityClient;
-using System.ComponentModel;
-using System.Windows.Markup;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
+using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
+using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
+using Separator = LiveCharts.Wpf.Separator;
 
 namespace FitnessCenterIS.View.Pages.Reports
 {
@@ -30,26 +23,6 @@ namespace FitnessCenterIS.View.Pages.Reports
         private DateTime startDate;
         private DateTime endDate;
         private string connectionString;
-        private List<FinancialTransaction> financialData;
-
-        // Класс для представления финансовой транзакции
-        public class FinancialTransaction : INotifyPropertyChanged
-        {
-            public DateTime Date { get; set; }
-            public int TransactionId { get; set; }
-            public string Category { get; set; }
-            public string Product { get; set; }
-            public decimal Income { get; set; }
-            public decimal Expenses { get; set; }
-            public decimal Profit => Income - Expenses;
-            public string Manager { get; set; }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-            protected void OnPropertyChanged(string name)
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
 
         public FinancialReportPage()
         {
@@ -57,31 +30,21 @@ namespace FitnessCenterIS.View.Pages.Reports
 
             try
             {
-                // Извлекаем строку подключения SQL из строки подключения Entity Framework
+                // Получаем строку подключения
                 var entityConnectionString = ConfigurationManager.ConnectionStrings["BDFitnessClubDipEntities"].ConnectionString;
                 var entityBuilder = new EntityConnectionStringBuilder(entityConnectionString);
                 connectionString = entityBuilder.ProviderConnectionString;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при получении строки подключения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            // Загрузка данных после полной инициализации UI
+            // Инициализация с датами по умолчанию
             this.Loaded += (s, e) => {
-                try
-                {
-                    // Set default date range (last 30 days)
-                    DateToPicker.SelectedDate = DateTime.Today;
-                    DateFromPicker.SelectedDate = DateTime.Today.AddDays(-30);
-
-                    // Initial data load
-                    LoadFinancialData();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при инициализации: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                DateToPicker.SelectedDate = DateTime.Today;
+                DateFromPicker.SelectedDate = DateTime.Today.AddDays(-30);
+                LoadReportData();
             };
         }
 
@@ -89,274 +52,137 @@ namespace FitnessCenterIS.View.Pages.Reports
         {
             if (DateFromPicker.SelectedDate.HasValue && DateToPicker.SelectedDate.HasValue)
             {
-                LoadFinancialData();
+                LoadReportData();
             }
         }
 
-        private void LoadFinancialData()
+        private void LoadReportData()
         {
             if (!DateFromPicker.SelectedDate.HasValue || !DateToPicker.SelectedDate.HasValue)
                 return;
 
             startDate = DateFromPicker.SelectedDate.Value;
-            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1); // End of the selected day
-
-            // Update period title
-            PeriodTitle.Text = $"Финансовые показатели за период {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}";
+            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1);
 
             try
             {
-                // Load financial metrics
-                LoadFinancialMetrics();
-
-                // Load chart data
-                CreateFinancialChart();
-
-                // Load DataGrid data
-                LoadTransactionDetails();
+                LoadKeyMetrics();
+                LoadDailyRevenueChart();
+                LoadPaymentMethodsChart();
+                LoadServiceSalesChart();
+                LoadTrainerRevenueChart();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void LoadFinancialMetrics()
+        private void LoadKeyMetrics()
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // Total income (revenue from sales)
+                // Общая выручка
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(SUM(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT ISNULL(SUM(s.PriceSold), 0)
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    decimal totalIncome = 0;
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        totalIncome = Convert.ToDecimal(result);
-                    }
-                    TotalIncomeTextBlock.Text = $"{totalIncome:N0} ₽";
+                    decimal revenue = Convert.ToDecimal(cmd.ExecuteScalar() ?? 0);
+                    TotalRevenueTextBlock.Text = $"{revenue:N0} ₽";
                 }
 
-                // Доход от абонементов
+                // Количество продаж
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(SUM(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SeasonticketID IS NOT NULL 
-                    AND SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(*)
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    decimal membershipIncome = 0;
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        membershipIncome = Convert.ToDecimal(result);
-                    }
-                    MembershipIncomeTextBlock.Text = $"{membershipIncome:N0} ₽";
-                }
-
-                // Доход от услуг
-                using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(SUM(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SeasonticketServiceID IS NOT NULL 
-                    AND SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    decimal serviceIncome = 0;
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        serviceIncome = Convert.ToDecimal(result);
-                    }
-                    ServiceIncomeTextBlock.Text = $"{serviceIncome:N0} ₽";
+                    TotalSalesTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
 
                 // Средний чек
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(AVG(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT ISNULL(AVG(s.PriceSold), 0)
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    decimal avgCheck = 0;
-                    var result = cmd.ExecuteScalar();
-                    if (result != null && result != DBNull.Value)
-                    {
-                        avgCheck = Convert.ToDecimal(result);
-                    }
+                    decimal avgCheck = Convert.ToDecimal(cmd.ExecuteScalar() ?? 0);
                     AverageCheckTextBlock.Text = $"{avgCheck:N0} ₽";
                 }
 
-                // Вычисляем показатели для расходов и прибыли
-                // В данной реализации расходы условно принимаются за 0
-                // (можно модифицировать, когда будут учитываться реальные расходы)
-
-                // Получаем значение дохода из текста
-                string incomeText = TotalIncomeTextBlock.Text.Replace("₽", "").Trim();
-                decimal income = 0;
-
-                if (decimal.TryParse(incomeText, NumberStyles.Currency | NumberStyles.AllowThousands,
-                                    CultureInfo.GetCultureInfo("ru-RU"), out income))
-                {
-                    // Расходы (по умолчанию 0, в демонстрационных целях)
-                    decimal expenses = 0;
-
-                    // Прибыль равна доходу за вычетом расходов
-                    decimal profit = income - expenses;
-                    ProfitTextBlock.Text = $"{profit:N0} ₽";
-
-                    // Маржинальность
-                    decimal marginality = (income > 0) ? (profit / income) * 100 : 0;
-                    MarginalityTextBlock.Text = $"{marginality:N1}%";
-                }
-                else
-                {
-                    ProfitTextBlock.Text = "0 ₽";
-                    MarginalityTextBlock.Text = "0.0%";
-                }
-            }
-        }
-
-        private void CreateFinancialChart()
-        {
-            var incomeData = new ChartValues<decimal>();
-            var expensesData = new ChartValues<decimal>();
-            var profitData = new ChartValues<decimal>();
-            var labels = new List<string>();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                // Group by day if period <= 31 days, otherwise group by month
-                string sqlQuery = (endDate - startDate).TotalDays <= 31
-                    ? @"SELECT 
-                         CONVERT(varchar, SaleDateTime, 104) as DateGroup, 
-                         SUM(PriceSold) as Revenue
-                       FROM Sales 
-                       WHERE SaleDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar, SaleDateTime, 104)
-                       ORDER BY MIN(SaleDateTime)"
-                    : @"SELECT 
-                         CONVERT(varchar(7), SaleDateTime, 104) as DateGroup, 
-                         SUM(PriceSold) as Revenue
-                       FROM Sales 
-                       WHERE SaleDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar(7), SaleDateTime, 104)
-                       ORDER BY MIN(SaleDateTime)";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                // Общие платежи
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT ISNULL(SUM(p.Amount), 0)
+                    FROM Payments p
+                    WHERE p.DateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            labels.Add(reader["DateGroup"].ToString());
-
-                            decimal revenue = 0;
-
-                            if (!reader.IsDBNull(reader.GetOrdinal("Revenue")))
-                            {
-                                revenue = reader.GetDecimal(reader.GetOrdinal("Revenue"));
-                            }
-
-                            // В данной демонстрационной версии расходы отсутствуют
-                            decimal expenses = 0;
-                            decimal profit = revenue;
-
-                            incomeData.Add(revenue);
-                            expensesData.Add(expenses);
-                            profitData.Add(profit);
-                        }
-                    }
+                    decimal payments = Convert.ToDecimal(cmd.ExecuteScalar() ?? 0);
+                    TotalPaymentsTextBlock.Text = $"{payments:N0} ₽";
                 }
-            }
 
-            // Create series for the chart
-            var series = new SeriesCollection
-            {
-                new LineSeries
-                {
-                    Title = "Доходы",
-                    Values = incomeData,
-                    PointGeometrySize = 10,
-                    Stroke = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Green
-                    Fill = new SolidColorBrush(Color.FromArgb(40, 76, 175, 80))
-                },
-                new LineSeries
-                {
-                    Title = "Прибыль",
-                    Values = profitData,
-                    PointGeometrySize = 10,
-                    Stroke = new SolidColorBrush(Color.FromRgb(33, 150, 243)), // Blue
-                    Fill = new SolidColorBrush(Color.FromArgb(40, 33, 150, 243))
-                }
-            };
-
-            // Очищаем предыдущие серии перед добавлением новых
-            FinancialChart.Series.Clear();
-            FinancialChart.Series = series;
-
-            // Update chart axes
-            if (FinancialChart.AxisX.Count > 0)
-            {
-                FinancialChart.AxisX[0].Labels = labels;
-                FinancialChart.AxisX[0].Separator = new LiveCharts.Wpf.Separator { Step = Math.Max(1, labels.Count / 10) };
-            }
-
-            if (FinancialChart.AxisY.Count > 0)
-            {
-                FinancialChart.AxisY[0].LabelFormatter = value => value.ToString("N0") + " ₽";
-            }
-        }
-
-        private void LoadTransactionDetails()
-        {
-            financialData = new List<FinancialTransaction>();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlQuery = @"
-                    SELECT 
-                        s.SaleID as TransactionId,
-                        s.SaleDateTime as Date,
-                        CASE
-                            WHEN s.SeasonticketID IS NOT NULL THEN 'Абонемент'
-                            WHEN s.SeasonticketServiceID IS NOT NULL THEN 'Услуга'
-                            ELSE 'Другое'
-                        END as Category,
-                        COALESCE(
-                            (SELECT st.Name FROM Seasontickets st WHERE st.SeasonticketID = s.SeasonticketID),
-                            (SELECT srv.Name FROM Services srv 
-                             JOIN SeasonticketServices ss ON srv.ServiceID = ss.ServiceID 
-                             WHERE ss.SeasonticketServiceID = s.SeasonticketServiceID),
-                            'Неизвестно'
-                        ) as ProductName,
-                        s.PriceSold as Income,
-                        CONCAT(p.Surname, ' ', p.Name) as ManagerName
+                // Общие скидки
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT ISNULL(SUM(s.DiscountAmount), 0)
                     FROM Sales s
-                    LEFT JOIN Users u ON s.AdministratorID = u.UserID
-                    LEFT JOIN Staffs st ON u.StaffID = st.StaffID
-                    LEFT JOIN Persons p ON st.PersonID = p.PersonID
-                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
-                    ORDER BY s.SaleDateTime DESC";
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    decimal discounts = Convert.ToDecimal(cmd.ExecuteScalar() ?? 0);
+                    TotalDiscountsTextBlock.Text = $"{discounts:N0} ₽";
+                }
 
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                // Лучший день по выручке
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 1 CONVERT(date, s.SaleDateTime) as SaleDate
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, s.SaleDateTime)
+                    ORDER BY SUM(s.PriceSold) DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && DateTime.TryParse(result.ToString(), out DateTime bestDay))
+                    {
+                        BestDayTextBlock.Text = bestDay.ToString("dd.MM.yyyy");
+                    }
+                    else
+                    {
+                        BestDayTextBlock.Text = "Н/Д";
+                    }
+                }
+            }
+        }
+
+        private void LoadDailyRevenueChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT CONVERT(date, s.SaleDateTime) as SaleDate, 
+                           SUM(s.PriceSold) as DailyRevenue
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, s.SaleDateTime)
+                    ORDER BY SaleDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
@@ -365,138 +191,614 @@ namespace FitnessCenterIS.View.Pages.Reports
                     {
                         while (reader.Read())
                         {
-                            try
-                            {
-                                var transaction = new FinancialTransaction
-                                {
-                                    TransactionId = reader.IsDBNull(reader.GetOrdinal("TransactionId")) ? 0 : reader.GetInt32(reader.GetOrdinal("TransactionId")),
-                                    Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                                    Category = reader.IsDBNull(reader.GetOrdinal("Category")) ? "Неизвестно" : reader.GetString(reader.GetOrdinal("Category")),
-                                    Product = reader.IsDBNull(reader.GetOrdinal("ProductName")) ? "Неизвестно" : reader.GetString(reader.GetOrdinal("ProductName")),
-                                    Income = reader.IsDBNull(reader.GetOrdinal("Income")) ? 0 : reader.GetDecimal(reader.GetOrdinal("Income")),
-                                    // Расходы по умолчанию равны 0 (демонстрационный вариант)
-                                    Expenses = 0,
-                                    Manager = reader.IsDBNull(reader.GetOrdinal("ManagerName")) ? "Неизвестно" : reader.GetString(reader.GetOrdinal("ManagerName"))
-                                };
-
-                                financialData.Add(transaction);
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Ошибка при обработке записи: {ex.Message}");
-                            }
+                            DateTime date = Convert.ToDateTime(reader["SaleDate"]);
+                            labels.Add(date.ToString("dd.MM"));
+                            values.Add(Convert.ToDouble(reader["DailyRevenue"]));
                         }
                     }
                 }
             }
 
-            // Update DataGrid and footer
-            FinancialDataGrid.ItemsSource = financialData;
-            TotalRowsTextBlock.Text = $"Всего записей: {financialData.Count}";
-
-            decimal totalIncome = financialData.Sum(t => t.Income);
-            decimal totalExpenses = financialData.Sum(t => t.Expenses);
-            decimal totalProfit = financialData.Sum(t => t.Profit);
-
-            IncomeFooterTextBlock.Text = $"{totalIncome:N2} ₽";
-            ExpensesFooterTextBlock.Text = $"{totalExpenses:N2} ₽";
-            ProfitFooterTextBlock.Text = $"{totalProfit:N2} ₽";
-        }
-
-        private void ExportToExcel_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
+            seriesCollection.Add(new LineSeries
             {
-                Filter = "Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv|All files (*.*)|*.*",
-                DefaultExt = "xlsx",
-                Title = "Экспорт финансового отчета"
+                Title = "Выручка",
+                Values = values,
+                Stroke = System.Windows.Media.Brushes.DodgerBlue,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 8
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
             };
 
-            if (saveFileDialog.ShowDialog() == true)
+            chart.AxisX.Add(new Axis
             {
-                try
-                {
-                    // Здесь можно реализовать экспорт в Excel с помощью библиотек
-                    // EPPlus, ClosedXML или NPOI
-                    MessageBox.Show("Отчет успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
+                Title = "Дата",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Выручка (₽)",
+                MinValue = 0
+            });
+
+            DailyRevenueChartContainer.Content = chart;
         }
 
-        private void PrintReport_Click(object sender, RoutedEventArgs e)
+        private void LoadPaymentMethodsChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT pm.Name as PaymentMethod, SUM(p.Amount) as TotalAmount
+                    FROM Payments p
+                    JOIN PaymentMethods pm ON p.PaymentMethodID = pm.PaymentMethodID
+                    WHERE p.DateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY pm.PaymentMethodID, pm.Name
+                    ORDER BY TotalAmount DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            seriesCollection.Add(new PieSeries
+                            {
+                                Title = reader["PaymentMethod"].ToString(),
+                                Values = new ChartValues<double> { Convert.ToDouble(reader["TotalAmount"]) },
+                                DataLabels = true
+                            });
+                        }
+                    }
+                }
+            }
+
+            var chart = new PieChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Right,
+                DisableAnimations = true
+            };
+
+            PaymentMethodsChartContainer.Content = chart;
+        }
+
+        private void LoadServiceSalesChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 10 se.Name as ServiceName, SUM(s.PriceSold) as ServiceRevenue
+                    FROM Sales s
+                    JOIN SeasonticketServices ss ON s.SeasonticketServiceID = ss.SeasonticketServiceID
+                    JOIN Seasontickets st ON ss.SeasonticketID = st.SeasonticketID
+                    JOIN Services se ON ss.ServiceID = se.ServiceID
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY se.ServiceID, se.Name
+                    ORDER BY ServiceRevenue DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            labels.Add(reader["ServiceName"].ToString());
+                            values.Add(Convert.ToDouble(reader["ServiceRevenue"]));
+                        }
+                    }
+                }
+            }
+
+            seriesCollection.Add(new ColumnSeries
+            {
+                Title = "Выручка",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.MediumSeaGreen
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
+            };
+
+            chart.AxisX.Add(new Axis
+            {
+                Title = "Услуга",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Выручка (₽)",
+                MinValue = 0
+            });
+
+            ServiceSalesChartContainer.Content = chart;
+        }
+
+        private void LoadTrainerRevenueChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 10 p.Surname + ' ' + LEFT(p.Name, 1) + '.' as TrainerName, 
+                           SUM(s.PriceSold) as TrainerRevenue
+                    FROM Sales s
+                    JOIN Staffs st ON s.TrainerID = st.StaffID
+                    JOIN Persons p ON st.PersonID = p.PersonID
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    AND s.TrainerID IS NOT NULL
+                    GROUP BY s.TrainerID, p.Surname, p.Name
+                    ORDER BY TrainerRevenue DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            labels.Add(reader["TrainerName"].ToString());
+                            values.Add(Convert.ToDouble(reader["TrainerRevenue"]));
+                        }
+                    }
+                }
+            }
+
+            seriesCollection.Add(new ColumnSeries
+            {
+                Title = "Выручка",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.Coral
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
+            };
+
+            chart.AxisX.Add(new Axis
+            {
+                Title = "Тренер",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Выручка (₽)",
+                MinValue = 0
+            });
+
+            TrainerRevenueChartContainer.Content = chart;
+        }
+
+        private void ExportToWord_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    // Create document for printing
-                    FixedDocument document = CreatePrintDocument();
-                    printDialog.PrintDocument(document.DocumentPaginator, "Финансовый отчет");
+                    Filter = "Word Documents (*.docx)|*.docx",
+                    DefaultExt = "docx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string filePath = saveFileDialog.FileName;
+                    ExportToWordDocument(filePath);
+                    MessageBox.Show("Финансовый отчет успешно экспортирован в Word", "Экспорт", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при печати: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private FixedDocument CreatePrintDocument()
+        private void ExportToWordDocument(string filePath)
         {
-            FixedDocument document = new FixedDocument();
-
-            // Create a visual representation of the report
-            Grid printGrid = new Grid();
-            printGrid.Width = 794; // A4 width in pixels at 96 DPI
-            printGrid.Height = 1123; // A4 height in pixels at 96 DPI
-
-            // Add a Title
-            TextBlock titleBlock = new TextBlock
+            using (WordprocessingDocument wordDocument =
+                WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
             {
-                Text = $"Финансовый отчет за период {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}",
-                FontSize = 18,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 20, 0, 20)
-            };
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
 
-            // Add summary section
-            StackPanel summaryPanel = new StackPanel { Margin = new Thickness(20) };
-            summaryPanel.Children.Add(new TextBlock { Text = "Основные показатели:", FontSize = 14, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 10, 0, 10) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Общий доход: {TotalIncomeTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Прибыль: {ProfitTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Маржинальность: {MarginalityTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Доход от абонементов: {MembershipIncomeTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Доход от услуг: {ServiceIncomeTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
-            summaryPanel.Children.Add(new TextBlock { Text = $"Средний чек: {AverageCheckTextBlock.Text}", Margin = new Thickness(10, 5, 0, 0) });
+                Body body = mainPart.Document.AppendChild(new Body());
 
-            // Setup grid
-            printGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            printGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                SectionProperties sectionProperties = new SectionProperties();
+                sectionProperties.AppendChild(new PageSize() { Width = 11900, Height = 16840 });
+                sectionProperties.AppendChild(new PageMargin() { Top = 720, Right = 720, Bottom = 720, Left = 720 });
+                body.AppendChild(sectionProperties);
 
-            // Place elements in the grid
-            Grid.SetRow(titleBlock, 0);
-            Grid.SetRow(summaryPanel, 1);
+                // Заголовок
+                Paragraph titleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "0", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "36" }
+                        ),
+                        new Text("ФИНАНСОВЫЙ ОТЧЕТ")
+                    )
+                );
+                body.AppendChild(titleParagraph);
 
-            printGrid.Children.Add(titleBlock);
-            printGrid.Children.Add(summaryPanel);
+                // Подзаголовок
+                Paragraph subTitleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "400", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new FontSize() { Val = "28" }
+                        ),
+                        new Text($"за период {DateFromPicker.SelectedDate?.ToString("dd.MM.yyyy")} - {DateToPicker.SelectedDate?.ToString("dd.MM.yyyy")}")
+                    )
+                );
+                body.AppendChild(subTitleParagraph);
 
-            // Create a page and add the grid
-            FixedPage page = new FixedPage();
-            page.Width = 794;
-            page.Height = 1123;
-            page.Children.Add(printGrid);
+                // Дата формирования
+                Paragraph dateInfo = new Paragraph(
+                    new Run(
+                        new RunProperties(new Bold()),
+                        new Text($"Дата формирования: {DateTime.Now:dd.MM.yyyy}")
+                    )
+                );
+                body.AppendChild(dateInfo);
 
-            // Add the page to the document
-            PageContent pageContent = new PageContent();
-            ((IAddChild)pageContent).AddChild(page);
-            document.Pages.Add(pageContent);
+                // Разделитель
+                Paragraph divider = new Paragraph(
+                    new ParagraphProperties(
+                        new ParagraphBorders(
+                            new BottomBorder() { Val = BorderValues.Single, Size = 6, Space = 1, Color = "AAAAAA" }
+                        ),
+                        new SpacingBetweenLines() { After = "400", Before = "200" }
+                    )
+                );
+                body.AppendChild(divider);
 
-            return document;
+                // Ключевые показатели
+                Paragraph metricsHeader = new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "28" },
+                            new Color() { Val = "2F5496" }
+                        ),
+                        new Text("1. Ключевые финансовые показатели")
+                    )
+                );
+                body.AppendChild(metricsHeader);
+
+                Table metricsTable = CreateFinancialMetricsTable();
+                body.AppendChild(metricsTable);
+
+                // Выручка по дням
+                Paragraph dailyRevenueHeader = new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "28" },
+                            new Color() { Val = "2F5496" }
+                        ),
+                        new Text("2. Выручка по дням")
+                    )
+                );
+                body.AppendChild(dailyRevenueHeader);
+
+                Table dailyRevenueTable = CreateDailyRevenueTable();
+                body.AppendChild(dailyRevenueTable);
+
+                // Способы оплаты
+                Paragraph paymentMethodsHeader = new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "28" },
+                            new Color() { Val = "2F5496" }
+                        ),
+                        new Text("3. Анализ способов оплаты")
+                    )
+                );
+                body.AppendChild(paymentMethodsHeader);
+
+                Table paymentMethodsTable = CreatePaymentMethodsTable();
+                body.AppendChild(paymentMethodsTable);
+            }
+        }
+
+        private Table CreateFinancialMetricsTable()
+        {
+            Table table = new Table();
+
+            TableProperties tblProp = new TableProperties(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableJustification() { Val = TableRowAlignmentValues.Center },
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" }
+                )
+            );
+            table.AppendChild(tblProp);
+
+            TableGrid tableGrid = new TableGrid(
+                new GridColumn() { Width = "7000" },
+                new GridColumn() { Width = "3000" }
+            );
+            table.AppendChild(tableGrid);
+
+            // Заголовок
+            TableRow headerRow = new TableRow();
+            headerRow.AppendChild(CreateHeaderCell("Показатель"));
+            headerRow.AppendChild(CreateHeaderCell("Значение"));
+            table.AppendChild(headerRow);
+
+            // Данные
+            table.AppendChild(CreateDataRow("Общая выручка", TotalRevenueTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Количество продаж", TotalSalesTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Средний чек", AverageCheckTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Общие платежи", TotalPaymentsTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Скидки", TotalDiscountsTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Лучший день", BestDayTextBlock.Text, true));
+
+            return table;
+        }
+
+        private Table CreateDailyRevenueTable()
+        {
+            Table table = new Table();
+
+            TableProperties tblProp = new TableProperties(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableJustification() { Val = TableRowAlignmentValues.Center },
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" }
+                )
+            );
+            table.AppendChild(tblProp);
+
+            TableGrid tableGrid = new TableGrid(
+                new GridColumn() { Width = "5000" },
+                new GridColumn() { Width = "5000" }
+            );
+            table.AppendChild(tableGrid);
+
+            // Заголовок
+            TableRow headerRow = new TableRow();
+            headerRow.AppendChild(CreateHeaderCell("Дата"));
+            headerRow.AppendChild(CreateHeaderCell("Выручка (₽)"));
+            table.AppendChild(headerRow);
+
+            // Данные
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT CONVERT(date, s.SaleDateTime) as SaleDate, 
+                           SUM(s.PriceSold) as DailyRevenue
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, s.SaleDateTime)
+                    ORDER BY SaleDate DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        bool isAlternateRow = false;
+                        while (reader.Read())
+                        {
+                            isAlternateRow = !isAlternateRow;
+                            DateTime date = Convert.ToDateTime(reader["SaleDate"]);
+                            decimal revenue = Convert.ToDecimal(reader["DailyRevenue"]);
+
+                            TableRow dataRow = CreateDataRow(
+                                date.ToString("dd.MM.yyyy"),
+                                $"{revenue:N0} ₽",
+                                isAlternateRow);
+
+                            table.AppendChild(dataRow);
+                        }
+                    }
+                }
+            }
+
+            return table;
+        }
+
+        private Table CreatePaymentMethodsTable()
+        {
+            Table table = new Table();
+
+            TableProperties tblProp = new TableProperties(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableJustification() { Val = TableRowAlignmentValues.Center },
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" }
+                )
+            );
+            table.AppendChild(tblProp);
+
+            TableGrid tableGrid = new TableGrid(
+                new GridColumn() { Width = "5000" },
+                new GridColumn() { Width = "5000" }
+            );
+            table.AppendChild(tableGrid);
+
+            // Заголовок
+            TableRow headerRow = new TableRow();
+            headerRow.AppendChild(CreateHeaderCell("Способ оплаты"));
+            headerRow.AppendChild(CreateHeaderCell("Сумма (₽)"));
+            table.AppendChild(headerRow);
+
+            // Данные
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT pm.Name as PaymentMethod, SUM(p.Amount) as TotalAmount
+                    FROM Payments p
+                    JOIN PaymentMethods pm ON p.PaymentMethodID = pm.PaymentMethodID
+                    WHERE p.DateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY pm.PaymentMethodID, pm.Name
+                    ORDER BY TotalAmount DESC", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        bool isAlternateRow = false;
+                        while (reader.Read())
+                        {
+                            isAlternateRow = !isAlternateRow;
+                            decimal amount = Convert.ToDecimal(reader["TotalAmount"]);
+
+                            TableRow dataRow = CreateDataRow(
+                                reader["PaymentMethod"].ToString(),
+                                $"{amount:N0} ₽",
+                                isAlternateRow);
+
+                            table.AppendChild(dataRow);
+                        }
+                    }
+                }
+            }
+
+            return table;
+        }
+
+        // Вспомогательные методы для создания ячеек таблицы (аналогично коду тренеров)
+        private TableCell CreateHeaderCell(string text)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "DEDEDE"
+                },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center }
+                ),
+                new Run(
+                    new RunProperties(
+                        new Bold(),
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableCell CreateDataCell(string text, bool alignRight = false, bool isAlternateRow = false)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+
+            if (isAlternateRow)
+            {
+                cellProperties.AppendChild(new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "F9F9F9"
+                });
+            }
+
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = alignRight ? JustificationValues.Right : JustificationValues.Left }
+                ),
+                new Run(
+                    new RunProperties(
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableRow CreateDataRow(string label, string value, bool isAlternateRow = false)
+        {
+            TableRow row = new TableRow();
+            row.AppendChild(CreateDataCell(label, false, isAlternateRow));
+            row.AppendChild(CreateDataCell(value, true, isAlternateRow));
+            return row;
         }
     }
 }

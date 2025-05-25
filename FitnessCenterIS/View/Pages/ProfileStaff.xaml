@@ -10,7 +10,6 @@
       Loaded="StaffProfilePage_Loaded">
 
     <Page.Resources>
-        <!-- Уже определенный стиль -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -18,23 +17,6 @@
             <Setter Property="Margin" Value="0,25,0,15"/>
             <Setter Property="Padding" Value="10,5"/>
             <Setter Property="Background" Value="#ecf0f1"/>
-            <!--<Setter Property="BorderThickness" Value="0,0,0,2"/>
-        <Setter Property="BorderBrush" Value="#3498db"/>-->
-        </Style>
-
-        <!-- Отсутствующие стили -->
-        <Style x:Key="ActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#090909"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2980b9"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="DataGridStyle" TargetType="DataGrid">
@@ -71,7 +53,6 @@
         </Style>
     </Page.Resources>
 
-
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <Grid Margin="20" Background="White">
@@ -89,47 +70,49 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Фото клиента -->
+                        <!-- Фото сотрудника -->
                         <Border Grid.Column="0" Width="150" Height="150" CornerRadius="75" 
                             BorderBrush="White" BorderThickness="3" Margin="0,0,20,0"
                             ClipToBounds="True">
                             <Border.Background>
-                                <ImageBrush x:Name="ClientImage" Stretch="UniformToFill"/>
+                                <ImageBrush x:Name="StaffImage" Stretch="UniformToFill"/>
                             </Border.Background>
                             <Border.Effect>
                                 <DropShadowEffect ShadowDepth="2" BlurRadius="5" Color="#22000000"/>
                             </Border.Effect>
                         </Border>
 
-
                         <!-- Основная информация -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock x:Name="ClientFullName" FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock x:Name="StaffFullName" FontSize="28" FontWeight="Bold" Foreground="White"/>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
-                                <Border x:Name="StatusBorder" Style="{StaticResource StatusChipStyle}" Background="#2ecc71">
-                                    <TextBlock x:Name="ClientStatus" FontSize="14" Foreground="White"/>
-                                </Border>
-                                <Border Margin="10,0,0,0" Style="{StaticResource StatusChipStyle}" Background="#f1c40f">
+                                <Border x:Name="RoleBorder" Style="{StaticResource StatusChipStyle}" Background="#3498db">
                                     <StackPanel Orientation="Horizontal">
-                                        <Icon:PackIconMaterial Kind="Star" Width="14" Height="14" Margin="0,0,5,0" Foreground="White" VerticalAlignment="Center"/>
-                                        <TextBlock x:Name="ClientLoyaltyLevel" FontSize="14" Foreground="White"/>
+                                        <Icon:PackIconMaterial Kind="AccountTie" Width="14" Height="14" Margin="0,0,5,0" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="StaffRole" FontSize="14" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Margin="10,0,0,0" Style="{StaticResource StatusChipStyle}" Background="#27ae60">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Icon:PackIconMaterial Kind="Calendar" Width="14" Height="14" Margin="0,0,5,0" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="StaffHireDate" FontSize="14" Foreground="White"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <Icon:PackIconMaterial Kind="Phone" Width="16" Height="16" Margin="0,0,5,0" Foreground="White" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="ClientPhoneNumber" Foreground="White" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StaffPhoneNumber" Foreground="White" VerticalAlignment="Center"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                                 <Icon:PackIconMaterial Kind="Email" Width="16" Height="16" Margin="0,0,5,0" Foreground="White" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="ClientEmail" Foreground="White" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StaffEmail" Foreground="White" VerticalAlignment="Center"/>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- QR-код -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
                             <Border Background="White" CornerRadius="5" Padding="5" Width="100" Height="100">
-                                <Image x:Name="ClientQRCodeImage" Stretch="Uniform"/>
+                                <Image x:Name="StaffQRCodeImage" Stretch="Uniform"/>
                             </Border>
                             <TextBlock Text="QR-код сотрудника" Foreground="White" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                         </StackPanel>
@@ -142,25 +125,19 @@
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <!-- Быстрые действия -->
-                            <RowDefinition Height="Auto"/>
                             <!-- Личная информация -->
                             <RowDefinition Height="Auto"/>
-                            <!-- Финансовая информация -->
+                            <!-- Рабочая информация -->
                             <RowDefinition Height="Auto"/>
-                            <!-- Абонементы и услуги -->
+                            <!-- Закрепленные услуги -->
                             <RowDefinition Height="Auto"/>
                             <!-- История посещений -->
-                            <RowDefinition Height="Auto"/>
-                            <!-- Опекуны -->
-                            <RowDefinition Height="Auto"/>
-                            <!-- Задачи -->
                             <RowDefinition Height="Auto"/>
                             <!-- Заметки -->
                         </Grid.RowDefinitions>
 
                         <!-- Личная информация -->
-                        <StackPanel Grid.Row="1">
+                        <StackPanel Grid.Row="0">
                             <TextBlock Text="Личная информация" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid Margin="10,0">
                                 <Grid.ColumnDefinitions>
@@ -177,21 +154,21 @@
                                 <StackPanel Grid.Column="0" Grid.Row="0">
                                     <TextBlock Text="ID сотрудника:" Style="{StaticResource LabelStyle}"/>
                                     <Border Background="#f8f9fa" CornerRadius="4" Padding="10,8">
-                                        <TextBlock x:Name="ClientIDTextBlock" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock x:Name="StaffIDTextBlock" Style="{StaticResource ValueStyle}"/>
                                     </Border>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,10,10,0">
                                     <TextBlock Text="Дата рождения:" Style="{StaticResource LabelStyle}"/>
                                     <Border Background="#f8f9fa" CornerRadius="4" Padding="10,8">
-                                        <TextBlock x:Name="ClientDateOfBirth" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock x:Name="StaffDateOfBirth" Style="{StaticResource ValueStyle}"/>
                                     </Border>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="0" Grid.Row="2" Margin="0,10,10,0">
                                     <TextBlock Text="Пол:" Style="{StaticResource LabelStyle}"/>
                                     <Border Background="#f8f9fa" CornerRadius="4" Padding="10,8">
-                                        <TextBlock x:Name="ClientGender" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock x:Name="StaffGender" Style="{StaticResource ValueStyle}"/>
                                     </Border>
                                 </StackPanel>
 
@@ -199,102 +176,82 @@
                                 <StackPanel Grid.Column="1" Grid.Row="0" Margin="10,0,0,0">
                                     <TextBlock Text="Номер карты:" Style="{StaticResource LabelStyle}"/>
                                     <Border Background="#f8f9fa" CornerRadius="4" Padding="10,8">
-                                        <TextBlock x:Name="ClientCardNumber" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock x:Name="StaffCardNumber" Style="{StaticResource ValueStyle}"/>
                                     </Border>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Grid.Row="1" Margin="10,10,0,0">
                                     <TextBlock Text="Адрес:" Style="{StaticResource LabelStyle}"/>
                                     <Border Background="#f8f9fa" CornerRadius="4" Padding="10,8">
-                                        <TextBlock x:Name="ClientAddress" Style="{StaticResource ValueStyle}" TextWrapping="Wrap"/>
+                                        <TextBlock x:Name="StaffAddress" Style="{StaticResource ValueStyle}" TextWrapping="Wrap"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
 
-                        <!-- Финансовая информация -->
-                        <StackPanel Grid.Row="2">
-                            <TextBlock Text="Финансовая информация" Style="{StaticResource SectionHeaderStyle}"/>
+                        <!-- Рабочая информация -->
+                        <StackPanel Grid.Row="1">
+                            <TextBlock Text="Рабочая информация" Style="{StaticResource SectionHeaderStyle}"/>
                             <Grid Margin="10,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Бонусный баланс -->
-                                <Border Grid.Column="0" Background="#e8f7f2" CornerRadius="8" Padding="15" Margin="0,0,10,0">
+                                <!-- Роль -->
+                                <Border Grid.Column="0" Background="#e8f4fd" CornerRadius="8" Padding="15" Margin="0,0,10,0">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <Icon:PackIconMaterial Kind="Gift" Width="24" Height="24" Foreground="#27ae60" VerticalAlignment="Center"/>
-                                            <TextBlock Text="Бонусный баланс" FontWeight="SemiBold" FontSize="16" Margin="10,0,0,0" Foreground="#27ae60"/>
+                                            <Icon:PackIconMaterial Kind="AccountTie" Width="24" Height="24" Foreground="#2980b9" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Должность" FontWeight="SemiBold" FontSize="16" Margin="10,0,0,0" Foreground="#2980b9"/>
                                         </StackPanel>
-                                        <TextBlock x:Name="ClientBonusBalance" FontSize="24" FontWeight="Bold" Margin="0,10,0,0" Foreground="#27ae60"/>
-                                        <TextBlock Text="бонусов" Foreground="#2ecc71"/>
+                                        <TextBlock x:Name="StaffRoleDetail" FontSize="18" FontWeight="Bold" Margin="0,10,0,0" Foreground="#2980b9"/>
+                                        <TextBlock x:Name="StaffRoleDescription" Foreground="#3498db" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
-                                <!-- Депозитный баланс -->
-                                <Border Grid.Column="1" Background="#f0f0f0" CornerRadius="8" Padding="15" Margin="10,0,0,0">
+                                <!-- Дата найма -->
+                                <Border Grid.Column="1" Background="#e8f7f2" CornerRadius="8" Padding="15" Margin="10,0,0,0">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal">
-                                            <Icon:PackIconMaterial Kind="WalletOutline" Width="24" Height="24" Foreground="#2980b9" VerticalAlignment="Center"/>
-                                            <TextBlock Text="Депозитный баланс" FontWeight="SemiBold" FontSize="16" Margin="10,0,0,0" Foreground="#2980b9"/>
+                                            <Icon:PackIconMaterial Kind="Calendar" Width="24" Height="24" Foreground="#27ae60" VerticalAlignment="Center"/>
+                                            <TextBlock Text="Дата найма" FontWeight="SemiBold" FontSize="16" Margin="10,0,0,0" Foreground="#27ae60"/>
                                         </StackPanel>
-                                        <TextBlock x:Name="ClientDepositBalance" FontSize="24" FontWeight="Bold" Margin="0,10,0,0" Foreground="#2980b9"/>
-                                        <TextBlock Text="рублей" Foreground="#3498db"/>
+                                        <TextBlock x:Name="StaffHireDateDetail" FontSize="18" FontWeight="Bold" Margin="0,10,0,0" Foreground="#27ae60"/>
+                                        <TextBlock x:Name="StaffWorkExperience" Foreground="#2ecc71"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
                         </StackPanel>
 
-                        <!-- Абонементы и услуги -->
-                        <StackPanel Grid.Row="3">
-                            <TextBlock Text="Услуги закрепленные за сотрудником" Style="{StaticResource SectionHeaderStyle}"/>
-                            <DataGrid x:Name="ClientSeasonTicketsGrid" Style="{StaticResource DataGridStyle}" Height="Auto" MaxHeight="250">
+                        <!-- Закрепленные услуги -->
+                        <StackPanel Grid.Row="2">
+                            <TextBlock Text="Закрепленные услуги" Style="{StaticResource SectionHeaderStyle}"/>
+                            <DataGrid x:Name="StaffServicesGrid" Style="{StaticResource DataGridStyle}" Height="Auto" MaxHeight="250">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
-                                    <DataGridTextColumn Header="Дата продажи" Binding="{Binding SaleDateTime, StringFormat=dd.MM.yyyy}" Width="Auto"/>
-                                    <DataGridTextColumn Header="Дата начала" Binding="{Binding StartDateTime, StringFormat=dd.MM.yyyy}" Width="Auto"/>
-                                    <DataGridTextColumn Header="Дата окончания" Binding="{Binding EndDateTime, StringFormat=dd.MM.yyyy}" Width="Auto"/>
-                                    <DataGridTextColumn Header="Цена" Binding="{Binding PriceSold, StringFormat={}{0:N0} ₽}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Название услуги" Binding="{Binding ServiceName}" Width="*"/>
+                                    <DataGridTextColumn Header="Тип услуги" Binding="{Binding ServiceType}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Классификация" Binding="{Binding ServiceClassification}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:N0} ₽}" Width="Auto"/>
                                     <DataGridTemplateColumn Header="Статус" Width="Auto">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Border CornerRadius="12" Padding="8,3" Margin="5,2" HorizontalAlignment="Center">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="#e74c3c"/>
+                                                            <Setter Property="Background" Value="#2ecc71"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding StatusSale}" Value="Активен">
-                                                                    <Setter Property="Background" Value="#2ecc71"/>
+                                                                <DataTrigger Binding="{Binding StatusService}" Value="Неактивна">
+                                                                    <Setter Property="Background" Value="#e74c3c"/>
                                                                 </DataTrigger>
-                                                                <DataTrigger Binding="{Binding StatusSale}" Value="Ожидает активации">
+                                                                <DataTrigger Binding="{Binding StatusService}" Value="Приостановлена">
                                                                     <Setter Property="Background" Value="#f39c12"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding StatusSale}" Value="Заморожен">
-                                                                    <Setter Property="Background" Value="#3498db"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
-                                                    <TextBlock Text="{Binding StatusSale}" Foreground="White" FontWeight="SemiBold"/>
+                                                    <TextBlock Text="{Binding StatusService}" Foreground="White" FontWeight="SemiBold"/>
                                                 </Border>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Действия" Width="Auto">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Button Margin="2" Padding="5,2" Background="Transparent" BorderThickness="0" 
-                                                        ToolTip="Просмотр деталей" Click="ViewSeasonTicketDetails_Click">
-                                                        <Icon:PackIconMaterial Kind="Eye" Width="16" Height="16" Foreground="#3498db"/>
-                                                    </Button>
-                                                    <Button Margin="2" Padding="5,2" Background="Transparent" BorderThickness="0" 
-                                                        ToolTip="Заморозить" Click="FreezeSeasonTicket_Click">
-                                                        <Icon:PackIconMaterial Kind="Snowflake" Width="16" Height="16" Foreground="#3498db"/>
-                                                    </Button>
-                                                </StackPanel>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -303,24 +260,24 @@
                         </StackPanel>
 
                         <!-- История посещений -->
-                        <StackPanel Grid.Row="4">
+                        <StackPanel Grid.Row="3">
                             <TextBlock Text="История посещений" Style="{StaticResource SectionHeaderStyle}"/>
-                            <DataGrid x:Name="ClientAttendancesGrid" Style="{StaticResource DataGridStyle}" Height="Auto" MaxHeight="200">
+                            <DataGrid x:Name="StaffAttendancesGrid" Style="{StaticResource DataGridStyle}" Height="Auto" MaxHeight="200">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Дата" Binding="{Binding EntryDateTime, StringFormat=dd.MM.yyyy}" Width="Auto"/>
                                     <DataGridTextColumn Header="Время входа" Binding="{Binding EntryDateTime, StringFormat=HH:mm}" Width="Auto"/>
                                     <DataGridTextColumn Header="Время выхода" Binding="{Binding ExitDateTime, StringFormat=HH:mm}" Width="Auto"/>
-                                    <DataGridTextColumn Header="Продолжительность" Binding="{Binding Duration}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Продолжительность" Binding="{Binding FormattedDuration}" Width="Auto"/>
                                     <DataGridTextColumn Header="Шкафчик" Binding="{Binding KeyNumber}" Width="*"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
 
                         <!-- Заметки -->
-                        <StackPanel Grid.Row="7">
+                        <StackPanel Grid.Row="4">
                             <TextBlock Text="Заметки" Style="{StaticResource SectionHeaderStyle}"/>
                             <Border Background="#f8f9fa" CornerRadius="5" Padding="15" Margin="10,0">
-                                <TextBlock x:Name="ClientNotesTextBox" TextWrapping="Wrap" Foreground="#34495e"/>
+                                <TextBlock x:Name="StaffNotesTextBox" TextWrapping="Wrap" Foreground="#34495e"/>
                             </Border>
                         </StackPanel>
                     </Grid>

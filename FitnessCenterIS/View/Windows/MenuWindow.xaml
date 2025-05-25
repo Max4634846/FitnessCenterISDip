@@ -212,10 +212,10 @@
                                 <Expander  Style="{StaticResource TransparentExpander}"  Foreground="#fff" IsExpanded="False" Margin="0 15 0 0">
                                     <Expander.Header>
                                         <WrapPanel Margin="-55,0,-49,0">
-                                            <materialDesign:PackIcon Kind="Dollar" Width="20" Height="20"
+                                            <materialDesign:PackIcon Kind="Money" Width="20" Height="20"
                                                                       VerticalAlignment="Center"
                                                                       Foreground="#fff"
-                                                                      Margin="-0 0 5 0"/>
+                                                                      Margin="0 0 5 0"/>
                                             <TextBlock Text="Продажи" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
                                         </WrapPanel>
                                     </Expander.Header>
@@ -232,7 +232,7 @@
                                             <materialDesign:PackIcon Kind="DocumentSign" Width="20" Height="20"
                                       VerticalAlignment="Center"
                                       Foreground="#fff"
-                                      Margin="-0 0 5 0"/>
+                                      Margin="0 0 5 0"/>
                                             <TextBlock Text="Отчеты" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="#fff" Padding="5 0 0 0"/>
                                         </WrapPanel>
                                     </Expander.Header>

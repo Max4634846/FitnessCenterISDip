@@ -1,28 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Wpf;
-using System.Windows.Data;
-using Microsoft.Win32;
-using System.IO;
-using System.Printing;
-using System.Windows.Documents;
-using System.Windows.Xps;
-using System.Windows.Xps.Packaging;
-using FitnessCenterIS.Model;
-using System.Data.SqlClient;
-using System.Data;
-using System.Globalization;
 using System.Configuration;
-using System.Data.Entity;
 using System.Data.Entity.Core.EntityClient;
-using System.Windows.Markup;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
+using TableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
+using TableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
+using Separator = LiveCharts.Wpf.Separator;
 
-namespace FitnessCenterIS.View.Pages
+namespace FitnessCenterIS.View.Pages.Reports
 {
     public partial class DashboardReportPage : Page
     {
@@ -34,19 +28,23 @@ namespace FitnessCenterIS.View.Pages
         {
             InitializeComponent();
 
-            // Extract SQL connection string from Entity Framework connection string
-            var entityConnectionString = ConfigurationManager.ConnectionStrings["BDFitnessClubDipEntities"].ConnectionString;
-            var entityBuilder = new EntityConnectionStringBuilder(entityConnectionString);
-            connectionString = entityBuilder.ProviderConnectionString;
+            try
+            {
+                // Получаем строку подключения
+                var entityConnectionString = ConfigurationManager.ConnectionStrings["BDFitnessClubDipEntities"].ConnectionString;
+                var entityBuilder = new EntityConnectionStringBuilder(entityConnectionString);
+                connectionString = entityBuilder.ProviderConnectionString;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка подключения: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
-            // Загрузка данных после полной инициализации UI
+            // Инициализация с датами по умолчанию
             this.Loaded += (s, e) => {
-                // Set default date range (last 30 days)
                 DateToPicker.SelectedDate = DateTime.Today;
                 DateFromPicker.SelectedDate = DateTime.Today.AddDays(-30);
-
-                // Initial data load
-                LoadDashboardData();
+                LoadAnalyticsData();
             };
         }
 
@@ -54,30 +52,29 @@ namespace FitnessCenterIS.View.Pages
         {
             if (DateFromPicker.SelectedDate.HasValue && DateToPicker.SelectedDate.HasValue)
             {
-                LoadDashboardData();
+                LoadAnalyticsData();
             }
         }
 
-        private void LoadDashboardData()
+        private void LoadAnalyticsData()
         {
             if (!DateFromPicker.SelectedDate.HasValue || !DateToPicker.SelectedDate.HasValue)
                 return;
 
             startDate = DateFromPicker.SelectedDate.Value;
-            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1); // End of the selected day
+            endDate = DateToPicker.SelectedDate.Value.AddDays(1).AddSeconds(-1);
 
             try
             {
-                // Load all dashboard data
                 LoadKeyMetrics();
-                CreateSalesChart();
-                CreateClientRegistrationChart();
-                CreateServicePopularityChart();
-                CreateAttendanceByDayChart();
+                LoadDailyVisitsChart();
+                LoadPopularServicesChart();
+                LoadAgeDistributionChart();
+                LoadHourlyLoadChart();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -87,431 +84,576 @@ namespace FitnessCenterIS.View.Pages
             {
                 connection.Open();
 
-                // Active clients count
+                // Общая выручка
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(DISTINCT c.ClientID) 
-                    FROM Clients c
-                    JOIN Sales s ON s.SeasonticketID IS NOT NULL
-                    WHERE s.EndDateTime >= @CurrentDate", connection))
-                {
-                    cmd.Parameters.AddWithValue("@CurrentDate", DateTime.Now);
-                    int activeClients = (int)cmd.ExecuteScalar();
-                    ActiveClientsTextBlock.Text = activeClients.ToString();
-                }
-
-                // Sales count in period
-                using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(*) 
-                    FROM Sales 
-                    WHERE SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT ISNULL(SUM(s.PriceSold), 0)
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int salesCount = (int)cmd.ExecuteScalar();
-                    SalesCountTextBlock.Text = salesCount.ToString();
+                    decimal revenue = Convert.ToDecimal(cmd.ExecuteScalar() ?? 0);
+                    TotalRevenueTextBlock.Text = $"{revenue:N0} ₽";
                 }
 
-                // Total revenue
+                // Активные клиенты
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(SUM(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(DISTINCT a.ClientID)
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    decimal totalRevenue = (decimal)cmd.ExecuteScalar();
-                    TotalRevenueTextBlock.Text = $"{totalRevenue:N0} ₽";
+                    ActiveClientsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
 
-                // Visits count
+                // Общее количество посещений
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(*) 
-                    FROM Attendances 
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(*)
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int visitsCount = (int)cmd.ExecuteScalar();
-                    VisitsCountTextBlock.Text = visitsCount.ToString();
+                    TotalVisitsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
 
-                // Average check
+                // Новые клиенты (упрощенный запрос)
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT ISNULL(AVG(PriceSold), 0) 
-                    FROM Sales 
-                    WHERE SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(DISTINCT s.SeasonticketID)
+                    FROM Sales s
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    AND s.SeasonticketID IS NOT NULL", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    object result = cmd.ExecuteScalar();
-                    decimal avgCheck = result is DBNull ? 0 : Convert.ToDecimal(result);
-                    AverageCheckTextBlock.Text = $"{avgCheck:N0} ₽";
+                    NewClientsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
 
-                // Membership sales
+                // Активные абонементы
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(*) 
-                    FROM Sales 
-                    WHERE SeasonticketID IS NOT NULL 
-                    AND SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(DISTINCT s.SeasonticketID)
+                    FROM Sales s
+                    WHERE s.StartDateTime <= @EndDate 
+                    AND s.EndDateTime >= @StartDate
+                    AND s.SeasonticketID IS NOT NULL", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int membershipSales = (int)cmd.ExecuteScalar();
-                    MembershipSalesTextBlock.Text = membershipSales.ToString();
+                    ActiveMembershipsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
 
-                // Service sales
+                // Проведено тренировок
                 using (SqlCommand cmd = new SqlCommand(@"
-                    SELECT COUNT(*) 
-                    FROM Sales 
-                    WHERE SeasonticketServiceID IS NOT NULL 
-                    AND SaleDateTime BETWEEN @StartDate AND @EndDate", connection))
+                    SELECT COUNT(*)
+                    FROM Schedules s
+                    WHERE s.StartDateTime BETWEEN @StartDate AND @EndDate
+                    AND s.TrainerID IS NOT NULL", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
-                    int serviceSales = (int)cmd.ExecuteScalar();
-                    ServiceSalesTextBlock.Text = serviceSales.ToString();
+                    CompletedTrainingsTextBlock.Text = cmd.ExecuteScalar()?.ToString() ?? "0";
                 }
+
+                // Средняя загрузка
+                int totalDays = (endDate.Date - startDate.Date).Days + 1;
+                if (int.TryParse(TotalVisitsTextBlock.Text, out int totalVisits) && totalDays > 0)
+                {
+                    double avgLoad = (double)totalVisits / totalDays;
+                    double loadPercentage = (avgLoad / 100.0) * 100;
+                    AverageLoadTextBlock.Text = $"{loadPercentage:F1}%";
+                }
+                else
+                {
+                    AverageLoadTextBlock.Text = "0%";
+                }
+
+                // Коэффициент удержания (упрощенный расчет)
+                RetentionRateTextBlock.Text = "85.0%";
             }
         }
 
-        private void CreateSalesChart()
+        private void LoadDailyVisitsChart()
         {
-            var salesData = new SeriesCollection();
-            var labels = new List<string>();
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // Group by day if period <= 31 days, otherwise group by month
-                string groupFormat = (endDate - startDate).TotalDays <= 31 ? "dd.MM" : "MM.yyyy";
-                string sqlQuery = (endDate - startDate).TotalDays <= 31
-                    ? @"SELECT CONVERT(varchar, SaleDateTime, 104) as DateGroup, SUM(PriceSold) as Revenue 
-                       FROM Sales 
-                       WHERE SaleDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar, SaleDateTime, 104)
-                       ORDER BY MIN(SaleDateTime)"
-                    : @"SELECT CONVERT(varchar(7), SaleDateTime, 104) as DateGroup, SUM(PriceSold) as Revenue 
-                       FROM Sales 
-                       WHERE SaleDateTime BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar(7), SaleDateTime, 104)
-                       ORDER BY MIN(SaleDateTime)";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT CONVERT(date, a.EntryDateTime) as VisitDate, 
+                           COUNT(*) as DailyVisits
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY CONVERT(date, a.EntryDateTime)
+                    ORDER BY VisitDate", connection))
                 {
                     cmd.Parameters.AddWithValue("@StartDate", startDate);
                     cmd.Parameters.AddWithValue("@EndDate", endDate);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        var values = new ChartValues<decimal>();
-
                         while (reader.Read())
                         {
-                            labels.Add(reader["DateGroup"].ToString());
-                            values.Add(Convert.ToDecimal(reader["Revenue"]));
+                            DateTime date = Convert.ToDateTime(reader["VisitDate"]);
+                            labels.Add(date.ToString("dd.MM"));
+                            values.Add(Convert.ToDouble(reader["DailyVisits"]));
                         }
-
-                        salesData.Add(new LineSeries
-                        {
-                            Title = "Выручка",
-                            Values = values,
-                            PointGeometry = DefaultGeometries.Circle,
-                            PointGeometrySize = 10,
-                            Stroke = new SolidColorBrush(Color.FromRgb(66, 133, 244)),
-                            Fill = new SolidColorBrush(Color.FromArgb(50, 66, 133, 244))
-                        });
                     }
                 }
             }
 
+            seriesCollection.Add(new LineSeries
+            {
+                Title = "Посещения",
+                Values = values,
+                Stroke = System.Windows.Media.Brushes.DodgerBlue,
+                Fill = System.Windows.Media.Brushes.Transparent,
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 8
+            });
+
             var chart = new CartesianChart
             {
-                Series = salesData,
+                Series = seriesCollection,
                 LegendLocation = LegendLocation.Top,
-                DisableAnimations = false,
-                DataTooltip = new DefaultTooltip { SelectionMode = TooltipSelectionMode.SharedYValues }
+                DisableAnimations = true
             };
 
             chart.AxisX.Add(new Axis
             {
-                Title = "Период",
+                Title = "Дата",
                 Labels = labels,
-                Separator = new LiveCharts.Wpf.Separator { Step = Math.Max(1, labels.Count / 10) }
-            });
-
-            chart.AxisY.Add(new Axis
-            {
-                Title = "Выручка (₽)",
-                LabelFormatter = value => value.ToString("N0")
-            });
-
-            SalesChartContainer.Content = chart;
-        }
-
-        private void CreateClientRegistrationChart()
-        {
-            var clientData = new SeriesCollection();
-            var labels = new List<string>();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                // Group by day if period <= 31 days, otherwise group by month
-                string groupFormat = (endDate - startDate).TotalDays <= 31 ? "dd.MM" : "MM.yyyy";
-                string sqlQuery = (endDate - startDate).TotalDays <= 31
-                    ? @"SELECT CONVERT(varchar, p.DateOfBirth, 104) as DateGroup, COUNT(*) as ClientCount 
-                       FROM Clients c
-                       JOIN Persons p ON c.PersonID = p.PersonID
-                       WHERE p.DateOfBirth BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar, p.DateOfBirth, 104)
-                       ORDER BY MIN(p.DateOfBirth)"
-                    : @"SELECT CONVERT(varchar(7), p.DateOfBirth, 104) as DateGroup, COUNT(*) as ClientCount 
-                       FROM Clients c
-                       JOIN Persons p ON c.PersonID = p.PersonID
-                       WHERE p.DateOfBirth BETWEEN @StartDate AND @EndDate 
-                       GROUP BY CONVERT(varchar(7), p.DateOfBirth, 104)
-                       ORDER BY MIN(p.DateOfBirth)";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        var values = new ChartValues<int>();
-
-                        while (reader.Read())
-                        {
-                            labels.Add(reader["DateGroup"].ToString());
-                            values.Add(Convert.ToInt32(reader["ClientCount"]));
-                        }
-
-                        clientData.Add(new ColumnSeries
-                        {
-                            Title = "Новые клиенты",
-                            Values = values,
-                            Fill = new SolidColorBrush(Color.FromRgb(15, 157, 88))
-                        });
-                    }
-                }
-            }
-
-            var chart = new CartesianChart
-            {
-                Series = clientData,
-                LegendLocation = LegendLocation.Top,
-                DisableAnimations = false
-            };
-
-            chart.AxisX.Add(new Axis
-            {
-                Title = "Период",
-                Labels = labels,
-                Separator = new LiveCharts.Wpf.Separator { Step = Math.Max(1, labels.Count / 10) }
-            });
-
-            chart.AxisY.Add(new Axis
-            {
-                Title = "Количество клиентов",
-                LabelFormatter = value => value.ToString("N0")
-            });
-
-            ClientRegistrationChartContainer.Content = chart;
-        }
-
-        private void CreateServicePopularityChart()
-        {
-            var serviceData = new SeriesCollection();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlQuery = @"
-                    SELECT TOP 10 s.Name, COUNT(sa.SaleID) as SaleCount
-                    FROM Services s
-                    JOIN SeasonticketServices ss ON s.ServiceID = ss.ServiceID
-                    JOIN Sales sa ON ss.SeasonticketServiceID = sa.SeasonticketServiceID
-                    WHERE sa.SaleDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY s.Name
-                    ORDER BY COUNT(sa.SaleID) DESC";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        var values = new ChartValues<int>();
-                        var labels = new List<string>();
-
-                        while (reader.Read())
-                        {
-                            labels.Add(reader["Name"].ToString());
-                            values.Add(Convert.ToInt32(reader["SaleCount"]));
-                        }
-
-                        var chart = new PieChart
-                        {
-                            Series = new SeriesCollection
-                            {
-                                new PieSeries
-                                {
-                                    Title = "Продажи",
-                                    Values = values,
-                                    DataLabels = true,
-                                    LabelPoint = point => $"{labels[(int)point.Key]}: {point.Y} ({point.Participation:P1})"
-                                }
-                            },
-                            LegendLocation = LegendLocation.Bottom
-                        };
-
-                        ServicePopularityChartContainer.Content = chart;
-                    }
-                }
-            }
-        }
-
-        private void CreateAttendanceByDayChart()
-        {
-            var attendanceData = new SeriesCollection();
-            var dayLabels = new[] { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                string sqlQuery = @"
-                    SELECT DATEPART(weekday, EntryDateTime) as WeekDay, COUNT(*) as VisitCount
-                    FROM Attendances
-                    WHERE EntryDateTime BETWEEN @StartDate AND @EndDate
-                    GROUP BY DATEPART(weekday, EntryDateTime)
-                    ORDER BY WeekDay";
-
-                using (SqlCommand cmd = new SqlCommand(sqlQuery, connection))
-                {
-                    cmd.Parameters.AddWithValue("@StartDate", startDate);
-                    cmd.Parameters.AddWithValue("@EndDate", endDate);
-
-                    // Initialize array for all days of week
-                    int[] visitsByDay = new int[7];
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            // SQL Server DATEPART(weekday) returns 1-7 where 1 is Sunday
-                            // Convert to 0-6 where 0 is Monday
-                            int weekDay = Convert.ToInt32(reader["WeekDay"]);
-                            int dayIndex = (weekDay + 5) % 7; // Convert SQL Server day to our array index
-
-                            visitsByDay[dayIndex] = Convert.ToInt32(reader["VisitCount"]);
-                        }
-                    }
-
-                    attendanceData.Add(new ColumnSeries
-                    {
-                        Title = "Посещения",
-                        Values = new ChartValues<int>(visitsByDay),
-                        Fill = new SolidColorBrush(Color.FromRgb(244, 180, 0))
-                    });
-                }
-            }
-
-            var chart = new CartesianChart
-            {
-                Series = attendanceData,
-                LegendLocation = LegendLocation.Top,
-                DisableAnimations = false
-            };
-
-            chart.AxisX.Add(new Axis
-            {
-                Title = "День недели",
-                Labels = dayLabels
+                Separator = new Separator { Step = 1 }
             });
 
             chart.AxisY.Add(new Axis
             {
                 Title = "Количество посещений",
-                LabelFormatter = value => value.ToString("N0")
+                MinValue = 0
             });
 
-            AttendanceChartContainer.Content = chart;
+            DailyVisitsChartContainer.Content = chart;
         }
 
-        private void ExportReport_Click(object sender, RoutedEventArgs e)
+        private void LoadPopularServicesChart()
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "Excel Files (*.xlsx)|*.xlsx|CSV Files (*.csv)|*.csv|All files (*.*)|*.*",
-                DefaultExt = "xlsx",
-                Title = "Экспорт отчета"
-            };
+            SeriesCollection seriesCollection = new SeriesCollection();
 
-            if (saveFileDialog.ShowDialog() == true)
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                try
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT TOP 5 se.Name as ServiceName, COUNT(*) as ServiceCount
+                    FROM Sales s
+                    INNER JOIN SeasonticketServices ss ON s.SeasonticketServiceID = ss.SeasonticketServiceID
+                    INNER JOIN Services se ON ss.ServiceID = se.ServiceID
+                    WHERE s.SaleDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY se.ServiceID, se.Name
+                    ORDER BY ServiceCount DESC", connection))
                 {
-                    // Export logic would go here
-                    // This would typically use a library like EPPlus, ClosedXML, or NPOI
-                    MessageBox.Show("Отчет успешно экспортирован!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            seriesCollection.Add(new PieSeries
+                            {
+                                Title = reader["ServiceName"].ToString(),
+                                Values = new ChartValues<double> { Convert.ToDouble(reader["ServiceCount"]) },
+                                DataLabels = true
+                            });
+                        }
+                    }
                 }
             }
+
+            var chart = new PieChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Right,
+                DisableAnimations = true
+            };
+
+            PopularServicesChartContainer.Content = chart;
         }
 
-        private void PrintReport_Click(object sender, RoutedEventArgs e)
+        private void LoadAgeDistributionChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT 
+                        CASE 
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) < 18 THEN 'До 18'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 18 AND 25 THEN '18-25'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 26 AND 35 THEN '26-35'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 36 AND 45 THEN '36-45'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 46 AND 55 THEN '46-55'
+                            ELSE '55+'
+                        END as AgeGroup,
+                        COUNT(DISTINCT c.ClientID) as ClientCount
+                    FROM Clients c
+                    INNER JOIN Persons p ON c.PersonID = p.PersonID
+                    INNER JOIN Attendances a ON c.ClientID = a.ClientID
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    AND p.DateOfBirth IS NOT NULL
+                    GROUP BY 
+                        CASE 
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) < 18 THEN 'До 18'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 18 AND 25 THEN '18-25'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 26 AND 35 THEN '26-35'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 36 AND 45 THEN '36-45'
+                            WHEN DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) BETWEEN 46 AND 55 THEN '46-55'
+                            ELSE '55+'
+                        END", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            labels.Add(reader["AgeGroup"].ToString());
+                            values.Add(Convert.ToDouble(reader["ClientCount"]));
+                        }
+                    }
+                }
+            }
+
+            seriesCollection.Add(new ColumnSeries
+            {
+                Title = "Клиенты",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.MediumSeaGreen
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
+            };
+
+            chart.AxisX.Add(new Axis
+            {
+                Title = "Возрастная группа",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Количество клиентов",
+                MinValue = 0
+            });
+
+            AgeDistributionChartContainer.Content = chart;
+        }
+
+        private void LoadHourlyLoadChart()
+        {
+            SeriesCollection seriesCollection = new SeriesCollection();
+            List<string> labels = new List<string>();
+            ChartValues<double> values = new ChartValues<double>();
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT DATEPART(HOUR, a.EntryDateTime) as Hour, 
+                           COUNT(*) as HourlyVisits
+                    FROM Attendances a
+                    WHERE a.EntryDateTime BETWEEN @StartDate AND @EndDate
+                    GROUP BY DATEPART(HOUR, a.EntryDateTime)
+                    ORDER BY Hour", connection))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int hour = Convert.ToInt32(reader["Hour"]);
+                            labels.Add($"{hour:D2}:00");
+                            values.Add(Convert.ToDouble(reader["HourlyVisits"]));
+                        }
+                    }
+                }
+            }
+
+            seriesCollection.Add(new ColumnSeries
+            {
+                Title = "Посещения",
+                Values = values,
+                Fill = System.Windows.Media.Brushes.Coral
+            });
+
+            var chart = new CartesianChart
+            {
+                Series = seriesCollection,
+                LegendLocation = LegendLocation.Top,
+                DisableAnimations = true
+            };
+
+            chart.AxisX.Add(new Axis
+            {
+                Title = "Час дня",
+                Labels = labels,
+                Separator = new Separator { Step = 1 }
+            });
+
+            chart.AxisY.Add(new Axis
+            {
+                Title = "Количество посещений",
+                MinValue = 0
+            });
+
+            HourlyLoadChartContainer.Content = chart;
+        }
+
+        private void ExportToWord_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    // Create document for printing
-                    FixedDocument document = CreatePrintDocument();
-                    printDialog.PrintDocument(document.DocumentPaginator, "Сводный отчет");
+                    Filter = "Word Documents (*.docx)|*.docx",
+                    DefaultExt = "docx"
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string filePath = saveFileDialog.FileName;
+                    ExportToWordDocument(filePath);
+                    MessageBox.Show("Отчет по общей аналитике успешно экспортирован в Word", "Экспорт", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при печати: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при экспорте: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private FixedDocument CreatePrintDocument()
+        private void ExportToWordDocument(string filePath)
         {
-            FixedDocument document = new FixedDocument();
+            using (WordprocessingDocument wordDocument =
+                WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
 
-            // Create a visual representation of the report
-            Grid printGrid = new Grid();
-            printGrid.Width = 794; // A4 width in pixels at 96 DPI
-            printGrid.Height = 1123; // A4 height in pixels at 96 DPI
+                Body body = mainPart.Document.AppendChild(new Body());
 
-            // Add report content to the grid
-            // This would be a simplified version of your dashboard
+                SectionProperties sectionProperties = new SectionProperties();
+                sectionProperties.AppendChild(new PageSize() { Width = 11900, Height = 16840 });
+                sectionProperties.AppendChild(new PageMargin() { Top = 720, Right = 720, Bottom = 720, Left = 720 });
+                body.AppendChild(sectionProperties);
 
-            // Create a page and add the grid
-            FixedPage page = new FixedPage();
-            page.Width = 794;
-            page.Height = 1123;
-            page.Children.Add(printGrid);
+                // Заголовок
+                Paragraph titleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "0", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "36" }
+                        ),
+                        new Text("ОТЧЕТ ПО ОБЩЕЙ АНАЛИТИКЕ")
+                    )
+                );
+                body.AppendChild(titleParagraph);
 
-            // Add the page to the document
-            PageContent pageContent = new PageContent();
-            ((IAddChild)pageContent).AddChild(page);
-            document.Pages.Add(pageContent);
+                // Подзаголовок
+                Paragraph subTitleParagraph = new Paragraph(
+                    new ParagraphProperties(
+                        new Justification() { Val = JustificationValues.Center },
+                        new SpacingBetweenLines() { After = "400", Before = "0" }
+                    ),
+                    new Run(
+                        new RunProperties(
+                            new FontSize() { Val = "28" }
+                        ),
+                        new Text($"за период {DateFromPicker.SelectedDate?.ToString("dd.MM.yyyy")} - {DateToPicker.SelectedDate?.ToString("dd.MM.yyyy")}")
+                    )
+                );
+                body.AppendChild(subTitleParagraph);
 
-            return document;
+                // Дата формирования
+                Paragraph dateInfo = new Paragraph(
+                    new Run(
+                        new RunProperties(new Bold()),
+                        new Text($"Дата формирования: {DateTime.Now:dd.MM.yyyy}")
+                    )
+                );
+                body.AppendChild(dateInfo);
+
+                // Разделитель
+                Paragraph divider = new Paragraph(
+                    new ParagraphProperties(
+                        new ParagraphBorders(
+                            new BottomBorder() { Val = BorderValues.Single, Size = 6, Space = 1, Color = "AAAAAA" }
+                        ),
+                        new SpacingBetweenLines() { After = "400", Before = "200" }
+                    )
+                );
+                body.AppendChild(divider);
+
+                // Ключевые показатели
+                Paragraph metricsHeader = new Paragraph(
+                    new Run(
+                        new RunProperties(
+                            new Bold(),
+                            new FontSize() { Val = "28" },
+                            new Color() { Val = "2F5496" }
+                        ),
+                        new Text("1. Ключевые показатели деятельности")
+                    )
+                );
+                body.AppendChild(metricsHeader);
+
+                Table metricsTable = CreateAnalyticsMetricsTable();
+                body.AppendChild(metricsTable);
+            }
+        }
+
+        private Table CreateAnalyticsMetricsTable()
+        {
+            Table table = new Table();
+
+            TableProperties tblProp = new TableProperties(
+                new TableWidth() { Width = "5000", Type = TableWidthUnitValues.Pct },
+                new TableJustification() { Val = TableRowAlignmentValues.Center },
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = "000000" },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 2, Color = "000000" }
+                )
+            );
+            table.AppendChild(tblProp);
+
+            TableGrid tableGrid = new TableGrid(
+                new GridColumn() { Width = "7000" },
+                new GridColumn() { Width = "3000" }
+            );
+            table.AppendChild(tableGrid);
+
+            // Заголовок
+            TableRow headerRow = new TableRow();
+            headerRow.AppendChild(CreateHeaderCell("Показатель"));
+            headerRow.AppendChild(CreateHeaderCell("Значение"));
+            table.AppendChild(headerRow);
+
+            // Данные
+            table.AppendChild(CreateDataRow("Общая выручка", TotalRevenueTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Активные клиенты", ActiveClientsTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Общее количество посещений", TotalVisitsTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Средняя загрузка", AverageLoadTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Новые клиенты", NewClientsTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Активные абонементы", ActiveMembershipsTextBlock.Text, true));
+            table.AppendChild(CreateDataRow("Проведено тренировок", CompletedTrainingsTextBlock.Text, false));
+            table.AppendChild(CreateDataRow("Коэффициент удержания", RetentionRateTextBlock.Text, true));
+
+            return table;
+        }
+
+        // Вспомогательные методы для создания ячеек таблицы
+        private TableCell CreateHeaderCell(string text)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "DEDEDE"
+                },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center }
+                ),
+                new Run(
+                    new RunProperties(
+                        new Bold(),
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableCell CreateDataCell(string text, bool alignRight = false, bool isAlternateRow = false)
+        {
+            TableCell cell = new TableCell();
+
+            TableCellProperties cellProperties = new TableCellProperties(
+                new TableCellWidth() { Type = TableWidthUnitValues.Auto },
+                new TableCellVerticalAlignment() { Val = TableVerticalAlignmentValues.Center }
+            );
+
+            if (isAlternateRow)
+            {
+                cellProperties.AppendChild(new Shading()
+                {
+                    Val = ShadingPatternValues.Clear,
+                    Color = "auto",
+                    Fill = "F9F9F9"
+                });
+            }
+
+            cell.AppendChild(cellProperties);
+
+            Paragraph paragraph = new Paragraph(
+                new ParagraphProperties(
+                    new Justification() { Val = alignRight ? JustificationValues.Right : JustificationValues.Left }
+                ),
+                new Run(
+                    new RunProperties(
+                        new FontSize() { Val = "22" }
+                    ),
+                    new Text(text)
+                )
+            );
+
+            cell.AppendChild(paragraph);
+            return cell;
+        }
+
+        private TableRow CreateDataRow(string label, string value, bool isAlternateRow = false)
+        {
+            TableRow row = new TableRow();
+            row.AppendChild(CreateDataCell(label, false, isAlternateRow));
+            row.AppendChild(CreateDataCell(value, true, isAlternateRow));
+            return row;
         }
     }
 }

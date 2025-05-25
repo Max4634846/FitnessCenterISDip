@@ -1,14 +1,14 @@
-﻿<Page x:Class="FitnessCenterIS.View.Pages.DashboardReportPage"
+﻿<Page x:Class="FitnessCenterIS.View.Pages.Reports.DashboardReportPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:FitnessCenterIS.View.Pages"
+      xmlns:local="clr-namespace:FitnessCenterIS.View.Pages.Reports"
       xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="1280"
-      Title="Сводный отчет">
+      Title="Общая аналитика">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -29,9 +29,9 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="ChartLineVariant" Width="30" Height="30" 
+                    <materialDesign:PackIcon Kind="ChartLine" Width="30" Height="30" 
                                          VerticalAlignment="Center" Foreground="#090909"/>
-                    <TextBlock Text="Сводный отчет" FontWeight="Bold" FontSize="22" 
+                    <TextBlock Text="Общая аналитика" FontWeight="Bold" FontSize="22" 
                            VerticalAlignment="Center" Margin="10 0 0 0"/>
                 </StackPanel>
 
@@ -45,19 +45,10 @@
 
                     <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
                         Margin="15 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
-                        Click="ExportReport_Click">
+                        Click="ExportToWord_Click">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="FileExport" Margin="0 0 5 0"/>
-                            <TextBlock Text="Экспорт"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Style="{StaticResource MaterialDesignOutlinedButton}" 
-                        Margin="10 0 0 0" Padding="10 5" Foreground="#090909" BorderBrush="#090909"
-                        Click="PrintReport_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Printer" Margin="0 0 5 0"/>
-                            <TextBlock Text="Печать"/>
+                            <materialDesign:PackIcon Kind="FileWord" Margin="0 0 5 0"/>
+                            <TextBlock Text="Экспорт в Word"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -69,81 +60,105 @@
                 BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                 materialDesign:ElevationAssist.Elevation="Dp2">
             <StackPanel>
-                <TextBlock Text="Ключевые показатели" FontWeight="SemiBold" FontSize="18" Margin="0 0 0 15"/>
+                <TextBlock Text="Ключевые показатели деятельности" FontWeight="SemiBold" FontSize="18" Margin="0 0 0 15"/>
 
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <!-- Активные клиенты -->
-                    <Border Grid.Column="0" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Активные клиенты" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="ActiveClientsTextBlock" Text="0" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#4285F4" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Первая строка показателей -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Количество продаж -->
-                    <Border Grid.Column="1" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Кол-во продаж" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="SalesCountTextBlock" Text="0" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#0F9D58" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Общая выручка -->
+                        <Border Grid.Column="0" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Общая выручка" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="TotalRevenueTextBlock" Text="0 ₽" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#4285F4" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Общая выручка -->
-                    <Border Grid.Column="2" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Общая выручка" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="TotalRevenueTextBlock" Text="0 ₽" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#DB4437" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Активные клиенты -->
+                        <Border Grid.Column="1" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Активные клиенты" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="ActiveClientsTextBlock" Text="0" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#0F9D58" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Посещения -->
-                    <Border Grid.Column="3" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Посещения" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="VisitsCountTextBlock" Text="0" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#F4B400" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Посещения -->
+                        <Border Grid.Column="2" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Посещения" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="TotalVisitsTextBlock" Text="0" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#DB4437" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Средний чек -->
-                    <Border Grid.Column="4" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Средний чек" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="AverageCheckTextBlock" Text="0 ₽" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#7B1FA2" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Средняя загрузка -->
+                        <Border Grid.Column="3" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Средняя загрузка" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="AverageLoadTextBlock" Text="0%" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#F4B400" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
 
-                    <!-- Абонементы -->
-                    <Border Grid.Column="5" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Абонементы" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="MembershipSalesTextBlock" Text="0" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#0288D1" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                    <!-- Вторая строка показателей -->
+                    <Grid Grid.Row="1" Margin="0 10 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Услуги -->
-                    <Border Grid.Column="6" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Услуги" FontWeight="Medium" FontSize="14"/>
-                            <TextBlock x:Name="ServiceSalesTextBlock" Text="0" FontWeight="Bold" 
-                                   FontSize="24" Foreground="#FF5722" Margin="0 10 0 0"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Новые клиенты -->
+                        <Border Grid.Column="0" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Новые клиенты" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="NewClientsTextBlock" Text="0" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#7B1FA2" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Активные абонементы -->
+                        <Border Grid.Column="1" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Активные абонементы" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="ActiveMembershipsTextBlock" Text="0" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#0288D1" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Проведено тренировок -->
+                        <Border Grid.Column="2" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Проведено тренировок" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="CompletedTrainingsTextBlock" Text="0" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#FF5722" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Коэффициент удержания -->
+                        <Border Grid.Column="3" Background="#F8F9FA" Padding="15" Margin="5" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Коэффициент удержания" FontWeight="Medium" FontSize="14"/>
+                                <TextBlock x:Name="RetentionRateTextBlock" Text="0%" FontWeight="Bold" 
+                                       FontSize="24" Foreground="#795548" Margin="0 10 0 0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </StackPanel>
         </Border>
@@ -155,23 +170,23 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- График продаж -->
+            <!-- График посещаемости по дням -->
             <Border Grid.Column="0" Background="White" Padding="20" Margin="0 0 5 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Динамика выручки" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="SalesChartContainer" Height="250"/>
+                    <TextBlock Text="Посещаемость по дням" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="DailyVisitsChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
 
-            <!-- График регистрации клиентов -->
+            <!-- График популярных услуг -->
             <Border Grid.Column="1" Background="White" Padding="20" Margin="5 0 0 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Динамика регистраций" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="ClientRegistrationChartContainer" Height="250"/>
+                    <TextBlock Text="Популярные услуги" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="PopularServicesChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -183,23 +198,23 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- График популярности услуг -->
+            <!-- График возрастного распределения клиентов -->
             <Border Grid.Column="0" Background="White" Padding="20" Margin="0 0 5 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Популярность услуг" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="ServicePopularityChartContainer" Height="250"/>
+                    <TextBlock Text="Возрастное распределение клиентов" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="AgeDistributionChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
 
-            <!-- График посещаемости по дням недели -->
+            <!-- График загруженности по часам -->
             <Border Grid.Column="1" Background="White" Padding="20" Margin="5 0 0 0" 
                     BorderThickness="1" BorderBrush="#E0E0E0" CornerRadius="8"
                     materialDesign:ElevationAssist.Elevation="Dp2">
                 <StackPanel>
-                    <TextBlock Text="Посещаемость по дням недели" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
-                    <ContentControl x:Name="AttendanceChartContainer" Height="250"/>
+                    <TextBlock Text="Загруженность по часам" FontWeight="SemiBold" FontSize="16" Margin="0 0 0 10"/>
+                    <ContentControl x:Name="HourlyLoadChartContainer" Height="250"/>
                 </StackPanel>
             </Border>
         </Grid>

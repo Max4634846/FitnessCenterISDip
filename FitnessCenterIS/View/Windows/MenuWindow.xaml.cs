@@ -191,7 +191,7 @@ namespace FitnessCenterIS.View.Windows
 
         private void TrainerBtn_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new TrainerPopularityReportPage());
+            MainFrame.Navigate(new TrainerReportPage());
         }
     }
 }

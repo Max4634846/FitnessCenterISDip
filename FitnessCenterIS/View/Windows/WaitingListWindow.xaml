@@ -32,10 +32,6 @@
                        VerticalAlignment="Center" Foreground="#333"/>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button x:Name="RefreshButton" Background="#090909" Height="40" Width="40"
-                        BorderThickness="0" Margin="0,0,10,0" Click="RefreshButton_Click">
-                    <materialDesign:PackIcon Kind="Refresh" Width="24" Height="24"/>
-                </Button>
                 <ComboBox x:Name="FilterComboBox" Width="150" Height="40" 
                           SelectionChanged="FilterComboBox_SelectionChanged">
                     <ComboBoxItem Content="Все записи" IsSelected="True"/>
@@ -56,10 +52,10 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Клиент" Binding="{Binding ClientName}" Width="150"/>
                     <DataGridTextColumn Header="Услуга" Binding="{Binding ServiceName}" Width="150"/>
-                    <DataGridTextColumn Header="Дата запроса" Binding="{Binding EnrollmentDateTime, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Width="120"/>
+                    <DataGridTextColumn Header="Дата запроса" Binding="{Binding EnrollmentDateTime, StringFormat={}{0:dd.MM.yyyy HH:mm}, TargetNullValue='Н/Д'}" Width="120"/>
                     <DataGridTextColumn Header="Запрошенное время" Width="150">
                         <DataGridTextColumn.Binding>
-                            <MultiBinding StringFormat="{}{0:dd.MM.yyyy HH:mm} - {1:HH:mm}">
+                            <MultiBinding StringFormat="{}{0:dd.MM.yyyy HH:mm} - {1:HH:mm}" TargetNullValue="Не указано">
                                 <Binding Path="RequestedStartDateTime"/>
                                 <Binding Path="RequestedEndDateTime"/>
                             </MultiBinding>

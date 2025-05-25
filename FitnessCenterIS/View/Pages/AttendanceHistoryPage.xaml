@@ -22,9 +22,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <WrapPanel VerticalAlignment="Center" Margin="10 10">
-                    <TextBox x:Name="SearchTextBox" Width="300" Margin="0 0 20 0"
+                    <TextBox x:Name="SearchTextBox" Width="300" Margin="0 0 20 0" Padding="5"
                              materialDesign:HintAssist.Hint="Поиск по имени"
-                             TextChanged="SearchTextBox_TextChanged"/>
+                             TextChanged="SearchTextBox_TextChanged" BorderThickness="1 1 1 1"/>
 
                     <DatePicker x:Name="StartDatePicker" Margin="0 0 20 0"
                                 materialDesign:HintAssist.Hint="Дата с"  SelectedDateChanged="DatePicker_SelectedDateChanged" />
