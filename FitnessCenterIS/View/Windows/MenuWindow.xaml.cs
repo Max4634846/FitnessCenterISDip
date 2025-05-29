@@ -193,5 +193,15 @@ namespace FitnessCenterIS.View.Windows
         {
             MainFrame.Navigate(new TrainerReportPage());
         }
+
+        private void Room_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AddRoomPage());
+        }
+
+        private void LocBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MainFrame.Navigate(new AddLockerPage());
+        }
     }
 }

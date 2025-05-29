@@ -188,6 +188,7 @@
                                             <Button Content="День" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="ScheduleDay_Click"/>
                                             <Button Content="Неделя" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="ScheduleWeek_Click" />
                                             <Button Content="Месяц" Style="{StaticResource TransparentButton}" Foreground="#fff"  Click="ScheduleMonth_Click"/>
+                                            <Button Content="Комнаты и залы" Style="{StaticResource TransparentButton}" Foreground="#fff"  Click="Room_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>
@@ -205,6 +206,7 @@
                                     <Expander.Content>
                                         <StackPanel Margin="45,0,0,0">
                                             <Button Content="История посещений" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="AttendanceHistoryBtn_Click"/>
+                                            <Button Content="Шкафчики" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="LocBtn_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>
@@ -221,7 +223,7 @@
                                     </Expander.Header>
                                     <Expander.Content>
                                         <StackPanel Margin="45,0,0,0">
-                                            <Button Content="История продаж" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="SalesBtn_Click"/>
+                                            <Button Content="Процесс продажи" Style="{StaticResource TransparentButton}" Foreground="#fff" Click="SalesBtn_Click"/>
                                         </StackPanel>
                                     </Expander.Content>
                                 </Expander>

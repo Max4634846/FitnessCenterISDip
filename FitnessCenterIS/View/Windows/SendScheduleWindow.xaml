@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="Отправка расписания" Height="550" Width="650"
+        Title="Отправка расписания" Height="650" Width="650"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -94,7 +94,7 @@
 
                 <!-- Прогресс бар -->
                 <ProgressBar x:Name="ProgressBar" Height="20" Margin="0,0,0,15" 
-                             Visibility="Collapsed" IsIndeterminate="True"/>
+                             Visibility="Collapsed" IsIndeterminate="True" Background="White" BorderBrush="#090909" Foreground="#090909" />
 
                 <!-- Статус -->
                 <TextBlock x:Name="StatusTextBlock" Text="" FontSize="12" Foreground="Green" 

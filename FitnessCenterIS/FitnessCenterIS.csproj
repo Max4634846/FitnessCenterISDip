@@ -430,6 +430,12 @@
     <Compile Include="Vatrates.cs">
       <DependentUpon>BDFitnessCenter.tt</DependentUpon>
     </Compile>
+    <Compile Include="View\Pages\AddLockerPage.xaml.cs">
+      <DependentUpon>AddLockerPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Pages\AddRoomPage.xaml.cs">
+      <DependentUpon>AddRoomPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Pages\AttendanceHistoryPage.xaml.cs">
       <DependentUpon>AttendanceHistoryPage.xaml</DependentUpon>
     </Compile>
@@ -593,6 +599,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Style\TextBoxStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\AddLockerPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Pages\AddRoomPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -823,9 +837,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModel\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="BDFitnessCenter.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

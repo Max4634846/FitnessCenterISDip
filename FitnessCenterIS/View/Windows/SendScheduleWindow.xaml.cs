@@ -149,15 +149,7 @@ namespace FitnessCenterIS.View.Windows
                             .Where(r => r.Type == EmailRecipientType.Group)
                             .ToList();
 
-                        MessageBox.Show($"Групп в списке: {groupRecipients.Count}", "Отладка", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                        if (groupRecipients.Count > 0)
-                        {
-                            foreach (var group in groupRecipients)
-                            {
-                                MessageBox.Show($"Группа: {group.Name}", "Отладка", MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
-                        }
+                       
 
                         RecipientComboBox.ItemsSource = groupRecipients;
                         break;
@@ -405,8 +397,6 @@ namespace FitnessCenterIS.View.Windows
                     });
                 }
 
-                MessageBox.Show($"Найдено получателей для группы {groupId}: {recipients.Count}", "Отладка",
-                                MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {

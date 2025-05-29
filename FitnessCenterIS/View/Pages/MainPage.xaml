@@ -99,14 +99,6 @@
                     </StackPanel>
                 </Button>
                 
-                <Button Style="{StaticResource ActionButtonStyle}">
-                    <StackPanel>
-                        <iconPacks:PackIconMaterialDesign Kind="DocumentScannerOutline" Width="40" Height="40" 
-                                     HorizontalAlignment="Center" Foreground="#090909"/>
-                        <TextBlock Text="Отчеты" HorizontalAlignment="Center" 
-               Margin="0 10 0 0" FontWeight="Medium"/>
-                    </StackPanel>
-                </Button>
             </WrapPanel>
         </Border>
 
